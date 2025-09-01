@@ -1,3 +1,8 @@
+@RestController
+@RequestMapping("/api/coupons")
+public class CouponController {
+  private final CouponRepository repo;
+  public CouponController(CouponRepository repo){ this.repo = repo; }
 @PostMapping("/validate")
 public Map<String, Object> validate(@RequestBody Map<String, Object> req) {
     String code = String.valueOf(req.getOrDefault("code", ""));
@@ -14,4 +19,5 @@ public Map<String, Object> validate(@RequestBody Map<String, Object> req) {
                         "minSubtotal", c.getMinSubtotalUSD()
                 );
             }).orElse(Map.of("valid", false));
+}
 }
