@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Home</title>
+    <link rel="stylesheet" href="./assets/css/style.css"/>
+  </head>
+  <body>
+    <div id="app-header"></div>
+    <main class="container">
+      
+<section class="hero">
+  <div class="hero__banner">
+    <h1 data-i18n="home.hero_title">Premium Marketplace</h1>
+    <p data-i18n="home.hero_sub">Calm, elegant, mobile-first design.</p>
+  </div>
+</section>
+
+<section class="categories-grid" id="home-cats">
+  <h2 data-i18n="home.categories">Categories</h2>
+  <div class="grid" id="categoriesGrid"></div>
+</section>
+
+<section class="carousel" id="saleNow">
+  <div class="section-head">
+    <h2 data-i18n="home.sale_now">Sale Now</h2>
+    <a href="./products.html?filter=sale" class="see-all" data-i18n="home.see_all">See all</a>
+  </div>
+  <div class="row" id="saleRow"></div>
+</section>
+
+<section class="carousel" id="bestSellers">
+  <div class="section-head">
+    <h2 data-i18n="home.best_sellers">Best Sellers</h2>
+    <a href="./products.html?filter=best" class="see-all" data-i18n="home.see_all">See all</a>
+  </div>
+  <div class="row" id="bestRow"></div>
+</section>
+
+<section class="carousel" id="frequentlyTogether">
+  <div class="section-head">
+    <h2 data-i18n="home.frequently_together">Frequently Bought Together</h2>
+  </div>
+  <div class="row" id="fbtRow"></div>
+</section>
+
+<section class="stores" id="ourStores">
+  <div class="section-head">
+    <h2 data-i18n="nav.our_stores">Our Stores</h2>
+    <a href="./our-stores.html" class="see-all" data-i18n="home.see_all">See all</a>
+  </div>
+  <div class="row" id="storesRow"></div>
+</section>
+
+    </main>
+    <div id="app-modal-root"></div>
+    <script src="./assets/js/i18n.js"></script>
+    <script src="./assets/js/currency.js"></script>
+    <script src="./assets/js/header.js"></script>
+    <script src="./assets/js/categories.js"></script>
+    <script src="./assets/js/pricing.js"></script>
+    <script src="./assets/js/cart.js"></script>
+    <script src="./assets/js/main.js"></script>
+  </body>
+</html>

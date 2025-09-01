@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard • Store</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <script defer src="../assets/js/i18n.js"></script>
+  <script defer src="../assets/js/currency.js"></script>
+  <script defer src="../assets/js/main.js"></script>
+</head>
+<body>
+  <header class="dash-header">
+    <h1>Store Dashboard</h1>
+    <div class="lang-currency">
+      <select id="lang-switch"></select>
+      <select id="currency-switch"></select>
+    </div>
+  </header>
+  <main class="container">
+    <section>
+      <h2>Products</h2>
+      <button class="btn primary">Add Product</button>
+      <table class="table">
+        <thead><tr><th>Title</th><th>Category</th><th>Variants</th><th>Price</th><th>Actions</th></tr></thead>
+        <tbody id="store-products"></tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Discounts & Coupons</h2>
+      <button class="btn">Add Discount</button>
+      <button class="btn">Create Coupon</button>
+    </section>
+  </main>
+</body>
+</html>

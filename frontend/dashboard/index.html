@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Dashboard (Store Owner)</title>
+  <link rel="stylesheet" href="../assets/css/style.css"/>
+  <link rel="stylesheet" href="./css/dashboard.css"/>
+</head>
+<body>
+  <header class="dashboard-header">
+    <h1>Dashboard — Store Owner</h1>
+    <nav>
+      <a href="./index.html#products">Products</a>
+      <a href="./index.html#discounts">Discounts</a>
+      <a href="./index.html#coupons">Coupons</a>
+    </nav>
+  </header>
+  <main class="container">
+    <section id="products">
+      <h2>Products</h2>
+      <button class="btn btn-primary" id="addProductBtn">+ Add Product</button>
+      <div id="productsTable"></div>
+    </section>
+    <section id="discounts">
+      <h2>Discount Rules</h2>
+      <div id="discountsTable"></div>
+    </section>
+    <section id="coupons">
+      <h2>Coupons</h2>
+      <div id="couponsTable"></div>
+    </section>
+  </main>
+  <script src="../assets/js/i18n.js"></script>
+  <script src="../assets/js/currency.js"></script>
+  <script src="./js/dashboard.js"></script>
+</body>
+</html>

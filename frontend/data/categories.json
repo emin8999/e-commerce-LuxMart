@@ -1,0 +1,177 @@
+{
+  "Clothing 👗": [
+    "Men’s Clothing",
+    "Women’s Clothing",
+    "Kids’ Clothing",
+    "Outerwear",
+    "Activewear"
+  ],
+  "Footwear 👟": [
+    "Men’s Footwear",
+    "Women’s Footwear",
+    "Sports Shoes",
+    "Boots",
+    "Sandals"
+  ],
+  "Electronics 📱": [
+    "Mobile Phones",
+    "Computers",
+    "Audio Equipment",
+    "Cameras",
+    "Smartwatches"
+  ],
+  "Groceries 🛒": [
+    "Fruits & Vegetables",
+    "Dairy Products",
+    "Beverages",
+    "Bakery",
+    "Snacks"
+  ],
+  "Books 📚": [
+    "Fiction",
+    "Non-fiction",
+    "Comics",
+    "Children’s Books",
+    "Textbooks"
+  ],
+  "Toys 🧸": [
+    "Educational Toys",
+    "Action Figures",
+    "Puzzles",
+    "Dolls",
+    "Remote Control Toys"
+  ],
+  "Jewelry 💍": [
+    "Rings",
+    "Necklaces",
+    "Earrings",
+    "Bracelets",
+    "Watches"
+  ],
+  "Tech 💻": [
+    "Laptops",
+    "Accessories",
+    "Gadgets",
+    "Tablets",
+    "Monitors"
+  ],
+  "Cosmetics 💄": [
+    "Makeup",
+    "Skincare",
+    "Perfumes",
+    "Hair Care",
+    "Nail Care"
+  ],
+  "Furniture 🛋️": [
+    "Living Room",
+    "Bedroom",
+    "Office",
+    "Kitchen",
+    "Outdoor"
+  ],
+  "Auto Products 🚗": [
+    "Oils & Fluids",
+    "Accessories",
+    "Tires",
+    "Batteries",
+    "Tools"
+  ],
+  "Home & Garden 🏡": [
+    "Garden Tools",
+    "Decor",
+    "Appliances",
+    "Lighting",
+    "Cleaning Supplies"
+  ],
+  "Sports 🏀": [
+    "Football",
+    "Gym Equipment",
+    "Outdoor Sports",
+    "Swimming",
+    "Cycling"
+  ],
+  "Health 🩺": [
+    "Supplements",
+    "Medical Supplies",
+    "Personal Care",
+    "Fitness Equipment",
+    "Therapy Devices"
+  ],
+  "Music 🎧": [
+    "Instruments",
+    "Accessories",
+    "Records & CDs",
+    "Speakers",
+    "Headphones"
+  ],
+  "Movies 🎬": [
+    "DVDs & Blu-rays",
+    "Merchandise",
+    "Streaming Services",
+    "Posters",
+    "Collectibles"
+  ],
+  "Photography 📷": [
+    "Cameras",
+    "Lenses",
+    "Accessories",
+    "Tripods",
+    "Lighting"
+  ],
+  "Gifts 🎁": [
+    "For Her",
+    "For Him",
+    "Custom Gifts",
+    "Wedding",
+    "Birthday"
+  ],
+  "Pets 🐶": [
+    "Food",
+    "Accessories",
+    "Toys",
+    "Grooming",
+    "Beds & Houses"
+  ],
+  "Baby 🍼": [
+    "Clothing",
+    "Toys",
+    "Feeding",
+    "Diapers",
+    "Furniture"
+  ],
+  "Tourism 🏕️": [
+    "Camping",
+    "Gear",
+    "Guides",
+    "Backpacks",
+    "Clothing"
+  ],
+  "Stationery ✏️": [
+    "Office Supplies",
+    "Art Supplies",
+    "School Supplies",
+    "Notebooks",
+    "Writing Tools"
+  ],
+  "Tools 🛠️": [
+    "Hand Tools",
+    "Power Tools",
+    "Accessories",
+    "Gardening Tools",
+    "Measuring Tools"
+  ],
+  "Games 🎮": [
+    "Console Games",
+    "PC Games",
+    "Board Games",
+    "Card Games",
+    "RPG Games"
+  ],
+  "Accessories 🧢": [
+    "Bags",
+    "Hats",
+    "Jewelry",
+    "Scarves",
+    "Glasses"
+  ]
+}

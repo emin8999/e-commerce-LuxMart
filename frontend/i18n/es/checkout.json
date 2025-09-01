@@ -1,0 +1,8 @@
+{
+  "checkout.title": "Checkout",
+  "checkout.address": "Shipping Address",
+  "checkout.payment": "Payment",
+  "checkout.online": "Online payment",
+  "checkout.cod": "Cash on delivery",
+  "checkout.pay_now": "Pay Now"
+}
