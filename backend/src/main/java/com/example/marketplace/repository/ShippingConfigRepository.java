@@ -1,1 +1,0 @@
-package com.example.marketplace.repository; import org.springframework.data.jpa.repository.*; import com.example.marketplace.entity.ShippingConfig; public interface ShippingConfigRepository extends JpaRepository<ShippingConfig,Long>{}

@@ -1,0 +1,1 @@
+package com.marketplace.repo; import com.marketplace.model.ExchangeRate; import org.springframework.data.jpa.repository.JpaRepository; public interface ExchangeRateRepository extends JpaRepository<ExchangeRate,Long>{ ExchangeRate findByTargetCurrency(String targetCurrency);}

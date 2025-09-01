@@ -1,0 +1,1 @@
+package com.marketplace.repo; import com.marketplace.model.Store; import org.springframework.data.jpa.repository.JpaRepository; public interface StoreRepository extends JpaRepository<Store,Long>{ Store findBySlug(String slug);}
