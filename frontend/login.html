@@ -1,30 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login</title>
-    <link rel="stylesheet" href="./assets/css/style.css"/>
+    <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <div id="app-header"></div>
     <main class="container">
-      
-<h1 data-i18n="auth.login">Login</h1>
-<form class="auth-form">
-  <input placeholder="Email"/>
-  <input placeholder="Password" type="password"/>
-  <button class="btn btn-primary" data-i18n="auth.login">Login</button>
-</form>
+      <h1>Sign In</h1>
+      <form class="auth-form" id="loginForm">
+        <input id="loginEmail" type="email" placeholder="Email" required />
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="Password"
+          required
+        />
+        <button class="btn btn-primary" type="submit">Sign In</button>
+      </form>
 
+      <!-- ▼▼▼ ДОБАВЛЕНО: переход на регистрацию ▼▼▼ -->
+      <p style="margin-top: 10px">
+        Don't have an account?
+        <a href="./register.html" class="btn btn-outline" id="goRegister"
+          >Go to Registration</a
+        >
+      </p>
+      <!-- ▲▲▲ ДОБАВЛЕНО ▲▲▲ -->
     </main>
     <div id="app-modal-root"></div>
-    <script src="./assets/js/i18n.js"></script>
-    <script src="./assets/js/currency.js"></script>
+
     <script src="./assets/js/header.js"></script>
-    <script src="./assets/js/categories.js"></script>
-    <script src="./assets/js/pricing.js"></script>
-    <script src="./assets/js/cart.js"></script>
-    <script src="./assets/js/main.js"></script>
+    <script>
+      // Заглушка логина, чтобы кнопка "работала" (без реального API):
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          alert("Login submitted (stub). Replace with real API call.");
+          window.location.href = "./profile.html";
+        });
+    </script>
   </body>
 </html>

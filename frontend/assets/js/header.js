@@ -1,8 +1,7 @@
-
 // Inject shared header and burger drawer
-(function(){
-  const header = document.getElementById('app-header');
-  if(!header) return;
+(function () {
+  const header = document.getElementById("app-header");
+  if (!header) return;
   header.innerHTML = `
     <div class="header">
       <div class="container header__row">
@@ -27,6 +26,11 @@
             <option value="EUR">€</option>
             <option value="TRY">₺</option>
           </select>
+
+          <!-- ▼ ДОБАВЛЕНО: кнопка входа -->
+          <a href="./login.html" class="btn btn-outline" id="headerLoginBtn" data-i18n="auth.login">Sign In</a>
+          <!-- ▲ ДОБАВЛЕНО -->
+
           <a href="./profile.html" title="Profile">👤</a>
           <a href="./cart.html" class="header__cart" title="Cart">🛒<span class="header__badge" id="cartBadge" style="display:none">0</span></a>
           <button class="burger" id="burgerBtn">☰</button>
@@ -41,50 +45,76 @@
       <a class="header__link" data-i18n="nav.our_stores" href="./our-stores.html">Our Stores</a>
       <a class="header__link" data-i18n="nav.customer_service" href="./index.html#service">Customer Service</a>
       <a class="header__link" data-i18n="nav.category" id="openCatModalDrawer" href="javascript:void(0)">Category</a>
+      <!-- ▼ ДОБАВЛЕНО: кнопка входа в бургер-меню -->
+      <a class="header__link" href="./login.html" data-i18n="auth.login">Sign In</a>
+      <!-- ▲ ДОБАВЛЕНО -->
     </div>
   `;
 
   // Drawer logic (slide right -> left)
-  const drawer = document.getElementById('drawer');
-  const overlay = document.getElementById('drawerOverlay');
-  document.getElementById('burgerBtn').addEventListener('click', ()=>{
-    drawer.classList.add('open'); overlay.classList.add('show');
+  const drawer = document.getElementById("drawer");
+  const overlay = document.getElementById("drawerOverlay");
+  document.getElementById("burgerBtn").addEventListener("click", () => {
+    drawer.classList.add("open");
+    overlay.classList.add("show");
   });
-  function closeDrawer(){ drawer.classList.remove('open'); overlay.classList.remove('show'); }
-  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-  overlay.addEventListener('click', closeDrawer);
+  function closeDrawer() {
+    drawer.classList.remove("open");
+    overlay.classList.remove("show");
+  }
+  document.getElementById("drawerClose").addEventListener("click", closeDrawer);
+  overlay.addEventListener("click", closeDrawer);
 
   // Category modal
-  const modalRoot = document.getElementById('app-modal-root');
-  const modal = document.createElement('div');
-  modal.className = 'modal'; modal.id = 'catModal';
+  const modalRoot = document.getElementById("app-modal-root");
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.id = "catModal";
   modal.innerHTML = `<div class="modal__panel">
     <h3 data-i18n="nav.category">Categories</h3>
     <div id="catList" class="grid"></div>
     <div style="text-align:right;margin-top:8px"><button class="btn" id="closeCat">Close</button></div>
   </div>`;
   modalRoot.appendChild(modal);
-  function openCat(){ modal.classList.add('show'); window.renderCategories('catList'); }
-  function closeCat(){ modal.classList.remove('show'); }
-  document.getElementById('openCatModal').addEventListener('click', openCat);
-  document.getElementById('openCatModalDrawer').addEventListener('click', ()=>{ openCat(); closeDrawer(); });
-  modal.querySelector('#closeCat').addEventListener('click', closeCat);
+  function openCat() {
+    modal.classList.add("show");
+    if (window.renderCategories) window.renderCategories("catList");
+  }
+  function closeCat() {
+    modal.classList.remove("show");
+  }
+  document.getElementById("openCatModal").addEventListener("click", openCat);
+  document
+    .getElementById("openCatModalDrawer")
+    .addEventListener("click", () => {
+      openCat();
+      closeDrawer();
+    });
+  modal.querySelector("#closeCat").addEventListener("click", closeCat);
 
   // Language & Currency
-  const langSelect = document.getElementById('langSelect');
+  const langSelect = document.getElementById("langSelect");
   langSelect.value = window.i18n.getLocale();
-  langSelect.addEventListener('change', (e)=> window.i18n.setLocale(e.target.value));
+  langSelect.addEventListener("change", (e) =>
+    window.i18n.setLocale(e.target.value)
+  );
 
-  const currencySelect = document.getElementById('currencySelect');
+  const currencySelect = document.getElementById("currencySelect");
   currencySelect.value = window.currency.getCurrency();
-  currencySelect.addEventListener('change', (e)=> window.currency.setCurrency(e.target.value));
+  currencySelect.addEventListener("change", (e) =>
+    window.currency.setCurrency(e.target.value)
+  );
 
   // Cart badge
-  window.renderCartBadge = function(){
-    const badge = document.getElementById('cartBadge');
+  window.renderCartBadge = function () {
+    const badge = document.getElementById("cartBadge");
     const count = window.cart.getCount();
-    if(count>0){ badge.textContent = count>99? "99+": String(count); badge.style.display='flex'; }
-    else{ badge.style.display='none'; }
-  }
+    if (count > 0) {
+      badge.textContent = count > 99 ? "99+" : String(count);
+      badge.style.display = "flex";
+    } else {
+      badge.style.display = "none";
+    }
+  };
   window.renderCartBadge();
 })();
