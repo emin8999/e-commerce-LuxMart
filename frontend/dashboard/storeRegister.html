@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard (Store Owner)</title>
+    <link rel="stylesheet" href="../assets/css/style.css" />
+    <link rel="stylesheet" href="./css/dashboard.css" />
+    <link rel="stylesheet" href="./css/storeRegister.css" />
+  </head>
+  <body>
+    <header class="dashboard-header">
+      <h1>Dashboard — Store Register</h1>
+      <nav>
+        <a href="./index.html#products">Products</a>
+        <a href="./index.html#discounts">Discounts</a>
+        <a href="./index.html#coupons">Coupons</a>
+      </nav>
+    </header>
+    <main class="container">
+      <form id="tab-store" class="auth-form">
+        <input type="text" name="storeName" placeholder="Store Name" required />
+        <input type="text" name="ownerName" placeholder="Owner Name" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Password"
+          required
+        />
+        <input
+          type="password"
+          name="confirmPassword"
+          id="confirmPassword"
+          placeholder="Confirm Password"
+          required
+        />
+        <div id="passwordError" class="error-msg">Passwords do not match</div>
+        <textarea
+          name="storeDescription"
+          placeholder="Store Description"
+        ></textarea>
+        <input type="file" name="logo" accept="image/*" />
+        <input type="tel" name="phone" placeholder="Phone" />
+        <input type="text" name="location" placeholder="Location" />
+        <input type="text" name="category" placeholder="Category" />
+
+        <label class="checkbox">
+          <input type="checkbox" name="agreedToTerms" required />
+          I agree to the Terms & Conditions
+        </label>
+
+        <button class="btn btn-primary" data-i18n="auth.register">
+          Register Store
+        </button>
+      </form>
+    </main>
+    <script src="../assets/js/i18n.js"></script>
+    <script src="./js/storeRegister.js"></script>
+    <script src="../assets/js/currency.js"></script>
+    <script src="./js/dashboard.js"></script>
+  </body>
+</html>

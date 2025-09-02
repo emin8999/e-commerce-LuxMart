@@ -1,44 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Register</title>
-    <link rel="stylesheet" href="./assets/css/style.css"/>
+    <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <div id="app-header"></div>
     <main class="container">
-      
-<h1 data-i18n="auth.register">Register</h1>
-<section class="tabs">
-  <button class="tab active" data-target="#tab-client" data-i18n="auth.client">Client</button>
-  <button class="tab" data-target="#tab-store" data-i18n="auth.store_owner">Store Owner</button>
-  <button class="tab" data-target="#tab-admin" data-i18n="auth.admin">Admin</button>
-</section>
-<div class="tab-content">
-  <form id="tab-client" class="auth-form visible">
-    <input placeholder="Name"/>
-    <input placeholder="Email"/>
-    <input placeholder="Password" type="password"/>
-    <button class="btn btn-primary" data-i18n="auth.register">Register</button>
-  </form>
-  <form id="tab-store" class="auth-form">
-    <input placeholder="Owner Name"/>
-    <input placeholder="Email"/>
-    <input placeholder="Password" type="password"/>
-    <input placeholder="Store Name"/>
-    <button class="btn btn-primary" data-i18n="auth.register">Register</button>
-  </form>
-  <form id="tab-admin" class="auth-form">
-    <input placeholder="Admin Email"/>
-    <input placeholder="Password" type="password"/>
-    <button class="btn btn-primary" data-i18n="auth.create_admin">Create Admin</button>
-  </form>
-</div>
-
+      <h1 data-i18n="auth.register">Register</h1>
+      <section class="tabs">
+        <button
+          class="tab active"
+          data-target="#tab-client"
+          data-i18n="auth.client"
+        >
+          Client
+        </button>
+        <!-- <button class="tab" data-target="#tab-store" data-i18n="auth.store_owner">Store Owner</button> -->
+        <!-- <button class="tab" data-target="#tab-admin" data-i18n="auth.admin">Admin</button> -->
+      </section>
+      <div class="tab-content">
+        <form id="tab-client" class="auth-form visible">
+          <input name="name" placeholder="Name" />
+          <input name="email" placeholder="Email" />
+          <input name="password" type="password" placeholder="Password" />
+          <button
+            type="submit"
+            class="btn btn-primary"
+            data-i18n="auth.register"
+          >
+            Register
+          </button>
+        </form>
+        <!-- <form id="tab-store" class="auth-form">
+          <input placeholder="Owner Name" />
+          <input placeholder="Email" />
+          <input placeholder="Password" type="password" />
+          <input placeholder="Store Name" />
+          <button class="btn btn-primary" data-i18n="auth.register">
+            Register
+          </button>
+        </form>
+        <form id="tab-admin" class="auth-form">
+          <input placeholder="Admin Email" />
+          <input placeholder="Password" type="password" />
+          <button class="btn btn-primary" data-i18n="auth.create_admin">
+            Create Admin
+          </button>
+        </form> -->
+      </div>
     </main>
     <div id="app-modal-root"></div>
+    <script src="./assets/js/register.js"></script>
+
     <script src="./assets/js/i18n.js"></script>
     <script src="./assets/js/currency.js"></script>
     <script src="./assets/js/header.js"></script>

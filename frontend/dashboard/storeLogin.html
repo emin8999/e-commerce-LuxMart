@@ -6,10 +6,11 @@
     <title>Dashboard (Store Owner)</title>
     <link rel="stylesheet" href="../assets/css/style.css" />
     <link rel="stylesheet" href="./css/dashboard.css" />
+    <link rel="stylesheet" href="./css/storeLogin.css" />
   </head>
   <body>
     <header class="dashboard-header">
-      <h1>Dashboard — Store Owner</h1>
+      <h1>Dashboard — Store Login</h1>
       <nav>
         <a href="./index.html#products">Products</a>
         <a href="./index.html#discounts">Discounts</a>
@@ -17,23 +18,16 @@
       </nav>
     </header>
     <main class="container">
-      <section id="products">
-        <h2>Products</h2>
-        <a class="btn btn-primary" href="addProducts.html" id="addProductBtn"
-          >+ Add Product</a
-        >
-        <div id="productsTable"></div>
-      </section>
-      <section id="discounts">
-        <h2>Discount Rules</h2>
-        <div id="discountsTable"></div>
-      </section>
-      <section id="coupons">
-        <h2>Coupons</h2>
-        <div id="couponsTable"></div>
-      </section>
+      <form id="tab-store" class="auth-form">
+        <input name="email" placeholder="Email" />
+        <input name="password" placeholder="Password" type="password" />
+        <button type="submit" class="btn btn-primary" data-i18n="auth.register">
+          Register
+        </button>
+      </form>
     </main>
     <script src="../assets/js/i18n.js"></script>
+    <script src="./js/storeLogin.js"></script>
     <script src="../assets/js/currency.js"></script>
     <script src="./js/dashboard.js"></script>
   </body>
