@@ -29,25 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ---------- CHECK TOKEN ----------
-  const storeJwt = localStorage.getItem("storeJwt");
-  if (!storeJwt) {
-    window.location.href = "store-login.html";
-    return;
-  }
-
-  const decodedToken = decodeJwtPayload(storeJwt);
-  if (!decodedToken) {
-    localStorage.removeItem("storeJwt");
-    window.location.href = "store-login.html";
-    return;
-  }
-
-  const storeName =
-    decodedToken.storeName || decodedToken.sub || "Unknown Store";
-  if (storeNameInput) storeNameInput.value = storeName;
-
-  // ---------- SIZE BLOCKS ----------
+  // ---------- SIZE BLOCKS (инициализация до проверок токена) ----------
   const sizeOptions = `
     <option value="">Size</option>
     <option value="TWO_XS">2XS</option>
@@ -69,36 +51,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function bindRemoveHandler(sizeBlock) {
-    const btn = sizeBlock.querySelector(".remove-button");
-    if (btn && !btn.dataset.bound) {
-      btn.addEventListener("click", () => {
-        sizeBlock.remove();
-        updateRemoveButtons();
-      });
-      btn.dataset.bound = "1";
-    }
-  }
-
-  function bindAllExistingSizeBlocks() {
-    if (!wrapper) return;
-    wrapper
-      .querySelectorAll(".size-quantity-wrapper")
-      .forEach(bindRemoveHandler);
+  function createSizeBlock() {
+    const div = document.createElement("div");
+    div.className = "size-quantity-wrapper";
+    div.innerHTML = `
+      <select name="productSizes" class="size-input">${sizeOptions}</select>
+      <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" min="0" step="1" />
+      <button type="button" class="remove-button">X</button>
+    `;
+    return div;
   }
 
   function addSizeBlock() {
     if (!wrapper) return;
     const addBtn = wrapper.querySelector(".add-size-btn");
-    const sizeBlock = document.createElement("div");
-    sizeBlock.classList.add("size-quantity-wrapper");
-    sizeBlock.innerHTML = `
-      <select name="productSizes" class="size-input">${sizeOptions}</select>
-      <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" />
-      <button type="button" class="remove-button">X</button>
-    `;
-    wrapper.insertBefore(sizeBlock, addBtn);
-    bindRemoveHandler(sizeBlock);
+    const block = createSizeBlock();
+    wrapper.insertBefore(block, addBtn);
     updateRemoveButtons();
   }
 
@@ -107,26 +75,64 @@ document.addEventListener("DOMContentLoaded", () => {
     wrapper.innerHTML = `
       <div class="size-quantity-wrapper">
         <select name="productSizes" class="size-input">${sizeOptions}</select>
-        <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" />
+        <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" min="0" step="1"/>
         <button type="button" class="remove-button" style="display:none;">X</button>
       </div>
-      <input type="button" value="+" class="add-size-btn" />
+      <input type="button" value="+" class="add-size-btn" aria-label="Add size" />
     `;
-    const addBtn = wrapper.querySelector(".add-size-btn");
-    if (addBtn) addBtn.addEventListener("click", addSizeBlock);
-    bindAllExistingSizeBlocks();
     updateRemoveButtons();
   }
 
+  // Делегирование: один обработчик на обёртке
   if (wrapper) {
-    const addBtn = wrapper.querySelector(".add-size-btn");
-    if (addBtn) addBtn.addEventListener("click", addSizeBlock);
-    bindAllExistingSizeBlocks();
+    // если вдруг верстка пустая — создаём базовый набор
+    if (!wrapper.querySelector(".size-quantity-wrapper")) {
+      resetSizeBlocks();
+    }
+
+    wrapper.addEventListener("click", (e) => {
+      const addBtn = e.target.closest(".add-size-btn");
+      const removeBtn = e.target.closest(".remove-button");
+
+      if (addBtn) {
+        addSizeBlock();
+        return;
+      }
+      if (removeBtn) {
+        const block = removeBtn.closest(".size-quantity-wrapper");
+        if (block) {
+          block.remove();
+          updateRemoveButtons();
+        }
+      }
+    });
+
     updateRemoveButtons();
   }
+
+  // ---------- CHECK TOKEN ----------
+  const storeJwt = localStorage.getItem("storeJwt");
+  if (!storeJwt) {
+    window.location.href = "storeLogin.html";
+    return;
+  }
+
+  const decodedToken = decodeJwtPayload(storeJwt);
+  if (!decodedToken) {
+    localStorage.removeItem("storeJwt");
+    window.location.href = "storeLogin.html";
+    return;
+  }
+
+  const storeName =
+    decodedToken.storeName || decodedToken.sub || "Unknown Store";
+  if (storeNameInput) storeNameInput.value = storeName;
 
   // ---------- FORM SUBMIT ----------
-  if (!form) return console.error("Form #addProductForm not found in DOM");
+  if (!form) {
+    console.error("Form #addProductForm not found in DOM");
+    return;
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -144,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const token = localStorage.getItem("storeJwt");
       if (!token) {
         localStorage.removeItem("storeJwt");
-        window.location.href = "store-login.html";
+        window.location.href = "storeLogin.html";
         return;
       }
 
@@ -165,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // --- sizeQuantities как отдельные поля ---
       const sizeWrappers = wrapper.querySelectorAll(".size-quantity-wrapper");
       let countSizes = 0;
-      sizeWrappers.forEach((blk, index) => {
+      sizeWrappers.forEach((blk) => {
         const size = blk.querySelector(".size-input")?.value || "";
         const qStr = blk.querySelector(".quantity-input")?.value || "";
         const quantity = Number(qStr);
@@ -194,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
       for (let i = 0; i < imgInput.files.length; i++) {
         formData.append("imageUrls", imgInput.files[i]);
       }
+
       const res = await fetch(`${API_BASE}/home/product`, {
         method: "POST",
         headers: { Authorization: "Bearer " + token },
@@ -202,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (res.status === 401 || res.status === 403) {
         localStorage.removeItem("storeJwt");
-        window.location.href = "store-login.html";
+        window.location.href = "storeLogin.html";
         return;
       }
 

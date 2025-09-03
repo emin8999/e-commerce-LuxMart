@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Если пришел токен, сохраняем его и переходим на store.html
       if (data.token) {
-        localStorage.setItem("storeJWT", data.token); // сохраняем токен
+        localStorage.setItem("storeJwt", data.token); // сохраняем токен
         window.location.href = "store.html"; // редирект на страницу магазина
       } else {
         console.warn("⚠️ Токен не получен. Авторизация не прошла.");
