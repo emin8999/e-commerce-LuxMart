@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard • Store</title>
     <link rel="stylesheet" href="../assets/css/style.css" />
-    <script defer src="../assets/js/i18n.js"></script>
-    <script defer src="../assets/js/currency.js"></script>
-    <script defer src="../assets/js/main.js"></script>
+    <link rel="stylesheet" href="../dashboard/css/dashboard.css" />
   </head>
   <body>
     <header class="dash-header">
       <h1>Store Dashboard</h1>
+      <nav>
+        <a href="./index.html#products">Products</a>
+        <a href="./index.html#discounts">Discounts</a>
+        <a href="./index.html#coupons">Coupons</a>
+        <a href="./store.html">Store Dashboard</a>
+      </nav>
       <div class="lang-currency">
         <select id="lang-switch"></select>
         <select id="currency-switch"></select>
@@ -40,5 +44,8 @@
         <button class="btn">Create Coupon</button>
       </section>
     </main>
+    <script defer src="../assets/js/i18n.js"></script>
+    <script defer src="../assets/js/currency.js"></script>
+    <script defer src="../assets/js/main.js"></script>
   </body>
 </html>
