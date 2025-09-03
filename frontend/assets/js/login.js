@@ -30,7 +30,7 @@ form.addEventListener("submit", async (e) => {
       // сохраняем JWT в localStorage
       if (result.token) {
         // предполагаем, что сервер возвращает { token: "..." }
-        localStorage.setItem("jwt", result.token);
+        localStorage.setItem("Jwt", result.token);
         console.log("JWT сохранён в localStorage:", result.token);
       } else {
         console.warn("Токен не получен от сервера!");

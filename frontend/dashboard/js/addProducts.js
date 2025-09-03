@@ -113,15 +113,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------- CHECK TOKEN ----------
   const storeJwt = localStorage.getItem("storeJwt");
   if (!storeJwt) {
-    window.location.href = "storeLogin.html";
-    return;
+    // window.location.href = "storeLogin.html";
+    // return;
   }
 
   const decodedToken = decodeJwtPayload(storeJwt);
   if (!decodedToken) {
-    localStorage.removeItem("storeJwt");
-    window.location.href = "storeLogin.html";
-    return;
+    // localStorage.removeItem("storeJwt");
+    // window.location.href = "storeLogin.html";
+    // return;
   }
 
   const storeName =
@@ -149,9 +149,9 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const token = localStorage.getItem("storeJwt");
       if (!token) {
-        localStorage.removeItem("storeJwt");
-        window.location.href = "storeLogin.html";
-        return;
+        // localStorage.removeItem("storeJwt");
+        // window.location.href = "storeLogin.html";
+        // return;
       }
 
       const name = val("productName").trim();
@@ -208,9 +208,9 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem("storeJwt");
-        window.location.href = "storeLogin.html";
-        return;
+        // localStorage.removeItem("storeJwt");
+        // window.location.href = "storeLogin.html";
+        // return;
       }
 
       let payload;
