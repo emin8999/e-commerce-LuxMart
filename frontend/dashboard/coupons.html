@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Coupons — Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/style.css" />
+    <link rel="stylesheet" href="../dashboard/css/dashboard.css" />
+  </head>
+  <body>
+    <header class="dashboard-header">
+      <h1>Dashboard — Store Owner</h1>
+      <nav>
+        <a href="./index.html#products">Products</a>
+        <a href="./index.html#discounts">Discounts</a>
+        <a href="./index.html#coupons">Coupons</a>
+        <a href="./store.html">Store Dashboard</a>
+      </nav>
+    </header>
+    <div class="container" style="padding: 16px 0; max-width: 800px">
+      <h1>Coupons</h1>
+      <div class="card">
+        <div class="card-body" style="display: grid; gap: 8px">
+          <input id="code" placeholder="CODE (e.g., FALL25)" />
+          <select id="type">
+            <option>PERCENT</option>
+            <option>FIXED</option>
+          </select>
+          <input id="value" placeholder="Value" type="number" step="0.01" />
+          <input
+            id="minSubtotal"
+            placeholder="Min subtotal"
+            type="number"
+            step="0.01"
+          />
+          <input id="usesLimit" placeholder="Uses limit" type="number" />
+          <select id="scope">
+            <option value="ALL">ALL</option>
+            <option value="STORE">STORE</option>
+            <option value="PRODUCT">PRODUCT</option>
+            <option value="CATEGORY">CATEGORY</option>
+          </select>
+          <input id="targets" placeholder="Targets (comma-separated IDs)" />
+          <button id="create" class="btn primary">Create coupon</button>
+        </div>
+      </div>
+      <div id="list" style="margin-top: 16px"></div>
+    </div>
+    <script>
+      (function () {
+        function load() {
+          var cs = db.get().coupons || [];
+          $("#list").innerHTML = cs
+            .map(function (c) {
+              return (
+                '<div class="card"><div class="card-body"><b>' +
+                c.code +
+                "</b> — " +
+                c.type +
+                " " +
+                c.value +
+                " — scope: " +
+                (c.appliesTo && c.appliesTo.scope) +
+                "</div></div>"
+              );
+            })
+            .join("");
+        }
+        $("#create").addEventListener("click", function () {
+          var scope = $("#scope").value,
+            targets = $("#targets").value.trim();
+          var appliesTo =
+            scope === "ALL"
+              ? { scope: scope }
+              : scope === "STORE"
+              ? {
+                  scope: scope,
+                  storeIds: targets
+                    ? targets.split(",").map((s) => s.trim())
+                    : [],
+                }
+              : scope === "PRODUCT"
+              ? {
+                  scope: scope,
+                  productIds: targets
+                    ? targets.split(",").map((s) => s.trim())
+                    : [],
+                }
+              : {
+                  scope: scope,
+                  categoryIds: targets
+                    ? targets.split(",").map((s) => s.trim())
+                    : [],
+                };
+          db.save(function (d) {
+            (d.coupons = d.coupons || []).push({
+              id: "coupon_" + Math.random().toString(36).slice(2, 8),
+              code: String($("#code").value || "").toUpperCase(),
+              type: $("#type").value,
+              value: Number($("#value").value || 0),
+              minSubtotal: Number($("#minSubtotal").value || 0),
+              usesLimit: Number($("#usesLimit").value || 0),
+              usedCount: 0,
+              appliesTo: appliesTo,
+            });
+          });
+          load();
+          alert("Coupon created");
+        });
+        load();
+      })();
+    </script>
+  </body>
+</html>
