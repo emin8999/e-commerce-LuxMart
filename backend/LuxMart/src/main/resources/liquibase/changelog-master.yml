@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/changelog/01-user-entity.yml
+  - include:
+      file: liquibase/changelog/02-user-entity-roles.yml
+  - include:
+      file: liquibase/changelog/03-store-entity.yml
+  - include:
+       file: liquibase/changelog/04-store-entity-roles.yml

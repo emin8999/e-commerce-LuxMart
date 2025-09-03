@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: 05-category-entity
+      author: yunis
+      changes:
+        - createTable:
+            tableName: category_entity
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name_en
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: name_az
+                  type: VARCHAR(255)
+
+              - column:
+                  name: name_es
+                  type: VARCHAR(255)
+
+              - column:
+                  name: name_de
+                  type: VARCHAR(255)
+
+              - column:
+                  name: emoji
+                  type: VARCHAR(50)
+
+              - column:
+                  name: slug
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: parent_id
+                  type: BIGINT
+
+        - addForeignKeyConstraint:
+            baseTableName: category_entity
+            baseColumnNames: parent_id
+            referencedTableName: category_entity
+            referencedColumnNames: id
+            constraintName: fk_category_entity_parent
+            onDelete: SET NULL

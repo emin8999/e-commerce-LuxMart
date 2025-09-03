@@ -1,1 +1,0 @@
-package com.marketplace.repo; import com.marketplace.model.Category; import org.springframework.data.jpa.repository.JpaRepository; public interface CategoryRepository extends JpaRepository<Category,Long>{ Category findBySlug(String slug);}

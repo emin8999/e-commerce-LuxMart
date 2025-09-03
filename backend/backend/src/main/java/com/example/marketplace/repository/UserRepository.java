@@ -1,1 +1,0 @@
-package com.example.marketplace.repository; import org.springframework.data.jpa.repository.*; import com.example.marketplace.entity.User; import java.util.*; public interface UserRepository extends JpaRepository<User,Long>{ Optional<User> findByEmail(String email);}

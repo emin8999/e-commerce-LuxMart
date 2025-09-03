@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 01-user-entity
+      author: Yunis
+      changes:
+        - createTable:
+            tableName: user_entity
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: surname
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+            
+
+              - column:
+                  name: phone
+                  type: VARCHAR(50)
+
+              - column:
+                  name: address
+                  type: VARCHAR(255)
+
+              - column:
+                  name: gender
+                  type: VARCHAR(50)
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+
+              - column:
+                  name: consent_membership_agreement
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
