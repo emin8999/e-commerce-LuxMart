@@ -249,3 +249,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+// ---------- FETCH BARCODE ----------
+async function fetchBarcode() {
+  try {
+    const res = await fetch("/api/barcode/new");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    return data.barcode; // допустим, backend возвращает { "barcode": "1234567890123" }
+  } catch (e) {
+    console.error("Barcode fetch failed", e);
+    return null;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const input = document.getElementById("Barcode");
+  if (input) {
+    const code = await fetchBarcode();
+    if (code) input.value = code;
+  }
+});
