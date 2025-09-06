@@ -1,5 +1,5 @@
 window.APP_CONFIG = {
-  apiBase: "http://localhost:8080/api",
+  apiBase: "http://localhost:9090/api",
   currency: localStorage.getItem("currency") || "USD",
-  locale: localStorage.getItem("locale") || "en"
+  locale: localStorage.getItem("locale") || "en",
 };
