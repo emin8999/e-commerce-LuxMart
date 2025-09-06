@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,7 +25,8 @@ public class ProductRequestDto {
     private BigDecimal basePriceUSD;
     private BigDecimal salePriceUSD;
     private Long categoryId;
-    private MultipartFile image;
+    @NotNull(message = "Please upload photo")
+    private List< MultipartFile> imageUrls;
     private List<ProductVariantRequestDto>variants;
 
 }

@@ -7,13 +7,11 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.LuxMart.enums.ProductStatus;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -57,6 +55,7 @@ public class ProductEntity {
     private BigDecimal salePriceUSD;
     
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private ProductStatus status = ProductStatus.ACTIVE;
     
     @ManyToOne
@@ -68,12 +67,16 @@ public class ProductEntity {
     private CategoryEntity category;
     
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<ProductVariantEntity> variants = new ArrayList<>();
     
+    @Builder.Default
     @OneToMany(mappedBy = "product")
     private List<ReviewEntity> reviews = new ArrayList<>();
     
-    private String imageUrl;
+    @Builder.Default
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductImageEntity> images = new ArrayList<>();
     
     @CreationTimestamp
     private LocalDateTime createdAt;

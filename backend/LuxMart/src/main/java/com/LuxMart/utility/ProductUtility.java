@@ -1,53 +1,37 @@
 package com.LuxMart.utility;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import com.LuxMart.cloudinary.CloudinaryService;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Component
-@Slf4j
+@RequiredArgsConstructor
 public class ProductUtility {
 
-    private final String baseDir = "uploads/products"; 
+    private final CloudinaryService cloudinaryService;
 
-    /**
-     * Məhsul üçün şəkil saxlayır və URL qaytarır
-     *
-     * @param file      MultipartFile
-     * @param storeId   Store ID
-     * @param productId Product ID
-     * @return Faylın URL və ya path-i
-     */
-    public String saveProductImage(MultipartFile file, Long storeId, Long productId) {
-        try {
-           
-            Path dirPath = Paths.get(baseDir, storeId.toString(), productId.toString());
-            if (!Files.exists(dirPath)) {
-                Files.createDirectories(dirPath);
-            }
+    public List<String> saveProductImages(List<MultipartFile> images, Long storeId, Long productId) {
+        List<String> imageUrls = new ArrayList<>();
+        String folderPath = "image/store_" + storeId + "/product_" + productId;
 
-            String originalFilename = file.getOriginalFilename();
-            String extension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            String filename = UUID.randomUUID().toString() + extension;
-
-            Path filePath = dirPath.resolve(filename);
-            file.transferTo(filePath.toFile());
-
-            return "/uploads/products/" + storeId + "/" + productId + "/" + filename;
-
-        } catch (IOException e) {
-            log.error("Failed to save product image", e);
-            throw new RuntimeException("Failed to save product image", e);
+        for (int i = 0; i < images.size(); i++) {
+            MultipartFile image = images.get(i);
+            String publicId = "product_" + i;
+            String imageUrl = cloudinaryService.uploadFile(image, folderPath, publicId);
+            imageUrls.add(imageUrl);
         }
+
+        return imageUrls;
     }
 }

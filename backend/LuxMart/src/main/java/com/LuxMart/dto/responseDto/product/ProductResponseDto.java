@@ -1,7 +1,6 @@
 package com.LuxMart.dto.responseDto.product;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class ProductResponseDto {
     private String description;
     private BigDecimal basePriceUSD;
     private BigDecimal salePriceUSD;
-    private String imageUrl;
+    private List<String> imageUrls;
     private ProductStatus status;
     private Long storeId;
     private Long categoryId;
