@@ -6,7 +6,7 @@ spring:
       static-locations: classpath:/static/, file:images/
 
 server:
-  port: 8080
+  port: 9090
   servlet:
     context-path: /home
 

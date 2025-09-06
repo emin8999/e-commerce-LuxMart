@@ -31,11 +31,11 @@ public class StoreController {
     
     private final StoreService storeService;
 
-@PostMapping("/register")  
-public ResponseEntity<String> register(@ModelAttribute  StoreRegisterRequest request) {
-    storeService.registerStore(request);
-    return ResponseEntity.ok("register");
-}
+ @PostMapping(value = "/register", consumes = "multipart/form-data")
+    public ResponseEntity<String> register(@ModelAttribute @Valid StoreRegisterRequest request) {
+        storeService.registerStore(request);
+        return ResponseEntity.ok("register");
+    }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
