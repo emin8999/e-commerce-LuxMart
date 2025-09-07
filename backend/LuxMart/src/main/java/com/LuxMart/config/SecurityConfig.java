@@ -35,7 +35,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(cors-> cors.configurationSource(corsConfigurationSource()))
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(
@@ -54,7 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/orders/**").authenticated()
                         .anyRequest().authenticated()
                 )
-              //  .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+               .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
@@ -71,7 +71,7 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-/* 
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -91,5 +91,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
       return source;
     }
-    */
+    
 }
