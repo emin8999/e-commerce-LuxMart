@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const API_BASE = "http://116.203.51.133:9090/home";
   const clientForm = document.getElementById("tab-client");
 
   clientForm.addEventListener("submit", async (e) => {
@@ -18,16 +19,13 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log(data);
 
     try {
-      const response = await fetch(
-        "http://116.203.51.133/luxmart/api/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(`${API_BASE}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
       const result = await response.json();
 

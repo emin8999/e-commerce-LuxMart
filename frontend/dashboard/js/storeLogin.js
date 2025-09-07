@@ -1,44 +1,47 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const API_BASE = "http://116.203.51.133:9090/home"; // порт + контекст бэкенда
   const form = document.getElementById("tab-store");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Берем значения полей
     const email = form.querySelector('input[name="email"]').value.trim();
     const password = form.querySelector('input[name="password"]').value.trim();
 
-    // Формируем объект
-    const payload = {
-      email: email,
-      password: password,
-    };
+    const payload = { email, password };
 
-    console.log("📤 Отправляю на бэк:", payload);
-
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const initialText = submitBtn?.textContent;
+    if (submitBtn) submitBtn.textContent = "Вход...";
     try {
-      const res = await fetch("http://116.203.51.133/api/store/login", {
+      const res = await fetch(`${API_BASE}/store/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload), // отправка как JSON
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`);
+      const contentType = res.headers.get("content-type") || "";
+      const parseBody = async () =>
+        contentType.includes("application/json") ? res.json() : res.text();
 
-      const data = await res.json();
-      console.log("✅ Ответ от сервера:", data);
+      if (!res.ok) {
+        const errBody = await parseBody();
+        const errMsg = typeof errBody === "string" ? errBody : errBody?.message || "Неверный email или пароль";
+        throw new Error(errMsg);
+      }
 
-      // Если пришел токен, сохраняем его и переходим на store.html
-      if (data.token) {
-        localStorage.setItem("storeJwt", data.token); // сохраняем токен
-        window.location.href = "store.html"; // редирект на страницу магазина
+      const data = await parseBody();
+      if (data && data.token) {
+        localStorage.setItem("storeJwt", data.token);
+        window.location.href = "store.html"; // переход на страницу магазина
       } else {
-        console.warn("⚠️ Токен не получен. Авторизация не прошла.");
+        alert("Не удалось получить токен авторизации");
       }
     } catch (err) {
-      console.error("❌ Ошибка при отправке:", err);
+      console.error("❌ Ошибка при входе:", err);
+      alert("Ошибка входа: " + err.message);
+    } finally {
+      if (submitBtn) submitBtn.textContent = initialText || "Sign In";
     }
   });
 });

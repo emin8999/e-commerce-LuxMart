@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const API_BASE = "http://116.203.51.133:9090/home";
   const form = document.getElementById("tab-admin");
 
   form.addEventListener("submit", async (e) => {
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Отправляем на бэк:", dataToSend);
 
     try {
-      const response = await fetch("http://116.203.51.133/api/admin/login", {
+      const response = await fetch(`${API_BASE}/admin/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json", // обязательно для JSON

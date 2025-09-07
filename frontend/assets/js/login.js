@@ -1,3 +1,4 @@
+const API_BASE = "http://116.203.51.133:9090/home";
 const form = document.getElementById("loginForm");
 
 form.addEventListener("submit", async (e) => {
@@ -13,7 +14,7 @@ form.addEventListener("submit", async (e) => {
   console.log("Данные для отправки:", data);
 
   try {
-    const response = await fetch("http://116.203.51.133/luxmart/api/login", {
+    const response = await fetch(`${API_BASE}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,4 +1,4 @@
-const API_BASE = "http://116.203.51.133:9090";
+const API_BASE = "http://116.203.51.133:9090/home";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("addProductForm");
@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append("imageUrls", imgInput.files[i]);
       }
 
-      const res = await fetch(`${API_BASE}/home/product`, {
+      const res = await fetch(`${API_BASE}/api/products`, {
         method: "POST",
         headers: { Authorization: "Bearer " + token },
         body: formData,
@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ---------- FETCH BARCODE ----------
 async function fetchBarcode() {
   try {
-    const res = await fetch("/api/barcode/new");
+    const res = await fetch(`${API_BASE}/api/barcode/new`);
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
     return data.barcode; // допустим, backend возвращает { "barcode": "1234567890123" }

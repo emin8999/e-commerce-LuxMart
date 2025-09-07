@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const API_BASE = "http://116.203.51.133:9090"; // сервер бэкенда
+  const API_BASE = "http://116.203.51.133:9090/home"; // базовый URL бэкенда
   const form = document.getElementById("tab-store");
   const passwordInput = document.getElementById("password");
   const confirmPasswordInput = document.getElementById("confirmPassword");
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (_) {}
 
     try {
-      const response = await fetch(`${API_BASE}/home/store/register`, {
+      const response = await fetch(`${API_BASE}/store/register`, {
         method: "POST",
         body: formData,
       });
