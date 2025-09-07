@@ -77,10 +77,13 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("📤 Отправляемые данные:", debugData);
 
     try {
-      const response = await fetch("http://116.203.51.133/api/store/register", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "http://116.203.51.133/luxmart/store/register",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const text = await response.text();
