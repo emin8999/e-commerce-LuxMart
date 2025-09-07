@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const API_BASE = "http://116.203.51.133:9090/home"; // порт + контекст бэкенда
+  const API_BASE = "http://116.203.51.133/luxmart"; // базовый URL для входа магазина
   const form = document.getElementById("tab-store");
 
   form.addEventListener("submit", async (e) => {
