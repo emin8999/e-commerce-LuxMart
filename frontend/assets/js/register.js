@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const response = await fetch(
-        "http://116.203.51.133/api/client/register",
+        "http://116.203.51.133/luxmart/api/register",
         {
           method: "POST",
           headers: {

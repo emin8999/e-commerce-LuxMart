@@ -13,7 +13,7 @@ form.addEventListener("submit", async (e) => {
   console.log("Данные для отправки:", data);
 
   try {
-    const response = await fetch("http://116.203.51.133/api/client/login", {
+    const response = await fetch("http://116.203.51.133/luxmart/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
