@@ -15,7 +15,7 @@ import lombok.Setter;
 @Builder
 public class StoreRegisterRequest {
 
-   private String storeName;
+    private String storeName;
     private String ownerName;
     private String email;  
     private String password;     

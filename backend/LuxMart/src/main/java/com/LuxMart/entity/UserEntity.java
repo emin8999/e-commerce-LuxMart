@@ -8,7 +8,6 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.LuxMart.enums.Gender;
 import com.LuxMart.enums.Roles;
 
 import jakarta.persistence.Column;
@@ -50,19 +49,9 @@ public class UserEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String surname;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<Roles> roles;
-    
-    private String phone;
-
-    private String address;
-
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
     
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -72,10 +61,6 @@ public class UserEntity {
     
     @OneToMany(mappedBy = "user")
     private List<OrderEntity> orders = new ArrayList<>();
-
-    @Column(nullable = false)
-    private boolean consentMembershipAgreement;
-
 
    
 }

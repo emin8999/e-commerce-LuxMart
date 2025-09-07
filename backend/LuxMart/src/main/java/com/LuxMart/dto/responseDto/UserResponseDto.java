@@ -22,9 +22,6 @@ public class UserResponseDto {
     private String email;
     private String name;
     private String surname;
-    private String phone;
-    private String address;
-    private String gender; 
     private Set<Roles> roles;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

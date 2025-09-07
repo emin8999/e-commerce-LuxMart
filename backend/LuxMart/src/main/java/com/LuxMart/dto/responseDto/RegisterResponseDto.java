@@ -18,8 +18,6 @@ public class RegisterResponseDto {
     private Long id;
     private String name;
     private String email;
-    private String address;
-    private String phone;
     private LocalDateTime createdAt;
     private String message;
 

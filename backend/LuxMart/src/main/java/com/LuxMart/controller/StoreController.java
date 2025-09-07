@@ -31,28 +31,28 @@ public class StoreController {
     
     private final StoreService storeService;
 
-// @PostMapping(value = "/register", consumes = "multipart/form-data")
-   // public ResponseEntity<String> register(@ModelAttribute @Valid StoreRegisterRequest request) {
-       // storeService.registerStore(request);
-       // return ResponseEntity.ok("register");
-   // }
-
-    @PostMapping(value = "/register", consumes = "multipart/form-data")
-public ResponseEntity<String> register(@ModelAttribute @Valid StoreRegisterRequest request) {
-    System.out.println("=== CONTROLLER REACHED ===");
-    System.out.println("StoreName: " + request.getStoreName());
-    System.out.println("Email: " + request.getEmail());
-    
-    try {
+  @PostMapping(value = "/register", consumes = "multipart/form-data")
+    public ResponseEntity<String> register(@ModelAttribute @Valid StoreRegisterRequest request) {
         storeService.registerStore(request);
-        System.out.println("=== SERVICE COMPLETED ===");
         return ResponseEntity.ok("register");
-    } catch (Exception e) {
-        System.out.println("=== SERVICE ERROR: " + e.getMessage() + " ===");
-        e.printStackTrace();
-        throw e;
     }
-}
+
+  //  @PostMapping(value = "/register", consumes = "multipart/form-data")
+//public ResponseEntity<String> register(@ModelAttribute @Valid StoreRegisterRequest request) {
+   // System.out.println("=== CONTROLLER REACHED ===");
+   // System.out.println("StoreName: " + request.getStoreName());
+   // System.out.println("Email: " + request.getEmail());
+    
+  //  try {
+   //     storeService.registerStore(request);
+  ///      System.out.println("=== SERVICE COMPLETED ===");
+    //    return ResponseEntity.ok("register");
+    //} catch (Exception e) {
+    //    System.out.println("=== SERVICE ERROR: " + e.getMessage() + " ===");
+    //    e.printStackTrace();
+   //     throw e;
+   // }
+//}
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
