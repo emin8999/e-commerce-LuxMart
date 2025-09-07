@@ -152,9 +152,28 @@ document.addEventListener("DOMContentLoaded", () => {
     // return;
   }
 
-  const storeName =
-    decodedToken.storeName || decodedToken.sub || "Unknown Store";
-  if (storeNameInput) storeNameInput.value = storeName;
+  // Пытаемся получить имя магазина из защищённого эндпойнта
+  async function fillStoreName() {
+    try {
+      const t = localStorage.getItem("storeJwt");
+      if (!t) return;
+      const resp = await fetch(`${API_BASE}/store/info`, {
+        headers: { Authorization: `Bearer ${t}` },
+      });
+      if (!resp.ok) {
+        // fallback на subject из токена (обычно email)
+        const storeName = decodedToken?.storeName || decodedToken?.sub || "Unknown Store";
+        if (storeNameInput) storeNameInput.value = storeName;
+        return;
+      }
+      const dto = await resp.json();
+      if (storeNameInput) storeNameInput.value = dto.storeName || dto.email || decodedToken?.sub || "Unknown Store";
+    } catch (_) {
+      const storeName = decodedToken?.storeName || decodedToken?.sub || "Unknown Store";
+      if (storeNameInput) storeNameInput.value = storeName;
+    }
+  }
+  fillStoreName();
 
   // ---------- FORM SUBMIT ----------
   if (!form) {
@@ -292,10 +311,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!input) return;
   try {
     const res = await fetch(`${API_BASE}/api/barcode/new`);
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data && data.barcode) input.value = data.barcode;
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.barcode) {
+        input.value = data.barcode;
+        return;
+      }
+    }
+    // Fallback: сгенерировать EAN-13 на фронте
+    input.value = (function genEAN13() {
+      const d = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10));
+      let sum = 0;
+      for (let i = 0; i < 12; i++) sum += d[i] * (i % 2 === 0 ? 1 : 3);
+      const checksum = (10 - (sum % 10)) % 10;
+      return d.join("") + String(checksum);
+    })();
   } catch (e) {
     console.warn("Barcode fetch failed", e);
+    // Fallback
+    input.value = (function genEAN13() {
+      const d = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10));
+      let sum = 0;
+      for (let i = 0; i < 12; i++) sum += d[i] * (i % 2 === 0 ? 1 : 3);
+      const checksum = (10 - (sum % 10)) % 10;
+      return d.join("") + String(checksum);
+    })();
   }
 });
