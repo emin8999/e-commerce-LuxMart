@@ -1,3 +1,4 @@
+const API_BASE = "http://116.203.51.133/luxmart";
 document.addEventListener("DOMContentLoaded", async () => {
   // Render categories (modal & home grid)
   if (document.getElementById("categoriesGrid")) {
@@ -6,9 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Home feed (sale/best/fbt)
   try {
-    const home = await fetch("http://localhost:9090/api/home").then((r) =>
-      r.json()
-    );
+    const home = await fetch(`${API_BASE}/api/home`).then((r) => r.json());
     const sections = [
       { id: "saleRow", list: home.sale || [] },
       { id: "bestRow", list: home.best || [] },
@@ -37,10 +36,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Our Stores page
   if (document.getElementById("storesSlider")) {
-    const stores = await fetch("http://localhost:9090/api/stores")
+    const stores = await fetch(`${API_BASE}/api/stores`)
       .then((r) => r.json())
       .catch(() => []);
-    const products = await fetch("http://localhost:9090/api/products")
+    const products = await fetch(`${API_BASE}/api/products`)
       .then((r) => r.json())
       .catch(() => []);
     const wrap = document.getElementById("storesSlider");
@@ -76,8 +75,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (document.getElementById("productView")) {
     const params = new URLSearchParams(location.search);
     const id = params.get("id") || "p1";
-    const p = await fetch(`http://localhost:9090/api/products/${id}`).then(
-      (r) => r.json()
+    const p = await fetch(`${API_BASE}/api/products/${id}`).then((r) =>
+      r.json()
     );
     const root = document.getElementById("productView");
     const price = window.pricing.formatPair(

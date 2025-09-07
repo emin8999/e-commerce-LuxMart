@@ -1,4 +1,4 @@
-const API_BASE = "http://116.203.51.133:9090/home";
+const API_BASE = "http://116.203.51.133/luxmart";
 const form = document.getElementById("loginForm");
 
 form.addEventListener("submit", async (e) => {

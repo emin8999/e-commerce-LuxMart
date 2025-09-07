@@ -37,14 +37,8 @@
             required
           ></textarea>
 
-          <input
-            type="number"
-            id="productPrice"
-            placeholder="Price ($)"
-            required
-            min="0"
-            step="0.01"
-          />
+          <input type="number" id="productPrice" placeholder="Base Price (USD)" required min="0" step="0.01" />
+          <input type="number" id="productSalePrice" placeholder="Sale Price (USD) — optional" min="0" step="0.01" />
 
           <label for="productCategory">Category:</label>
           <select id="productCategory" required>
@@ -273,6 +267,15 @@
                 placeholder="Quantity"
                 min="0"
                 step="1"
+              />
+
+              <input
+                type="number"
+                name="variantPrices"
+                class="variant-price-input"
+                placeholder="Variant price (USD)"
+                min="0"
+                step="0.01"
               />
 
               <button type="button" class="remove-button" style="display: none">

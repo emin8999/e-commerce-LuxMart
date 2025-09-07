@@ -1,4 +1,4 @@
-const API_BASE = "http://116.203.51.133:9090/home";
+const API_BASE = "http://116.203.51.133/luxmart";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("addProductForm");
@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const message = document.getElementById("addProductMessage");
   const storeNameInput = document.getElementById("productStore");
   const submitBtn = form ? form.querySelector('[type="submit"]') : null;
+  const categorySelect = document.getElementById("productCategory");
 
   function setMsg(text, ok = false) {
     if (!message) return;
@@ -57,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     div.innerHTML = `
       <select name="productSizes" class="size-input">${sizeOptions}</select>
       <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" min="0" step="1" />
+      <input type="number" name="variantPrices" class="variant-price-input" placeholder="Variant price (USD)" min="0" step="0.01" />
       <button type="button" class="remove-button">X</button>
     `;
     return div;
@@ -76,12 +78,38 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="size-quantity-wrapper">
         <select name="productSizes" class="size-input">${sizeOptions}</select>
         <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" min="0" step="1"/>
+        <input type="number" name="variantPrices" class="variant-price-input" placeholder="Variant price (USD)" min="0" step="0.01"/>
         <button type="button" class="remove-button" style="display:none;">X</button>
       </div>
       <input type="button" value="+" class="add-size-btn" aria-label="Add size" />
     `;
     updateRemoveButtons();
   }
+
+  async function populateCategories() {
+    if (!categorySelect) return;
+    try {
+      categorySelect.innerHTML = '<option value="" disabled selected>Choose category</option>';
+      const res = await fetch(`${API_BASE}/api/categories`);
+      if (!res.ok) throw new Error("Failed to load categories");
+      const list = await res.json();
+      // Флэт-рендер: родительские и подкатегории одним списком
+      const queue = Array.isArray(list) ? [...list] : [];
+      while (queue.length) {
+        const c = queue.shift();
+        const opt = document.createElement("option");
+        opt.value = String(c.id);
+        opt.textContent = c.nameEn || c.slug || `Category #${c.id}`;
+        categorySelect.appendChild(opt);
+        if (c.subcategories && c.subcategories.length) {
+          c.subcategories.forEach((sc) => queue.push(sc));
+        }
+      }
+    } catch (e) {
+      console.warn("Categories load failed", e);
+    }
+  }
+  populateCategories();
 
   // Делегирование: один обработчик на обёртке
   if (wrapper) {
@@ -157,40 +185,48 @@ document.addEventListener("DOMContentLoaded", () => {
       const name = val("productName").trim();
       if (!name) throw new Error("Укажите название товара.");
 
-      const priceNum = Number(val("productPrice"));
-      if (!Number.isFinite(priceNum) || priceNum < 0)
-        throw new Error("Цена должна быть числом ≥ 0.");
+      const basePrice = Number(val("productPrice"));
+      if (!Number.isFinite(basePrice) || basePrice < 0)
+        throw new Error("Базовая цена должна быть числом ≥ 0.");
+
+      const salePriceInput = document.getElementById("productSalePrice");
+      const salePrice = salePriceInput ? Number(salePriceInput.value || 0) : 0;
+      if (salePrice && (!Number.isFinite(salePrice) || salePrice < 0))
+        throw new Error("Цена со скидкой должна быть числом ≥ 0.");
+
+      const categoryId = Number(val("productCategory"));
+      if (!Number.isFinite(categoryId) || categoryId <= 0)
+        throw new Error("Выберите категорию (валидный ID).");
 
       const formData = new FormData();
-      formData.append("name", name);
+      // Поля, ожидаемые бэкендом (ProductRequestDto)
+      formData.append("title", name);
       formData.append("description", val("productDescription"));
-      formData.append("price", priceNum);
-      formData.append("category", val("productCategory"));
-      formData.append("store", storeNameInput ? storeNameInput.value : "");
+      formData.append("basePriceUSD", String(basePrice));
+      if (salePrice) formData.append("salePriceUSD", String(salePrice));
+      formData.append("categoryId", String(categoryId));
 
-      // --- sizeQuantities как отдельные поля ---
+      // --- variants[*] как ожидает бэкенд ---
       const sizeWrappers = wrapper.querySelectorAll(".size-quantity-wrapper");
       let countSizes = 0;
       sizeWrappers.forEach((blk) => {
         const size = blk.querySelector(".size-input")?.value || "";
         const qStr = blk.querySelector(".quantity-input")?.value || "";
         const quantity = Number(qStr);
+        const vStr = blk.querySelector(".variant-price-input")?.value || "";
+        const vPrice = vStr ? Number(vStr) : basePrice;
         if (size && Number.isFinite(quantity) && quantity > 0) {
-          formData.append(`sizeQuantities[${countSizes}].size`, size);
-          formData.append(`sizeQuantities[${countSizes}].quantity`, quantity);
+          formData.append(`variants[${countSizes}].size`, size);
+          formData.append(`variants[${countSizes}].stockQuantity`, String(quantity));
+          formData.append(`variants[${countSizes}].variantPriceUSD`, String(vPrice));
           countSizes++;
         }
       });
 
       if (countSizes === 0)
-        throw new Error("Укажите хотя бы один размер с количеством > 0.");
+        throw new Error("Укажите хотя бы один вариант: размер, количество и (опц.) цену варианта.");
 
-      const colorsRaw = val("productColors") || "";
-      const colors = colorsRaw
-        .split(",")
-        .map((c) => c.trim())
-        .filter((c) => c.length > 0);
-      formData.append("colors", JSON.stringify(colors));
+      // Прочие пользовательские поля (цвета, магазин и т.п.) бэкендом не требуются — не отправляем
 
       const imgInput = document.getElementById("productImages");
       if (!imgInput || imgInput.files.length === 0) {
@@ -228,12 +264,12 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error(errText);
       }
 
-      setMsg("Product added successfully!", true);
+      setMsg("Товар успешно добавлен!", true);
       form.reset();
       resetSizeBlocks();
     } catch (err) {
       console.error(err);
-      setMsg(err?.message || "Error adding product.", false);
+      setMsg(err?.message || "Ошибка при добавлении товара.", false);
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -248,25 +284,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
-});
-
-// ---------- FETCH BARCODE ----------
-async function fetchBarcode() {
-  try {
-    const res = await fetch(`${API_BASE}/api/barcode/new`);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    return data.barcode; // допустим, backend возвращает { "barcode": "1234567890123" }
-  } catch (e) {
-    console.error("Barcode fetch failed", e);
-    return null;
-  }
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const input = document.getElementById("Barcode");
-  if (input) {
-    const code = await fetchBarcode();
-    if (code) input.value = code;
-  }
 });

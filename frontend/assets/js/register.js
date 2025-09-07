@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const API_BASE = "http://116.203.51.133:9090/home";
+  const API_BASE = "http://116.203.51.133/luxmart";
   const clientForm = document.getElementById("tab-client");
 
   clientForm.addEventListener("submit", async (e) => {

@@ -1,3 +1,4 @@
+const API_BASE = "http://116.203.51.133/luxmart";
 window.currency = (function () {
   let cur = localStorage.getItem("currency") || "USD";
   let rates = { AZN: 1.7, EUR: 0.92, TRY: 33.0 };
@@ -5,9 +6,9 @@ window.currency = (function () {
 
   async function fetchConfig() {
     try {
-      const r1 = await fetch("http://localhost:9090/api/config/rates");
+      const r1 = await fetch(`${API_BASE}/api/config/rates`);
       rates = await r1.json();
-      const r2 = await fetch("http://localhost:9090/api/config/shipping");
+      const r2 = await fetch(`${API_BASE}/api/config/shipping`);
       const js = await r2.json();
       shipping = js.shippingCost;
       localStorage.setItem("exchangeRates", JSON.stringify(rates));
