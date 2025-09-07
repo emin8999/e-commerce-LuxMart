@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const API_BASE = "http://116.203.51.133:9090/home"; // базовый URL бэкенда
+  const API_BASE = "http://116.203.51.133/luxmart"; // базовый URL для регистрации магазина
   const form = document.getElementById("tab-store");
   const passwordInput = document.getElementById("password");
   const confirmPasswordInput = document.getElementById("confirmPassword");
@@ -64,7 +64,10 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("category", form.category.value);
 
     // === Boolean ===
-    formData.append("agreedToTerms", form.agreedToTerms.checked ? "true" : "false");
+    formData.append(
+      "agreedToTerms",
+      form.agreedToTerms.checked ? "true" : "false"
+    );
 
     // === Файл ===
     // Логотип как MultipartFile (обязателен)
@@ -77,7 +80,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (key === "password" || key === "confirmPassword") {
           safeLog.push({ field: key, value: "***" });
         } else if (value instanceof File) {
-          safeLog.push({ field: key, type: "File", name: value.name, size: `${value.size} bytes`, mime: value.type });
+          safeLog.push({
+            field: key,
+            type: "File",
+            name: value.name,
+            size: `${value.size} bytes`,
+            mime: value.type,
+          });
         } else {
           safeLog.push({ field: key, value: value });
         }
@@ -93,11 +102,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const contentType = response.headers.get("content-type") || "";
       const parseBody = async () =>
-        contentType.includes("application/json") ? response.json() : response.text();
+        contentType.includes("application/json")
+          ? response.json()
+          : response.text();
 
       if (!response.ok) {
         const errBody = await parseBody();
-        const errMsg = typeof errBody === "string" ? errBody : errBody?.message || JSON.stringify(errBody);
+        const errMsg =
+          typeof errBody === "string"
+            ? errBody
+            : errBody?.message || JSON.stringify(errBody);
         throw new Error(`Ошибка: ${response.status} → ${errMsg}`);
       }
 
