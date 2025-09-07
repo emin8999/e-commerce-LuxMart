@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const API_BASE = "http://116.203.51.133:9090"; // сервер бэкенда
   const form = document.getElementById("tab-store");
   const passwordInput = document.getElementById("password");
   const confirmPasswordInput = document.getElementById("confirmPassword");
@@ -30,8 +31,23 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
 
     if (!validatePasswords()) {
-      alert("Passwords do not match!");
+      alert("Пароли не совпадают");
       return;
+    }
+
+    // Согласие с условиями обязательно (соответствует проверке на бэке)
+    if (!form.agreedToTerms.checked) {
+      alert("Необходимо согласиться с условиями использования");
+      return;
+    }
+
+    // Логотип обязателен (на бэке колонка logo nullable = false)
+    if (!form.logo || form.logo.files.length === 0) {
+      alert("Пожалуйста, загрузите логотип магазина");
+      form.logo?.classList?.add("error-input");
+      return;
+    } else {
+      form.logo.classList?.remove("error-input");
     }
 
     const formData = new FormData();
@@ -48,51 +64,46 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("category", form.category.value);
 
     // === Boolean ===
-    formData.append("agreedToTerms", form.agreedToTerms.checked ? true : false);
+    formData.append("agreedToTerms", form.agreedToTerms.checked ? "true" : "false");
 
     // === Файл ===
-    if (form.logo.files.length > 0) {
-      formData.append("logo", form.logo.files[0]); // как MultipartFile
-    }
+    // Логотип как MultipartFile (обязателен)
+    formData.append("logo", form.logo.files[0]);
 
-    // === Логируем FormData как массив объектов ===
-    const debugData = [];
-    for (let [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        debugData.push({
-          field: key,
-          type: "File",
-          name: value.name,
-          size: value.size + " bytes",
-          mime: value.type,
-        });
-      } else {
-        debugData.push({
-          field: key,
-          value: value,
-          type: typeof value,
-        });
+    // === Легкое логирование без чувствительных данных ===
+    try {
+      const safeLog = [];
+      for (let [key, value] of formData.entries()) {
+        if (key === "password" || key === "confirmPassword") {
+          safeLog.push({ field: key, value: "***" });
+        } else if (value instanceof File) {
+          safeLog.push({ field: key, type: "File", name: value.name, size: `${value.size} bytes`, mime: value.type });
+        } else {
+          safeLog.push({ field: key, value: value });
+        }
       }
-    }
-    console.log("📤 Отправляемые данные:", debugData);
+      console.log("📤 Отправляемые данные:", safeLog);
+    } catch (_) {}
 
     try {
-      const response = await fetch(
-        "http://116.203.51.133/luxmart/store/register",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_BASE}/home/store/register`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const contentType = response.headers.get("content-type") || "";
+      const parseBody = async () =>
+        contentType.includes("application/json") ? response.json() : response.text();
 
       if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Ошибка: ${response.status} → ${text}`);
+        const errBody = await parseBody();
+        const errMsg = typeof errBody === "string" ? errBody : errBody?.message || JSON.stringify(errBody);
+        throw new Error(`Ошибка: ${response.status} → ${errMsg}`);
       }
 
-      const result = await response.json();
-      console.log("✅ Успешная регистрация:", result);
-      alert("Store registered successfully!");
+      const body = await parseBody();
+      console.log("✅ Успешная регистрация:", body);
+      alert("Магазин успешно зарегистрирован");
     } catch (error) {
       console.error("❌ Ошибка при отправке:", error);
       alert("Произошла ошибка при регистрации: " + error.message);
