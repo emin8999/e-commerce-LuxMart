@@ -285,3 +285,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+// ---------- FETCH BARCODE AND FILL INPUT ----------
+document.addEventListener("DOMContentLoaded", async () => {
+  const input = document.getElementById("Barcode");
+  if (!input) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/barcode/new`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.barcode) input.value = data.barcode;
+  } catch (e) {
+    console.warn("Barcode fetch failed", e);
+  }
+});
