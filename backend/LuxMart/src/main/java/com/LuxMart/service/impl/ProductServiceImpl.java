@@ -1,6 +1,7 @@
 package com.LuxMart.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ import com.LuxMart.security.util.StoreSecurityUtil;
 import com.LuxMart.service.ProductService;
 import com.LuxMart.utility.ProductUtility;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -136,5 +137,31 @@ public class ProductServiceImpl implements ProductService {
         return sku;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> getAllProductsOfCurrentStore()
+            throws AccessDeniedException, java.nio.file.AccessDeniedException {
+        StoreEntity store = storeSecurityUtil.getCurrentStore();
+        List<ProductEntity> products = productRepository.findByStoreId(store.getId());
+
+        return products.stream()
+                .map(this::mapProductWithImages)
+                .collect(Collectors.toList());
+    }
+    
+    private ProductResponseDto mapProductWithImages(ProductEntity product) {
+        ProductResponseDto dto = productMapper.mapToProductResponseDto(product);
+
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            dto.setImageUrls(
+                    product.getImages().stream()
+                            .map(ProductImageEntity::getImageUrl)
+                            .toList());
+        } else {
+            dto.setImageUrls(Collections.emptyList());
+        }
+
+        return dto;
+    }
 
 }

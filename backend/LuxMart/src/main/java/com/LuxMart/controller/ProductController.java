@@ -5,13 +5,11 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.LuxMart.dto.requestDto.product.ProductRequestDto;
 import com.LuxMart.dto.responseDto.product.ProductResponseDto;
@@ -34,6 +32,11 @@ public class ProductController {
         ProductResponseDto savedProduct = productService.addProduct(productRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
-
+   
+    @GetMapping("/my-store")
+    public ResponseEntity<List<ProductResponseDto>> getProductsOfCurrentStore() throws AccessDeniedException, java.nio.file.AccessDeniedException {
+        List<ProductResponseDto> products = productService.getAllProductsOfCurrentStore();
+        return ResponseEntity.ok(products);
+    }
    
 }

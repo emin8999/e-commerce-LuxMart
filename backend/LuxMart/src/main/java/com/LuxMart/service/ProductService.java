@@ -11,7 +11,7 @@ public interface ProductService {
     ProductResponseDto addProduct(ProductRequestDto request)
             throws AccessDeniedException, java.nio.file.AccessDeniedException;
 
-    //List<ProductResponseDto> getAllProductsOfCurrentStore() throws AccessDeniedException;
+    List<ProductResponseDto> getAllProductsOfCurrentStore()  throws AccessDeniedException, java.nio.file.AccessDeniedException;
 
 
 }
