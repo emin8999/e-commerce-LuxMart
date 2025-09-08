@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const sizeInput = document.createElement("input");
     sizeInput.type = "text";
     sizeInput.placeholder = "Размер (напр.: M или 42)";
-    sizeInput.required = true;
+    // sizeInput.required = true;
     sizeInput.value = initialSize;
 
     const qtyInput = document.createElement("input");
