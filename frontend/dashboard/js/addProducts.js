@@ -1,4 +1,4 @@
-const API_BASE = "http://116.203.51.133:9090";
+const API_BASE = "http://116.203.51.133/luxmart";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("addProductForm");
@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const message = document.getElementById("addProductMessage");
   const storeNameInput = document.getElementById("productStore");
   const submitBtn = form ? form.querySelector('[type="submit"]') : null;
+  const categorySelect = document.getElementById("productCategory");
 
   function setMsg(text, ok = false) {
     if (!message) return;
@@ -29,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ---------- SIZE BLOCKS (инициализация до проверок токена) ----------
+  // ---------- SIZE BLOCKS ----------
   const sizeOptions = `
     <option value="">Size</option>
     <option value="TWO_XS">2XS</option>
@@ -57,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     div.innerHTML = `
       <select name="productSizes" class="size-input">${sizeOptions}</select>
       <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" min="0" step="1" />
+      <input type="number" name="variantPrices" class="variant-price-input" placeholder="Variant price (USD)" min="0" step="0.01" />
       <button type="button" class="remove-button">X</button>
     `;
     return div;
@@ -76,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="size-quantity-wrapper">
         <select name="productSizes" class="size-input">${sizeOptions}</select>
         <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" min="0" step="1"/>
+        <input type="number" name="variantPrices" class="variant-price-input" placeholder="Variant price (USD)" min="0" step="0.01"/>
         <button type="button" class="remove-button" style="display:none;">X</button>
       </div>
       <input type="button" value="+" class="add-size-btn" aria-label="Add size" />
@@ -83,17 +86,11 @@ document.addEventListener("DOMContentLoaded", () => {
     updateRemoveButtons();
   }
 
-  // Делегирование: один обработчик на обёртке
   if (wrapper) {
-    // если вдруг верстка пустая — создаём базовый набор
-    if (!wrapper.querySelector(".size-quantity-wrapper")) {
-      resetSizeBlocks();
-    }
-
+    if (!wrapper.querySelector(".size-quantity-wrapper")) resetSizeBlocks();
     wrapper.addEventListener("click", (e) => {
       const addBtn = e.target.closest(".add-size-btn");
       const removeBtn = e.target.closest(".remove-button");
-
       if (addBtn) {
         addSizeBlock();
         return;
@@ -106,38 +103,70 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     });
-
-    updateRemoveButtons();
   }
 
-  // ---------- CHECK TOKEN ----------
+  // ---------- AUTH + STORE NAME ----------
   const storeJwt = localStorage.getItem("storeJwt");
   if (!storeJwt) {
-    // window.location.href = "storeLogin.html";
-    // return;
-  }
-
-  const decodedToken = decodeJwtPayload(storeJwt);
-  if (!decodedToken) {
-    // localStorage.removeItem("storeJwt");
-    // window.location.href = "storeLogin.html";
-    // return;
-  }
-
-  const storeName =
-    decodedToken.storeName || decodedToken.sub || "Unknown Store";
-  if (storeNameInput) storeNameInput.value = storeName;
-
-  // ---------- FORM SUBMIT ----------
-  if (!form) {
-    console.error("Form #addProductForm not found in DOM");
+    window.location.href = "storeLogin.html";
     return;
   }
+  const decodedToken = decodeJwtPayload(storeJwt) || {};
 
+  async function fillStoreName() {
+    try {
+      const resp = await fetch(`${API_BASE}/store/info`, {
+        headers: { Authorization: `Bearer ${storeJwt}` },
+      });
+      if (resp.ok) {
+        const dto = await resp.json();
+        if (storeNameInput)
+          storeNameInput.value =
+            dto.storeName || dto.email || decodedToken.sub || "Unknown Store";
+      } else {
+        if (storeNameInput)
+          storeNameInput.value = decodedToken.sub || "Unknown Store";
+      }
+    } catch {
+      if (storeNameInput)
+        storeNameInput.value = decodedToken.sub || "Unknown Store";
+    }
+  }
+  fillStoreName();
+
+  // ---------- CATEGORIES ----------
+  async function populateCategories() {
+    if (!categorySelect) return;
+    try {
+      categorySelect.innerHTML =
+        '<option value="" disabled selected>Loading categories...</option>';
+      const res = await fetch(`${API_BASE}/api/categories`);
+      if (!res.ok) throw new Error("Failed to load categories");
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      categorySelect.innerHTML =
+        '<option value="" disabled selected>Choose category</option>';
+      const queue = [...list];
+      while (queue.length) {
+        const c = queue.shift();
+        const opt = document.createElement("option");
+        opt.value = String(c.id);
+        opt.textContent = c.nameEn || c.slug || `Category #${c.id}`;
+        categorySelect.appendChild(opt);
+        if (c.subcategories && c.subcategories.length)
+          c.subcategories.forEach((sc) => queue.push(sc));
+      }
+    } catch (e) {
+      console.warn("Categories load failed", e);
+    }
+  }
+  populateCategories();
+
+  // ---------- SUBMIT ----------
+  if (!form) return;
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     setMsg("");
-
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.dataset.orig = submitBtn.textContent || submitBtn.value || "";
@@ -147,85 +176,77 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const token = localStorage.getItem("storeJwt");
-      if (!token) {
-        // localStorage.removeItem("storeJwt");
-        // window.location.href = "storeLogin.html";
-        // return;
-      }
-
       const name = val("productName").trim();
-      if (!name) throw new Error("Укажите название товара.");
+      if (!name) throw new Error("Please enter product name.");
 
-      const priceNum = Number(val("productPrice"));
-      if (!Number.isFinite(priceNum) || priceNum < 0)
-        throw new Error("Цена должна быть числом ≥ 0.");
+      const basePrice = Number(val("productPrice"));
+      if (!Number.isFinite(basePrice) || basePrice < 0)
+        throw new Error("Base price must be >= 0.");
+
+      const salePriceEl = document.getElementById("productSalePrice");
+      const salePrice =
+        salePriceEl && salePriceEl.value !== ""
+          ? Number(salePriceEl.value)
+          : undefined;
+      if (
+        salePrice !== undefined &&
+        (!Number.isFinite(salePrice) || salePrice < 0)
+      )
+        throw new Error("Sale price must be >= 0.");
+
+      const categoryId = Number(val("productCategory"));
+      if (!Number.isFinite(categoryId) || categoryId <= 0)
+        throw new Error("Select a valid category.");
 
       const formData = new FormData();
-      formData.append("name", name);
+      formData.append("title", name);
       formData.append("description", val("productDescription"));
-      formData.append("price", priceNum);
-      formData.append("category", val("productCategory"));
-      formData.append("store", storeNameInput ? storeNameInput.value : "");
+      formData.append("basePriceUSD", String(basePrice));
+      if (salePrice !== undefined)
+        formData.append("salePriceUSD", String(salePrice));
+      formData.append("categoryId", String(categoryId));
 
-      // --- sizeQuantities как отдельные поля ---
-      const sizeWrappers = wrapper.querySelectorAll(".size-quantity-wrapper");
-      let countSizes = 0;
-      sizeWrappers.forEach((blk) => {
+      // Variants
+      const blocks = wrapper.querySelectorAll(".size-quantity-wrapper");
+      let vi = 0;
+      blocks.forEach((blk) => {
         const size = blk.querySelector(".size-input")?.value || "";
-        const qStr = blk.querySelector(".quantity-input")?.value || "";
-        const quantity = Number(qStr);
-        if (size && Number.isFinite(quantity) && quantity > 0) {
-          formData.append(`sizeQuantities[${countSizes}].size`, size);
-          formData.append(`sizeQuantities[${countSizes}].quantity`, quantity);
-          countSizes++;
+        const q = Number(blk.querySelector(".quantity-input")?.value || "");
+        const vStr = blk.querySelector(".variant-price-input")?.value || "";
+        const vPrice = vStr === "" ? basePrice : Number(vStr);
+        if (size && Number.isFinite(q) && q > 0) {
+          formData.append(`variants[${vi}].size`, size);
+          formData.append(`variants[${vi}].stockQuantity`, String(q));
+          formData.append(`variants[${vi}].variantPriceUSD`, String(vPrice));
+          vi++;
         }
       });
+      if (vi === 0)
+        throw new Error("Add at least one variant (size and quantity).");
 
-      if (countSizes === 0)
-        throw new Error("Укажите хотя бы один размер с количеством > 0.");
-
-      const colorsRaw = val("productColors") || "";
-      const colors = colorsRaw
-        .split(",")
-        .map((c) => c.trim())
-        .filter((c) => c.length > 0);
-      formData.append("colors", JSON.stringify(colors));
-
+      // Images
       const imgInput = document.getElementById("productImages");
-      if (!imgInput || imgInput.files.length === 0) {
-        throw new Error("Загрузите хотя бы одно изображение товара.");
-      }
-
-      for (let i = 0; i < imgInput.files.length; i++) {
+      if (!imgInput || imgInput.files.length === 0)
+        throw new Error("Upload at least one image.");
+      for (let i = 0; i < imgInput.files.length; i++)
         formData.append("imageUrls", imgInput.files[i]);
-      }
 
-      const res = await fetch(`${API_BASE}/home/product`, {
+      const res = await fetch(`${API_BASE}/api/products`, {
         method: "POST",
-        headers: { Authorization: "Bearer " + token },
+        headers: { Authorization: `Bearer ${storeJwt}` },
         body: formData,
       });
 
-      if (res.status === 401 || res.status === 403) {
-        // localStorage.removeItem("storeJwt");
-        // window.location.href = "storeLogin.html";
-        // return;
-      }
-
-      let payload;
       const ct = res.headers.get("content-type") || "";
-      payload = ct.includes("application/json")
-        ? await res.json()
-        : await res.text();
-
+      const parse = async () =>
+        ct.includes("application/json") ? res.json() : res.text();
+      const body = await parse();
       if (!res.ok) {
-        const errText =
-          typeof payload === "string"
-            ? payload
-            : (payload && (payload.message || JSON.stringify(payload))) ||
-              "Unknown error";
-        throw new Error(errText);
+        const msg =
+          typeof body === "string"
+            ? body
+            : body?.message || JSON.stringify(body);
+        throw new Error(msg);
       }
 
       setMsg("Product added successfully!", true);
@@ -233,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
       resetSizeBlocks();
     } catch (err) {
       console.error(err);
-      setMsg(err?.message || "Error adding product.", false);
+      setMsg(err?.message || "Failed to add product.", false);
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -248,25 +269,4 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
-});
-
-// ---------- FETCH BARCODE ----------
-async function fetchBarcode() {
-  try {
-    const res = await fetch("/api/barcode/new");
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    return data.barcode; // допустим, backend возвращает { "barcode": "1234567890123" }
-  } catch (e) {
-    console.error("Barcode fetch failed", e);
-    return null;
-  }
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const input = document.getElementById("Barcode");
-  if (input) {
-    const code = await fetchBarcode();
-    if (code) input.value = code;
-  }
 });

@@ -37,8 +37,21 @@
             required
           ></textarea>
 
-          <input type="number" id="productPrice" placeholder="Base Price (USD)" required min="0" step="0.01" />
-          <input type="number" id="productSalePrice" placeholder="Sale Price (USD) — optional" min="0" step="0.01" />
+          <input
+            type="number"
+            id="productPrice"
+            placeholder="Base Price (USD)"
+            required
+            min="0"
+            step="0.01"
+          />
+          <input
+            type="number"
+            id="productSalePrice"
+            placeholder="Sale Price (USD) — optional"
+            min="0"
+            step="0.01"
+          />
 
           <label for="productCategory">Category:</label>
           <select id="productCategory" required>
@@ -112,20 +125,12 @@
             placeholder="Store name (from token)"
           />
 
-          <input
-            type="text"
-            id="Barcode"
-            name="Barcode"
-            readonly
-            placeholder="Barcode (from token)"
-          />
-
           <button type="submit">Add Product</button>
         </form>
 
         <div id="addProductMessage" role="status" aria-live="polite"></div>
       </div>
-  </main>
+    </main>
     <div id="app-footer"></div>
     <script src="../assets/js/i18n.js"></script>
     <script src="../assets/js/currency.js"></script>
