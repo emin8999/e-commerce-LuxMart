@@ -39,9 +39,6 @@ public class ProductVariantEntity {
     @Column(nullable = false)
     private Integer stockQuantity = 0;
     
-  
-    private BigDecimal variantPriceUSD;
-    
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;

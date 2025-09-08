@@ -1,6 +1,5 @@
 package com.LuxMart.dto.requestDto.product;
 
-import java.math.BigDecimal;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +16,4 @@ public class ProductVariantRequestDto {
 
     private String size;
     private Integer stockQuantity;
-    private BigDecimal variantPriceUSD;
-    
 }

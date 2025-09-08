@@ -76,7 +76,6 @@ public class ProductServiceImpl implements ProductService {
                                 .sku(sku)
                                 .size(variantDto.getSize())
                                 .stockQuantity(variantDto.getStockQuantity())
-                                .variantPriceUSD(variantDto.getVariantPriceUSD())
                                 .product(savedProduct)
                                 .build();
                     }).collect(Collectors.toList());
