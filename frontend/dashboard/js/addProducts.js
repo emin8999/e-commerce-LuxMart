@@ -3,18 +3,18 @@
 const API_BASE = "http://116.203.51.133/luxmart";
 
 // Категории
-const CATEGORIES_URL = `${API_BASE}/categories`; // GET: список категорий [{id, name}]
+const CATEGORIES_URL = `${API_BASE}/api/categories`; // GET: список категорий [{id, name}]
 // Или `${API_BASE}/api/v1/categories`
 
 // Магазины / Текущий магазин (по JWT)
-const MY_STORE_URL = `${API_BASE}/stores/me`; // GET: текущий магазин {id, name}
+const MY_STORE_URL = `${API_BASE}/store/info`; // GET: текущий магазин {id, name}
 const STORES_URL = `${API_BASE}/stores`; // GET: список магазинов (для админа) [{id, name}]
 
 // Опционально: подсказка slug от бэкенда (если есть такой сервис)
 const SLUG_SUGGEST_URL = `${API_BASE}/utils/slug?title=`; // GET: ?title=... => { slug: "..." }
 
 // Создание товара
-const CREATE_PRODUCT_URL = `${API_BASE}/products`; // POST: multipart/form-data
+const CREATE_PRODUCT_URL = `${API_BASE}/api/products`; // POST: multipart/form-data
 // Имя поля с файлами — под бэкенд, чаще "imageUrls" или "images"
 const IMAGES_FIELD_NAME = "imageUrls";
 
