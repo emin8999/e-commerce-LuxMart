@@ -170,7 +170,15 @@ public class ProductServiceImpl implements ProductService {
         return products.stream()
                 .map(productMapper::mapToProductResponseDto)
                 .toList();
-
-
             }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> getAllProducts() {
+        List<ProductEntity> products = productRepository.findAll();
+        return products.stream()
+                .map(this::mapProductWithImages)
+                .collect(Collectors.toList());
+    }
+
 }

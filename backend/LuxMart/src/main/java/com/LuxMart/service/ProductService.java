@@ -14,4 +14,6 @@ public interface ProductService {
     List<ProductResponseDto> getAllProductsOfCurrentStore()  throws AccessDeniedException, java.nio.file.AccessDeniedException;
 
      List<ProductResponseDto> getProductsByCategory(Long categoryId);
+
+      public List<ProductResponseDto> getAllProducts();
 }
