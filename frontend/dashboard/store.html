@@ -28,6 +28,65 @@
     </header>
     <main class="container">
       <section>
+        <h2>Store Information</h2>
+        <div id="storeInfo">
+          <form id="storeInfoForm" class="form" autocomplete="off">
+            <div class="grid two">
+              <label>
+                <span>Store Name</span>
+                <input type="text" id="storeName" name="storeName" disabled />
+              </label>
+              <label>
+                <span>Owner Name</span>
+                <input type="text" id="ownerName" name="ownerName" disabled />
+              </label>
+              <label>
+                <span>Email</span>
+                <input type="email" id="email" name="email" disabled />
+              </label>
+              <label>
+                <span>Phone</span>
+                <input type="tel" id="phone" name="phone" disabled />
+              </label>
+              <label>
+                <span>Location</span>
+                <input type="text" id="location" name="location" disabled />
+              </label>
+              <label>
+                <span>Category</span>
+                <input type="text" id="category" name="category" disabled />
+              </label>
+            </div>
+            <label>
+              <span>Description</span>
+              <textarea id="storeDescription" name="storeDescription" rows="3" disabled></textarea>
+            </label>
+            <div class="grid two" style="align-items:center">
+              <div>
+                <label>
+                  <span>Slug</span>
+                  <input type="text" id="slug" name="slug" disabled />
+                </label>
+                <label style="display:flex;gap:8px;align-items:center;margin-top:8px">
+                  <input type="checkbox" id="agreedToTerms" disabled />
+                  <span>Agreed To Terms</span>
+                </label>
+              </div>
+              <div style="justify-self:end;text-align:center">
+                <img id="logoPreview" alt="Logo" style="max-width:140px;max-height:140px;border:1px solid #e5e5e5;border-radius:8px;object-fit:contain" />
+              </div>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:12px">
+              <button type="button" id="editStoreBtn" class="btn">Edit</button>
+              <button type="submit" id="saveStoreBtn" class="btn primary" disabled>Save</button>
+              <button type="button" id="cancelEditBtn" class="btn" disabled>Cancel</button>
+              <span id="storeInfoMsg" style="margin-left:8px"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+      <section>
         <h2>Products</h2>
         <a href="addProducts.html" class="btn primary">Add Product</a>
         <table class="table">
@@ -53,6 +112,7 @@
     <script defer src="../assets/js/i18n.js"></script>
     <script defer src="../assets/js/currency.js"></script>
     <script defer src="./js/dashboard.js"></script>
+    <script defer src="./js/store.js"></script>
     <script defer src="../assets/js/main.js"></script>
     <script defer src="../assets/js/footer.js"></script>
   </body>
