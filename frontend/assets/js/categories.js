@@ -18,7 +18,7 @@ function localeField(lc) {
 async function loadCategories() {
   if (CATEGORIES_CACHE) return CATEGORIES_CACHE;
   try {
-    const res = await fetch(`${API_BASE}/api/products/category/{categoryId}`);
+    const res = await fetch(`${API_BASE}/api/categories`);
     const data = await res.json();
     CATEGORIES_CACHE = Array.isArray(data) ? data : [];
   } catch (e) {

@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const stores = await fetch(`${API_BASE}/api/stores`)
       .then((r) => r.json())
       .catch(() => []);
-    const products = await fetch(`${API_BASE}/api/products`)
+    const products = await fetch(`${API_BASE}/api/products/all-products`)
       .then((r) => r.json())
       .catch(() => []);
     const wrap = document.getElementById("storesSlider");
@@ -87,10 +87,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       const listRoot = document.getElementById("productsList");
       const params = new URLSearchParams(location.search);
       const cat = params.get('cat');
-      let products = await fetch(`${API_BASE}/api/products`).then((r) => r.json());
+      let products = [];
       if (cat) {
-        const catId = Number(cat);
-        products = products.filter(p => Number(p.categoryId) === catId);
+        // Prefer server-side by-category endpoint, fallback to client filter
+        try {
+          products = await fetch(`${API_BASE}/api/products/category/${encodeURIComponent(cat)}`).then(r => {
+            if (!r.ok) throw new Error('no-endpoint');
+            return r.json();
+          });
+        } catch(_) {
+          const all = await fetch(`${API_BASE}/api/products/all-products`).then(r=>r.json());
+          const catId = Number(cat);
+          products = all.filter(p => Number(p.categoryId) === catId);
+        }
+      } else {
+        products = await fetch(`${API_BASE}/api/products/all-products`).then((r) => r.json());
       }
       listRoot.innerHTML = "";
       products.forEach((p) => {
@@ -192,12 +203,19 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (window.renderCartBadge) window.renderCartBadge();
     };
 
-    // Similar by category
+    // Similar by category (server endpoint if available)
     try {
-      const all = await fetch(`${API_BASE}/api/products`).then((r) => r.json());
-      const sim = all
-        .filter((x) => x.categoryId === p.categoryId && x.id !== p.id)
-        .slice(0, 12);
+      let sim = [];
+      try {
+        const list = await fetch(`${API_BASE}/api/products/category/${encodeURIComponent(p.categoryId)}`).then(r => {
+          if (!r.ok) throw new Error('no-endpoint');
+          return r.json();
+        });
+        sim = list.filter(x => x.id !== p.id).slice(0,12);
+      } catch(_) {
+        const all = await fetch(`${API_BASE}/api/products/all-products`).then((r) => r.json());
+        sim = all.filter((x) => x.categoryId === p.categoryId && x.id !== p.id).slice(0, 12);
+      }
       const row = document.getElementById("similarRow");
       if (row) {
         row.innerHTML = "";
