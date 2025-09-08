@@ -1,9 +1,12 @@
 package com.LuxMart.exception;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,8 +35,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
     }
 
-       @ExceptionHandler(Exception.class)
-public ResponseEntity<ErrorResponse> handleAllOtherException(Exception ex,HttpServletRequest request) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleAllOtherException(Exception ex,HttpServletRequest request) {
     ErrorResponse error = ErrorResponse.builder()
         .statusCode(HttpStatus.BAD_REQUEST.value())
         .message(ex.getMessage())
@@ -44,5 +47,19 @@ public ResponseEntity<ErrorResponse> handleAllOtherException(Exception ex,HttpSe
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(error);
 }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+            errors.put(error.getField(), error.getDefaultMessage()));
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
     
 }

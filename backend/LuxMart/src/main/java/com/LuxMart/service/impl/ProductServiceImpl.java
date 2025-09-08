@@ -56,7 +56,6 @@ public class ProductServiceImpl implements ProductService {
         product.setStore(store);
         product.setCategory(category);
 
-        
         String slug = productRequestDto.getSlug();
         if (slug == null || slug.isBlank()) {
             slug = generateSlug(productRequestDto.getTitle());
@@ -80,7 +79,6 @@ public class ProductServiceImpl implements ProductService {
                                 .build();
                     }).collect(Collectors.toList());
 
-            
             if (savedProduct.getVariants() == null) {
                 savedProduct.setVariants(new ArrayList<>());
             }
@@ -130,7 +128,6 @@ public class ProductServiceImpl implements ProductService {
         return slug;
     }
 
-   
     private String ensureUniqueSku(String baseSku) {
         String sku = baseSku;
         while (productVariantRepository.existsBySku(sku)) {
@@ -138,4 +135,6 @@ public class ProductServiceImpl implements ProductService {
         }
         return sku;
     }
+
+
 }
