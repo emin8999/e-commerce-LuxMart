@@ -4,9 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="../dashboard/css/addProduct.css" />
     <link rel="stylesheet" href="../assets/css/style.css" />
+    <link rel="stylesheet" href="../dashboard/css/addProduct.css" />
+
     <link rel="stylesheet" href="../dashboard/css/dashboard.css" />
+    <link rel="stylesheet" href="../dashboard/css/add-style.css" />
   </head>
   <body>
     <header class="dashboard-header">
@@ -19,121 +21,170 @@
       </nav>
     </header>
     <main>
-      <div class="product-form-container">
-        <h1>Add a New Product</h1>
-
-        <!-- Валидацию по динамическим размерам делаем в JS -->
-        <form id="addProductForm" novalidate>
-          <input
-            type="text"
-            id="productName"
-            placeholder="Product Name"
-            required
-          />
-
-          <textarea
-            id="productDescription"
-            placeholder="Description"
-            required
-          ></textarea>
-
-          <input
-            type="number"
-            id="productPrice"
-            placeholder="Base Price (USD)"
-            required
-            min="0"
-            step="0.01"
-          />
-          <input
-            type="number"
-            id="productSalePrice"
-            placeholder="Sale Price (USD) — optional"
-            min="0"
-            step="0.01"
-          />
-
-          <label for="productCategory">Category:</label>
-          <select id="productCategory" required>
-            <option value="" disabled selected>Loading categories...</option>
-          </select>
-
-          <!-- SIZE + QUANTITY SECTION -->
-          <div class="size-wrapper" id="sizeQuantitiesWrapper">
-            <div class="size-quantity-wrapper">
-              <!-- ВАЖНО: без required; валидация в JS -->
-              <select name="productSizes" class="size-input">
-                <option value="">Size</option>
-                <option value="TWO_XS">2XS</option>
-                <option value="XS">XS</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="TWO_XL">2XL</option>
-              </select>
-
-              <input
-                type="number"
-                name="quantities"
-                class="quantity-input"
-                placeholder="Quantity"
-                min="0"
-                step="1"
-              />
-
-              <input
-                type="number"
-                name="variantPrices"
-                class="variant-price-input"
-                placeholder="Variant price (USD)"
-                min="0"
-                step="0.01"
-              />
-
-              <button type="button" class="remove-button" style="display: none">
-                X
-              </button>
+      <div class="wrap">
+        <div class="bar">
+          <div class="title">Добавить товар</div>
+          <div class="kvs">
+            <div class="kv">
+              Магазин: <b id="storeDisplay" style="color: var(--sand)"></b>
             </div>
-            <input
-              type="button"
-              value="+"
-              class="add-size-btn"
-              aria-label="Add size"
-            />
+            <div class="kv">
+              Категорий: <b id="catCount" style="color: var(--sand)"></b>
+            </div>
           </div>
+        </div>
 
-          <input
-            type="text"
-            id="productColors"
-            placeholder="Colors (comma-separated)"
-          />
+        <!-- <div class="card" style="margin-top: 14px">
+          <p class="muted" style="margin-top: 0">
+            Поля маппятся на бэкенд:
+            <span class="chip"><b>title</b></span>
+            <span class="chip"><b>slug</b></span>
+            <span class="chip"><b>description</b></span>
+            <span class="chip"><b>basePriceUSD</b></span>
+            <span class="chip"><b>salePriceUSD</b></span>
+            <span class="chip"><b>categoryId</b></span>
+            <span class="chip"><b>imageUrls[]</b></span>
+            <span class="chip"><b>variants[size, quantity]</b></span>
+          </p> -->
 
-          <input
-            type="file"
-            id="productImages"
-            accept="image/*"
-            multiple
-            required
-          />
+          <form
+            id="addProductForm"
+            class="grid"
+            enctype="multipart/form-data"
+            autocomplete="off"
+          >
+            <!-- Магазин (авто) -->
+            <div class="col-12 who">
+              <div
+                class="row"
+                style="justify-content: space-between; width: 100%"
+              >
+                <div style="min-width: 240px; flex: 1">
+                  <label for="storeSelect">Магазин</label>
+                  <select id="storeSelect"></select>
+                </div>
+                <div style="min-width: 240px; flex: 1">
+                  <label for="categoryId">Категория</label>
+                  <select id="categoryId" required>
+                    <option value="">Загрузка категорий…</option>
+                  </select>
+                </div>
+              </div>
+            </div>
 
-          <input
-            type="text"
-            id="productStore"
-            name="productStore"
-            readonly
-            placeholder="Store name (from token)"
-          />
+            <div class="col-6">
+              <label for="title">Название (title)</label>
+              <input
+                id="title"
+                type="text"
+                placeholder="Например: Nike Air Zoom"
+                required
+              />
+            </div>
+            <div class="col-6">
+              <label for="slug">Слаг (slug)</label>
+              <input
+                id="slug"
+                type="text"
+                placeholder="nike-air-zoom"
+                required
+              />
+            </div>
 
-          <button type="submit">Add Product</button>
-        </form>
+            <div class="col-12">
+              <label for="description">Описание (description)</label>
+              <textarea
+                id="description"
+                placeholder="Короткое описание товара"
+                required
+              ></textarea>
+            </div>
 
-        <div id="addProductMessage" role="status" aria-live="polite"></div>
+            <div class="col-6">
+              <label for="basePrice">Базовая цена USD (basePriceUSD)</label>
+              <input
+                id="basePrice"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="149.99"
+                required
+              />
+            </div>
+            <div class="col-6">
+              <label for="salePrice"
+                >Цена со скидкой USD (salePriceUSD, опционально)</label
+              >
+              <input
+                id="salePrice"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="129.99"
+              />
+            </div>
+
+            <div class="col-12 images">
+              <label for="images">Изображения (imageUrls[], multiple)</label>
+              <input id="images" type="file" accept="image/*" multiple />
+              <div id="imagePreview" class="preview"></div>
+            </div>
+
+            <div class="col-12 sizes">
+              <div class="row" style="justify-content: space-between">
+                <label style="margin: 0"
+                  >Варианты (variants): размер + количество</label
+                >
+                <div class="row">
+                  <select id="presetSize" title="Быстрый выбор размера">
+                    <option value="">Размеры…</option>
+                    <option>XS</option>
+                    <option>S</option>
+                    <option>M</option>
+                    <option>L</option>
+                    <option>XL</option>
+                    <option>XXL</option>
+                    <option>36</option>
+                    <option>37</option>
+                    <option>38</option>
+                    <option>39</option>
+                    <option>40</option>
+                    <option>41</option>
+                    <option>42</option>
+                    <option>43</option>
+                    <option>44</option>
+                    <option>45</option>
+                  </select>
+                  <button class="btn" type="button" id="addPresetBtn">
+                    Добавить выбранный
+                  </button>
+                  <button class="btn ghost" type="button" id="addCustomBtn">
+                    + Свой размер
+                  </button>
+                </div>
+              </div>
+
+              <div id="sizesWrapper"></div>
+            </div>
+
+            <div
+              class="col-12 row"
+              style="justify-content: flex-end; gap: 10px"
+            >
+              <button class="btn ghost" type="reset" id="resetBtn">
+                Сбросить
+              </button>
+              <button class="btn primary" type="submit">Сохранить товар</button>
+            </div>
+
+            <div id="addProductMessage" class="col-12 msg"></div>
+          </form>
+        </div>
       </div>
     </main>
     <div id="app-footer"></div>
     <script src="../assets/js/i18n.js"></script>
-    <script src="../assets/js/currency.js"></script>
+    <!-- <script src="../assets/js/currency.js"></script> -->
     <script src="./js/dashboard.js"></script>
     <script src="./js/addProducts.js"></script>
     <script src="../assets/js/footer.js"></script>

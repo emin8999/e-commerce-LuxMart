@@ -1,272 +1,363 @@
+// ==================== КОНФИГ API ====================
+// Подставьте ваши реальные эндпойнты. Ниже — рабочие предположения.
 const API_BASE = "http://116.203.51.133/luxmart";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("addProductForm");
-  const wrapper = document.getElementById("sizeQuantitiesWrapper");
-  const message = document.getElementById("addProductMessage");
-  const storeNameInput = document.getElementById("productStore");
-  const submitBtn = form ? form.querySelector('[type="submit"]') : null;
-  const categorySelect = document.getElementById("productCategory");
+// Категории
+const CATEGORIES_URL = `${API_BASE}/categories`; // GET: список категорий [{id, name}]
+// Или `${API_BASE}/api/v1/categories`
 
-  function setMsg(text, ok = false) {
-    if (!message) return;
-    message.textContent = text;
-    message.style.color = ok ? "green" : "crimson";
+// Магазины / Текущий магазин (по JWT)
+const MY_STORE_URL = `${API_BASE}/stores/me`; // GET: текущий магазин {id, name}
+const STORES_URL = `${API_BASE}/stores`; // GET: список магазинов (для админа) [{id, name}]
+
+// Опционально: подсказка slug от бэкенда (если есть такой сервис)
+const SLUG_SUGGEST_URL = `${API_BASE}/utils/slug?title=`; // GET: ?title=... => { slug: "..." }
+
+// Создание товара
+const CREATE_PRODUCT_URL = `${API_BASE}/products`; // POST: multipart/form-data
+// Имя поля с файлами — под бэкенд, чаще "imageUrls" или "images"
+const IMAGES_FIELD_NAME = "imageUrls";
+
+// Где хранится токен (если у вас другой ключ — поменяйте)
+const TOKEN_KEY = "storeJwt";
+
+// ==================== УТИЛИТЫ ====================
+const authHeaders = () => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const setMsg = (text, ok = false) => {
+  const msg = document.getElementById("addProductMessage");
+  if (!msg) return;
+  msg.textContent = text;
+  msg.className = `msg ${ok ? "ok" : "error"}`;
+};
+
+const safeJson = async (res) => {
+  try {
+    return await res.json();
+  } catch {
+    return null;
   }
-
-  function val(id) {
-    const el = document.getElementById(id);
-    return el ? el.value : "";
+};
+const safeText = async (res) => {
+  try {
+    return await res.text();
+  } catch {
+    return "";
   }
+};
 
-  function decodeJwtPayload(token) {
-    try {
-      const part = token.split(".")[1];
-      const base64 = part.replace(/-/g, "+").replace(/_/g, "/");
-      const padded = base64 + "===".slice((base64.length + 3) % 4);
-      return JSON.parse(atob(padded));
-    } catch {
-      return null;
-    }
-  }
+const slugifyLocal = (s) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "")
+    .slice(0, 140);
 
-  // ---------- SIZE BLOCKS ----------
-  const sizeOptions = `
-    <option value="">Size</option>
-    <option value="TWO_XS">2XS</option>
-    <option value="XS">XS</option>
-    <option value="S">S</option>
-    <option value="M">M</option>
-    <option value="L">L</option>
-    <option value="XL">XL</option>
-    <option value="TWO_XL">2XL</option>
-  `;
+const normalizePrice = (v) => {
+  if (v == null) return null;
+  const n = String(v).replace(",", ".").trim();
+  if (!n) return null;
+  const num = Number(n);
+  return Number.isFinite(num) ? Number(n) : null;
+};
+const toBigDecimalString = (n) => n.toFixed(2);
 
-  function updateRemoveButtons() {
-    if (!wrapper) return;
-    const blocks = wrapper.querySelectorAll(".size-quantity-wrapper");
-    const many = blocks.length > 1;
-    blocks.forEach((blk) => {
-      const btn = blk.querySelector(".remove-button");
-      if (btn) btn.style.display = many ? "inline-block" : "none";
+const toggleDisabled = (disabled) => {
+  document
+    .querySelectorAll(
+      "#addProductForm input, #addProductForm textarea, #addProductForm select, #addProductForm button"
+    )
+    .forEach((el) => {
+      el.disabled = disabled;
     });
-  }
+};
 
-  function createSizeBlock() {
-    const div = document.createElement("div");
-    div.className = "size-quantity-wrapper";
-    div.innerHTML = `
-      <select name="productSizes" class="size-input">${sizeOptions}</select>
-      <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" min="0" step="1" />
-      <input type="number" name="variantPrices" class="variant-price-input" placeholder="Variant price (USD)" min="0" step="0.01" />
-      <button type="button" class="remove-button">X</button>
-    `;
-    return div;
+// ==================== ПОДГРУЗКА ДАННЫХ С БЭКА ====================
+async function fetchCategories() {
+  const sel = document.getElementById("categoryId");
+  sel.innerHTML = `<option value="">Загрузка категорий…</option>`;
+  try {
+    const res = await fetch(CATEGORIES_URL, { headers: { ...authHeaders() } });
+    if (!res.ok) throw new Error(`Ошибка категорий ${res.status}`);
+    const list = await res.json();
+    sel.innerHTML = `<option value="">— Выберите категорию —</option>`;
+    let count = 0;
+    (Array.isArray(list) ? list : []).forEach((c) => {
+      if (!c || typeof c.id === "undefined") return;
+      const opt = document.createElement("option");
+      opt.value = String(c.id);
+      opt.textContent = c.name || `#${c.id}`;
+      sel.appendChild(opt);
+      count++;
+    });
+    document.getElementById("catCount").textContent = String(count);
+  } catch (e) {
+    sel.innerHTML = `<option value="">Не удалось загрузить</option>`;
+    document.getElementById("catCount").textContent = "—";
+    console.error(e);
   }
+}
 
-  function addSizeBlock() {
-    if (!wrapper) return;
-    const addBtn = wrapper.querySelector(".add-size-btn");
-    const block = createSizeBlock();
-    wrapper.insertBefore(block, addBtn);
-    updateRemoveButtons();
-  }
+async function fetchStoreContext() {
+  const storeSelect = document.getElementById("storeSelect");
+  const storeDisplay = document.getElementById("storeDisplay");
+  storeSelect.innerHTML = `<option value="">Загрузка магазина…</option>`;
 
-  function resetSizeBlocks() {
-    if (!wrapper) return;
-    wrapper.innerHTML = `
-      <div class="size-quantity-wrapper">
-        <select name="productSizes" class="size-input">${sizeOptions}</select>
-        <input type="number" name="quantities" class="quantity-input" placeholder="Quantity" min="0" step="1"/>
-        <input type="number" name="variantPrices" class="variant-price-input" placeholder="Variant price (USD)" min="0" step="0.01"/>
-        <button type="button" class="remove-button" style="display:none;">X</button>
-      </div>
-      <input type="button" value="+" class="add-size-btn" aria-label="Add size" />
-    `;
-    updateRemoveButtons();
-  }
-
-  if (wrapper) {
-    if (!wrapper.querySelector(".size-quantity-wrapper")) resetSizeBlocks();
-    wrapper.addEventListener("click", (e) => {
-      const addBtn = e.target.closest(".add-size-btn");
-      const removeBtn = e.target.closest(".remove-button");
-      if (addBtn) {
-        addSizeBlock();
+  // 1) Пытаемся получить текущий магазин по токену
+  try {
+    const me = await fetch(MY_STORE_URL, { headers: { ...authHeaders() } });
+    if (me.ok) {
+      const data = await me.json();
+      if (data && data.id) {
+        // Показываем только текущий магазин
+        storeSelect.innerHTML = "";
+        const opt = document.createElement("option");
+        opt.value = String(data.id);
+        opt.textContent = data.name || `Store #${data.id}`;
+        storeSelect.appendChild(opt);
+        storeSelect.disabled = true; // для продавца — фиксированный
+        storeDisplay.textContent = opt.textContent;
         return;
       }
-      if (removeBtn) {
-        const block = removeBtn.closest(".size-quantity-wrapper");
-        if (block) {
-          block.remove();
-          updateRemoveButtons();
-        }
-      }
+    }
+  } catch {}
+
+  // 2) Если вы админ (или нет /me), подгружаем список магазинов
+  try {
+    const res = await fetch(STORES_URL, { headers: { ...authHeaders() } });
+    if (!res.ok) throw new Error(`Ошибка магазинов ${res.status}`);
+    const list = await res.json();
+    storeSelect.innerHTML = `<option value="">— Выберите магазин —</option>`;
+    (Array.isArray(list) ? list : []).forEach((s) => {
+      if (!s || typeof s.id === "undefined") return;
+      const opt = document.createElement("option");
+      opt.value = String(s.id);
+      opt.textContent = s.name || `Store #${s.id}`;
+      storeSelect.appendChild(opt);
     });
+    storeSelect.addEventListener("change", () => {
+      const opt = storeSelect.selectedOptions[0];
+      storeDisplay.textContent = opt ? opt.textContent : "";
+    });
+  } catch (e) {
+    storeSelect.innerHTML = `<option value="">Не удалось загрузить магазины</option>`;
+    storeDisplay.textContent = "—";
+    console.error(e);
   }
+}
 
-  // ---------- AUTH + STORE NAME ----------
-  const storeJwt = localStorage.getItem("storeJwt");
-  if (!storeJwt) {
-    window.location.href = "storeLogin.html";
-    return;
-  }
-  const decodedToken = decodeJwtPayload(storeJwt) || {};
+async function suggestSlugFromBackend(title) {
+  if (!SLUG_SUGGEST_URL) return null;
+  try {
+    const res = await fetch(SLUG_SUGGEST_URL + encodeURIComponent(title), {
+      headers: { ...authHeaders() },
+    });
+    if (!res.ok) return null;
+    const data = await safeJson(res);
+    if (data && data.slug) return String(data.slug);
+  } catch {}
+  return null;
+}
 
-  async function fillStoreName() {
-    try {
-      const resp = await fetch(`${API_BASE}/store/info`, {
-        headers: { Authorization: `Bearer ${storeJwt}` },
-      });
-      if (resp.ok) {
-        const dto = await resp.json();
-        if (storeNameInput)
-          storeNameInput.value =
-            dto.storeName || dto.email || decodedToken.sub || "Unknown Store";
-      } else {
-        if (storeNameInput)
-          storeNameInput.value = decodedToken.sub || "Unknown Store";
-      }
-    } catch {
-      if (storeNameInput)
-        storeNameInput.value = decodedToken.sub || "Unknown Store";
+// ==================== ИНИЦИАЛИЗАЦИЯ UI ====================
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("addProductForm");
+  const titleEl = document.getElementById("title");
+  const slugEl = document.getElementById("slug");
+  const descEl = document.getElementById("description");
+  const basePriceEl = document.getElementById("basePrice");
+  const salePriceEl = document.getElementById("salePrice");
+  const categoryIdEl = document.getElementById("categoryId");
+  const imagesEl = document.getElementById("images");
+  const previewEl = document.getElementById("imagePreview");
+
+  const sizesWrapper = document.getElementById("sizesWrapper");
+  const presetSizeEl = document.getElementById("presetSize");
+  const addPresetBtn = document.getElementById("addPresetBtn");
+  const addCustomBtn = document.getElementById("addCustomBtn");
+
+  // Загружаем категории и магазин
+  fetchCategories();
+  fetchStoreContext();
+
+  // Автослаг: сначала локально, затем пытаемся уточнить с бэка (если доступен)
+  let slugTimeout = null;
+  titleEl.addEventListener("input", () => {
+    const base = slugifyLocal(titleEl.value);
+    if (!slugEl.dataset.touched) slugEl.value = base;
+
+    clearTimeout(slugTimeout);
+    if (titleEl.value.trim().length > 2) {
+      slugTimeout = setTimeout(async () => {
+        const suggested = await suggestSlugFromBackend(titleEl.value.trim());
+        if (suggested && !slugEl.dataset.touched) slugEl.value = suggested;
+      }, 300);
     }
-  }
-  fillStoreName();
+  });
+  slugEl.addEventListener("input", () => (slugEl.dataset.touched = "1"));
 
-  // ---------- CATEGORIES ----------
-  async function populateCategories() {
-    if (!categorySelect) return;
-    try {
-      categorySelect.innerHTML =
-        '<option value="" disabled selected>Loading categories...</option>';
-      const res = await fetch(`${API_BASE}/api/categories`);
-      if (!res.ok) throw new Error("Failed to load categories");
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : [];
-      categorySelect.innerHTML =
-        '<option value="" disabled selected>Choose category</option>';
-      const queue = [...list];
-      while (queue.length) {
-        const c = queue.shift();
-        const opt = document.createElement("option");
-        opt.value = String(c.id);
-        opt.textContent = c.nameEn || c.slug || `Category #${c.id}`;
-        categorySelect.appendChild(opt);
-        if (c.subcategories && c.subcategories.length)
-          c.subcategories.forEach((sc) => queue.push(sc));
-      }
-    } catch (e) {
-      console.warn("Categories load failed", e);
-    }
-  }
-  populateCategories();
+  // Превью изображений
+  imagesEl.addEventListener("change", () => {
+    previewEl.innerHTML = "";
+    const files = Array.from(imagesEl.files || []);
+    files.forEach((file) => {
+      const url = URL.createObjectURL(file);
+      const img = document.createElement("img");
+      img.src = url;
+      img.className = "thumb";
+      previewEl.appendChild(img);
+    });
+  });
 
-  // ---------- SUBMIT ----------
-  if (!form) return;
+  // Размеры
+  addPresetBtn.addEventListener("click", () => {
+    const val = (presetSizeEl.value || "").trim();
+    if (!val) return;
+    addSizeRow(val);
+    presetSizeEl.value = "";
+  });
+  addCustomBtn.addEventListener("click", () => addSizeRow(""));
+
+  document.getElementById("resetBtn")?.addEventListener("click", () => {
+    sizesWrapper.innerHTML = "";
+    previewEl.innerHTML = "";
+    setMsg("");
+    slugEl.dataset.touched = "";
+  });
+
+  // Сабмит
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     setMsg("");
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.dataset.orig = submitBtn.textContent || submitBtn.value || "";
-      if ("textContent" in submitBtn) submitBtn.textContent = "Saving...";
-      if ("value" in submitBtn && submitBtn.type === "submit")
-        submitBtn.value = "Saving...";
-    }
+
+    const title = titleEl.value.trim();
+    const slug = slugEl.value.trim();
+    const description = descEl.value.trim();
+    const basePriceUSD = normalizePrice(basePriceEl.value);
+    const salePriceUSD = salePriceEl.value
+      ? normalizePrice(salePriceEl.value)
+      : null;
+    const categoryId = categoryIdEl.value ? Number(categoryIdEl.value) : null;
+
+    if (!title || !slug || !description)
+      return setMsg("Заполните название, slug и описание.");
+    if (basePriceUSD === null || basePriceUSD < 0)
+      return setMsg("Некорректная базовая цена.");
+    if (salePriceUSD !== null && salePriceUSD < 0)
+      return setMsg("Некорректная цена со скидкой.");
+    if (!categoryId) return setMsg("Выберите категорию.");
+
+    const variants = collectVariants();
+    if (!variants.length)
+      return setMsg("Добавьте хотя бы один размер и количество.");
+
+    // Собираем полезную инфу о магазине (для отображения и, возможно, чтобы передать, если бэкенд ждёт)
+    const storeSelect = document.getElementById("storeSelect");
+    const selectedStoreId = storeSelect?.value
+      ? Number(storeSelect.value)
+      : null;
+
+    // JSON часть "product"
+    const productPayload = {
+      title,
+      slug,
+      description,
+      basePriceUSD: toBigDecimalString(basePriceUSD),
+      salePriceUSD:
+        salePriceUSD !== null ? toBigDecimalString(salePriceUSD) : null,
+      categoryId,
+      variants, // [{size, quantity}]
+      // Если бэкенд принимает связь с магазином в DTO:
+      // storeId: selectedStoreId
+    };
+
+    const fd = new FormData();
+    fd.append(
+      "product",
+      new Blob([JSON.stringify(productPayload)], { type: "application/json" })
+    );
+
+    const files = Array.from(imagesEl.files || []);
+    files.forEach((f) => fd.append(IMAGES_FIELD_NAME, f));
 
     try {
-      const name = val("productName").trim();
-      if (!name) throw new Error("Please enter product name.");
-
-      const basePrice = Number(val("productPrice"));
-      if (!Number.isFinite(basePrice) || basePrice < 0)
-        throw new Error("Base price must be >= 0.");
-
-      const salePriceEl = document.getElementById("productSalePrice");
-      const salePrice =
-        salePriceEl && salePriceEl.value !== ""
-          ? Number(salePriceEl.value)
-          : undefined;
-      if (
-        salePrice !== undefined &&
-        (!Number.isFinite(salePrice) || salePrice < 0)
-      )
-        throw new Error("Sale price must be >= 0.");
-
-      const categoryId = Number(val("productCategory"));
-      if (!Number.isFinite(categoryId) || categoryId <= 0)
-        throw new Error("Select a valid category.");
-
-      const formData = new FormData();
-      formData.append("title", name);
-      formData.append("description", val("productDescription"));
-      formData.append("basePriceUSD", String(basePrice));
-      if (salePrice !== undefined)
-        formData.append("salePriceUSD", String(salePrice));
-      formData.append("categoryId", String(categoryId));
-
-      // Variants
-      const blocks = wrapper.querySelectorAll(".size-quantity-wrapper");
-      let vi = 0;
-      blocks.forEach((blk) => {
-        const size = blk.querySelector(".size-input")?.value || "";
-        const q = Number(blk.querySelector(".quantity-input")?.value || "");
-        const vStr = blk.querySelector(".variant-price-input")?.value || "";
-        const vPrice = vStr === "" ? basePrice : Number(vStr);
-        if (size && Number.isFinite(q) && q > 0) {
-          formData.append(`variants[${vi}].size`, size);
-          formData.append(`variants[${vi}].stockQuantity`, String(q));
-          formData.append(`variants[${vi}].variantPriceUSD`, String(vPrice));
-          vi++;
-        }
-      });
-      if (vi === 0)
-        throw new Error("Add at least one variant (size and quantity).");
-
-      // Images
-      const imgInput = document.getElementById("productImages");
-      if (!imgInput || imgInput.files.length === 0)
-        throw new Error("Upload at least one image.");
-      for (let i = 0; i < imgInput.files.length; i++)
-        formData.append("imageUrls", imgInput.files[i]);
-
-      const res = await fetch(`${API_BASE}/api/products`, {
+      toggleDisabled(true);
+      const res = await fetch(CREATE_PRODUCT_URL, {
         method: "POST",
-        headers: { Authorization: `Bearer ${storeJwt}` },
-        body: formData,
+        headers: { ...authHeaders() }, // ВАЖНО: не добавляйте Content-Type вручную для FormData
+        body: fd,
       });
-
-      const ct = res.headers.get("content-type") || "";
-      const parse = async () =>
-        ct.includes("application/json") ? res.json() : res.text();
-      const body = await parse();
       if (!res.ok) {
-        const msg =
-          typeof body === "string"
-            ? body
-            : body?.message || JSON.stringify(body);
-        throw new Error(msg);
+        const t = await safeText(res);
+        throw new Error(`Ошибка ${res.status}: ${t || res.statusText}`);
       }
-
-      setMsg("Product added successfully!", true);
+      setMsg("Товар успешно сохранён.", true);
       form.reset();
-      resetSizeBlocks();
+      sizesWrapper.innerHTML = "";
+      document.getElementById("imagePreview").innerHTML = "";
+      document.getElementById("slug").dataset.touched = "";
     } catch (err) {
-      console.error(err);
-      setMsg(err?.message || "Failed to add product.", false);
+      setMsg(err.message || "Ошибка сохранения товара.");
     } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        if ("textContent" in submitBtn && submitBtn.dataset.orig)
-          submitBtn.textContent = submitBtn.dataset.orig;
-        if (
-          "value" in submitBtn &&
-          submitBtn.type === "submit" &&
-          submitBtn.dataset.orig
-        )
-          submitBtn.value = submitBtn.dataset.orig;
-      }
+      toggleDisabled(false);
     }
   });
+
+  // ==== helpers для variants ====
+  function addSizeRow(initialSize = "") {
+    const row = document.createElement("div");
+    row.className = "size-row";
+
+    const sizeInput = document.createElement("input");
+    sizeInput.type = "text";
+    sizeInput.placeholder = "Размер (напр.: M или 42)";
+    sizeInput.required = true;
+    sizeInput.value = initialSize;
+
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.min = "0";
+    qtyInput.step = "1";
+    qtyInput.placeholder = "Количество";
+    qtyInput.required = true;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "btn";
+    removeBtn.textContent = "Удалить";
+    removeBtn.addEventListener("click", () => row.remove());
+
+    row.appendChild(sizeInput);
+    row.appendChild(qtyInput);
+    row.appendChild(removeBtn);
+    sizesWrapper.appendChild(row);
+  }
+
+  function collectVariants() {
+    const rows = document.querySelectorAll(".size-row");
+    const list = [];
+    rows.forEach((row) => {
+      const [sizeInput, qtyInput] = row.querySelectorAll("input");
+      const size = (sizeInput?.value || "").trim();
+      const qty = Number(qtyInput?.value || "0");
+      if (size && Number.isFinite(qty) && qty >= 0) {
+        list.push({ size, quantity: qty });
+      }
+    });
+    // Аггрегируем дубли по size
+    const bySize = new Map();
+    list.forEach((v) => {
+      const k = v.size.toLowerCase();
+      bySize.set(k, {
+        size: v.size,
+        quantity: (bySize.get(k)?.quantity || 0) + v.quantity,
+      });
+    });
+    return Array.from(bySize.values());
+  }
 });
