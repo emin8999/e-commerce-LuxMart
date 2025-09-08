@@ -88,19 +88,29 @@
       </section>
       <section>
         <h2>Products</h2>
-        <a href="addProducts.html" class="btn primary">Add Product</a>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Variants</th>
-              <th>Price</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="store-products"></tbody>
-        </table>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <a href="addProducts.html" class="btn primary">+ Add Product</a>
+          <button id="exportXlsBtn" class="btn">Export XLS</button>
+          <span id="productsMsg" style="margin-left:8px"></span>
+        </div>
+        <div style="overflow:auto">
+          <table class="table" id="productsTable">
+            <thead>
+              <tr>
+                <th>Photo</th>
+                <th>Title</th>
+                <th>Slug</th>
+                <th>Category</th>
+                <th>Base USD</th>
+                <th>Sale USD</th>
+                <th>Variants</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="store-products"></tbody>
+          </table>
+        </div>
       </section>
       <section>
         <h2>Discounts & Coupons</h2>
