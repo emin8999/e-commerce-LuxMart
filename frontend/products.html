@@ -3,34 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Products</title>
+    <title>Product</title>
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <div id="app-header"></div>
     <main class="container">
-      <h1 data-i18n="nav.products">Products</h1>
-      <div class="catalog">
-        <aside class="filters">
-          <button
-            id="openCategories"
-            class="btn btn-outline"
-            data-i18n="catalog.filter_by_category"
-          >
-            Filter by Category
-          </button>
-          <div class="filter">
-            <label data-i18n="catalog.only_sale">Only with discount</label>
-            <input type="checkbox" id="filterSale" />
-          </div>
-          <div class="filter">
-            <label data-i18n="catalog.price_range">Price range</label>
-            <input type="number" id="minPrice" placeholder="min" />
-            <input type="number" id="maxPrice" placeholder="max" />
-          </div>
-        </aside>
-        <section class="list" id="productsList"></section>
-      </div>
+      <section id="productView"></section>
+      <section class="carousel" id="similarByCategory">
+        <div class="section-head">
+          <h2 data-i18n="product.similar">Similar in category</h2>
+        </div>
+        <div class="row" id="similarRow"></div>
+      </section>
     </main>
     <div id="app-modal-root"></div>
     <script src="./assets/js/i18n.js"></script>
