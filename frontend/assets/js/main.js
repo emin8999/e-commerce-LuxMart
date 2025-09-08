@@ -71,6 +71,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  // Products catalog list (all stores)
+  if (document.getElementById("productsList")) {
+    try {
+      const listRoot = document.getElementById("productsList");
+      const products = await fetch(`${API_BASE}/api/products`).then((r) => r.json());
+      listRoot.innerHTML = "";
+      products.forEach((p) => {
+        const price = window.pricing.formatPair(
+          window.pricing.computePriceUSD(p, {})
+        );
+        const card = document.createElement("div");
+        card.className = "card product-card";
+        const img = (p.imageUrls && p.imageUrls.length ? p.imageUrls[0] : "");
+        card.innerHTML = `
+          <a class="product-link" href="./product.html?id=${encodeURIComponent(p.id)}">
+            <div class="product-thumb">${
+              img
+                ? `<img src="${img}" alt="${p.title}"/>`
+                : `<div class='product-thumb__ph'>🛍️</div>`
+            }</div>
+            <div class="product-title"><strong>${p.title}</strong></div>
+          </a>
+          <div class="price">${price.current} ${
+          price.old ? `<span class='old'>${price.old}</span>` : ""
+        }</div>
+          <button class="btn btn-primary add-to-cart" data-id="${p.id}">Add to cart</button>
+        `;
+        card.querySelector(".add-to-cart").addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.cart.add({
+            productId: p.id,
+            variantId: null,
+            storeId: p.storeId,
+            title: p.title,
+            basePriceUSD: p.basePriceUSD,
+            salePriceUSD: p.salePriceUSD,
+            qty: 1,
+          });
+          if (window.renderCartBadge) window.renderCartBadge();
+        });
+        listRoot.appendChild(card);
+      });
+    } catch (e) {
+      // noop
+    }
+  }
+
   // Product view
   if (document.getElementById("productView")) {
     const params = new URLSearchParams(location.search);
@@ -91,21 +139,32 @@ document.addEventListener("DOMContentLoaded", async () => {
           } — stock: ${v.stock}</option>`
       )
       .join("");
-    root.innerHTML = `<div class="card">
-      <h2>${p.title}</h2>
-      <div class="price">${price.current} ${
-      price.old ? `<span class='old'>${price.old}</span>` : ""
-    }</div>
-      <label>Size</label>
-      <select id="variantSel">${options}</select>
-      <div><button id="addToCart" class="btn btn-primary">Add to cart</button></div>
+    const img = (p.imageUrls && p.imageUrls.length ? p.imageUrls[0] : "");
+    root.innerHTML = `<div class="card product-detail">
+      <div class="product-detail__media">${
+        img
+          ? `<img src=\"${img}\" alt=\"${p.title}\"/>`
+          : `<div class='product-thumb__ph product-detail__ph'>🛍️</div>`
+      }</div>
+      <div class="product-detail__info">
+        <h2>${p.title}</h2>
+        <div class="price">${price.current} ${
+          price.old ? `<span class='old'>${price.old}</span>` : ""
+        }</div>
+        ${p.description ? `<p class=\"muted\">${p.description}</p>` : ""}
+        ${(p.variants && p.variants.length)
+          ? `<label>Size</label><select id=\"variantSel\">${options}</select>`
+          : ""}
+        <div style="margin-top:8px"><button id="addToCart" class="btn btn-primary">Add to cart</button></div>
+      </div>
     </div>`;
     document.getElementById("addToCart").onclick = () => {
-      const vId = document.getElementById("variantSel").value;
-      const v = (p.variants || []).find((x) => x.id === vId) || {};
+      const sel = document.getElementById("variantSel");
+      const vId = sel ? sel.value : null;
+      const v = (p.variants || []).find((x) => String(x.id) === String(vId)) || {};
       window.cart.add({
         productId: p.id,
-        variantId: v.id || p.id,
+        variantId: v.id || null,
         storeId: p.storeId,
         title: p.title,
         size: v.size,
@@ -116,6 +175,40 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("Added");
       if (window.renderCartBadge) window.renderCartBadge();
     };
+
+    // Similar by category
+    try {
+      const all = await fetch(`${API_BASE}/api/products`).then((r) => r.json());
+      const sim = all
+        .filter((x) => x.categoryId === p.categoryId && x.id !== p.id)
+        .slice(0, 12);
+      const row = document.getElementById("similarRow");
+      if (row) {
+        row.innerHTML = "";
+        sim.forEach((sp) => {
+          const pr = window.pricing.formatPair(
+            window.pricing.computePriceUSD(sp, {})
+          );
+          const a = document.createElement("a");
+          a.className = "card product-card";
+          a.href = `./product.html?id=${encodeURIComponent(sp.id)}`;
+          const img2 = sp.imageUrls && sp.imageUrls.length ? sp.imageUrls[0] : "";
+          a.innerHTML = `
+            <div class="product-thumb">${
+              img2
+                ? `<img src=\"${img2}\" alt=\"${sp.title}\"/>`
+                : `<div class='product-thumb__ph'>🛍️</div>`
+            }</div>
+            <div><strong>${sp.title}</strong></div>
+            <div class="price">${pr.current} ${
+              pr.old ? `<span class='old'>${pr.old}</span>` : ""
+            }</div>`;
+          row.appendChild(a);
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   // Cart page
