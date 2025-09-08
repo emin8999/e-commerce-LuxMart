@@ -8,7 +8,8 @@
   // Products
   const PRODUCTS_URL = `${API_BASE}/api/products`;
   const PRODUCTS_MY_STORE_URL = `${API_BASE}/api/products/my-store`;
-  const PRODUCT_BY_ID = (id) => `${API_BASE}/api/products/${encodeURIComponent(id)}`;
+  const PRODUCT_BY_ID = (id) =>
+    `${API_BASE}/api/products/${encodeURIComponent(id)}`;
 
   const authHeaders = () => {
     const t = localStorage.getItem(TOKEN_KEY);
@@ -72,7 +73,9 @@
   async function loadStoreInfo() {
     setMsg("");
     try {
-      const res = await fetch(STORE_INFO_URL, { headers: { ...authHeaders() } });
+      const res = await fetch(STORE_INFO_URL, {
+        headers: { ...authHeaders() },
+      });
       if (!res.ok) throw new Error(`Ошибка загрузки: ${res.status}`);
       const data = await res.json();
       originalData = data;
@@ -97,14 +100,22 @@
 
   const sumStock = (p) => {
     const list = Array.isArray(p?.variants) ? p.variants : [];
-    return list.reduce((acc, v) => acc + (Number(v.stockQuantity ?? v.stock ?? 0) || 0), 0);
+    return list.reduce(
+      (acc, v) => acc + (Number(v.stockQuantity ?? v.stock ?? 0) || 0),
+      0
+    );
   };
 
   const variantsLabel = (p) => {
     const list = Array.isArray(p?.variants) ? p.variants : [];
     if (!list.length) return "—";
     return list
-      .map((v) => `${v.size ?? v.name ?? "?"}:${Number(v.stockQuantity ?? v.stock ?? 0)}`)
+      .map(
+        (v) =>
+          `${v.size ?? v.name ?? "?"}:${Number(
+            v.stockQuantity ?? v.stock ?? 0
+          )}`
+      )
       .join(", ");
   };
 
@@ -119,10 +130,12 @@
       const base = p.basePriceUSD != null ? Number(p.basePriceUSD) : null;
       const sale = p.salePriceUSD != null ? Number(p.salePriceUSD) : null;
       tr.innerHTML = `
-        <td style="width:72px"><img src="${img || ""}" alt="" style="width:64px;height:64px;object-fit:cover;border:1px solid #eee;border-radius:6px" onerror="this.style.display='none'"/></td>
+        <td style="width:72px"><img src="${
+          img || ""
+        }" alt="" style="width:64px;height:64px;object-fit:cover;border:1px solid #eee;border-radius:6px" onerror="this.style.display='none'"/></td>
         <td>${p.title ?? ""}</td>
         <td>${p.slug ?? ""}</td>
-        <td>${p.categoryName ?? p.category ?? p.categoryId ?? ""}</td>
+        <td>${p.nameEn ?? p.category ?? p.categoryId ?? ""}</td>
         <td>${base ?? ""}</td>
         <td>${sale ?? ""}</td>
         <td>${variantsLabel(p)}</td>
@@ -130,7 +143,9 @@
         <td>
           <button class="btn" data-act="edit">Edit</button>
           <button class="btn" data-act="delete">Delete</button>
-          <a class="btn" href="../product.html?id=${encodeURIComponent(p.id)}" target="_blank">View</a>
+          <a class="btn" href="../product.html?id=${encodeURIComponent(
+            p.id
+          )}" target="_blank">View</a>
         </td>`;
       tbody.appendChild(tr);
     });
@@ -153,7 +168,9 @@
     setProductsMsg("Loading…");
     try {
       // Prefer server-side filter for current store
-      let res = await fetch(PRODUCTS_MY_STORE_URL, { headers: { ...authHeaders() } });
+      let res = await fetch(PRODUCTS_MY_STORE_URL, {
+        headers: { ...authHeaders() },
+      });
       if (!res.ok) {
         // Fallback to legacy endpoint if specific one is unavailable
         res = await fetch(PRODUCTS_URL, { headers: { ...authHeaders() } });
@@ -199,9 +216,9 @@
           }" /></label>
           <label><span>New Images</span><input type="file" name="imageUrls" accept="image/*" multiple /></label>
         </div>
-        <label><span>Description</span><textarea name="description" rows="3">${
-          (product.description ?? "").replace(/</g, "&lt;")
-        }</textarea></label>
+        <label><span>Description</span><textarea name="description" rows="3">${(
+          product.description ?? ""
+        ).replace(/</g, "&lt;")}</textarea></label>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="btn primary" data-act="save">Save</button>
           <button class="btn" data-act="cancel" type="button">Cancel</button>
@@ -328,7 +345,9 @@
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
-        throw new Error(`Endpoint недоступен (${res.status}). Свяжитесь с разработчиком.`);
+        throw new Error(
+          `Endpoint недоступен (${res.status}). Свяжитесь с разработчиком.`
+        );
       }
       const updated = await res.json().catch(() => payload);
       originalData = { ...originalData, ...updated };
@@ -352,6 +371,8 @@
     $("cancelEditBtn")?.addEventListener("click", cancelEdit);
     $("storeInfoForm")?.addEventListener("submit", onSave);
 
-    document.getElementById("exportXlsBtn")?.addEventListener("click", exportTableToXls);
+    document
+      .getElementById("exportXlsBtn")
+      ?.addEventListener("click", exportTableToXls);
   });
 })();
