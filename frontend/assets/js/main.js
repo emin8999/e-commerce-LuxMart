@@ -73,9 +73,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Products catalog list (all stores)
   if (document.getElementById("productsList")) {
+    const catBtn = document.getElementById('openCategories');
+    if (catBtn) {
+      catBtn.addEventListener('click', () => {
+        const modal = document.getElementById('catModal');
+        if (modal) {
+          modal.classList.add('show');
+          if (window.renderCategories) window.renderCategories('catList');
+        }
+      });
+    }
     try {
       const listRoot = document.getElementById("productsList");
-      const products = await fetch(`${API_BASE}/api/products`).then((r) => r.json());
+      const params = new URLSearchParams(location.search);
+      const cat = params.get('cat');
+      let products = await fetch(`${API_BASE}/api/products`).then((r) => r.json());
+      if (cat) {
+        const catId = Number(cat);
+        products = products.filter(p => Number(p.categoryId) === catId);
+      }
       listRoot.innerHTML = "";
       products.forEach((p) => {
         const price = window.pricing.formatPair(
