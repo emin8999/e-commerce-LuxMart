@@ -118,7 +118,7 @@ async function fetchStoreContext() {
         storeSelect.innerHTML = "";
         const opt = document.createElement("option");
         opt.value = String(data.id);
-        opt.textContent = data.name || `Store #${data.id}`;
+        opt.textContent = data.storeName || `Store #${data.id}`;
         storeSelect.appendChild(opt);
         storeSelect.disabled = true; // для продавца — фиксированный
         storeDisplay.textContent = opt.textContent;
