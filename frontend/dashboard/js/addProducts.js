@@ -293,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Варианты: variants[i].size / variants[i].stockQuantity
     variants.forEach((v, i) => {
       fd.append(`variants[${i}].size`, v.size);
-      fd.append(`variants[${i}].stockQuantity`, String(v.quantity));
+      fd.append(`variants[${i}].stockQuantity`, String(v.stockQuantity));
     });
 
     // Картинки
