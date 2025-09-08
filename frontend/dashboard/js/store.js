@@ -7,6 +7,7 @@
   const STORE_UPDATE_URL = `${API_BASE}/store/update`;
   // Products
   const PRODUCTS_URL = `${API_BASE}/api/products`;
+  const PRODUCTS_MY_STORE_URL = `${API_BASE}/api/products/my-store`;
   const PRODUCT_BY_ID = (id) => `${API_BASE}/api/products/${encodeURIComponent(id)}`;
 
   const authHeaders = () => {
@@ -151,11 +152,21 @@
   async function loadProducts() {
     setProductsMsg("Loading…");
     try {
-      const res = await fetch(PRODUCTS_URL, { headers: { ...authHeaders() } });
+      // Prefer server-side filter for current store
+      let res = await fetch(PRODUCTS_MY_STORE_URL, { headers: { ...authHeaders() } });
+      if (!res.ok) {
+        // Fallback to legacy endpoint if specific one is unavailable
+        res = await fetch(PRODUCTS_URL, { headers: { ...authHeaders() } });
+      }
       if (!res.ok) throw new Error(`Ошибка продуктов: ${res.status}`);
       const all = await res.json();
-      const list = Array.isArray(all) ? all : [];
-      productsCache = storeId ? list.filter((p) => String(p.storeId) === String(storeId)) : list;
+      const list = Array.isArray(all)
+        ? all
+        : Array.isArray(all?.content)
+        ? all.content
+        : [];
+      // If backend already scopes to store, no extra filtering needed
+      productsCache = list;
       renderProducts(productsCache);
       setProductsMsg(`Loaded: ${productsCache.length}`, true);
     } catch (e) {
