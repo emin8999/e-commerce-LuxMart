@@ -2,17 +2,17 @@
 const API_BASE = "http://116.203.51.133/luxmart";
 
 // Категории
-const CATEGORIES_URL = `${API_BASE}/api/categories`; // GET: [{id, name/nameEn}]
+const CATEGORIES_URL = `${API_BASE}/api/categories`;
 
 // Магазины / Текущий магазин (по JWT)
-const MY_STORE_URL = `${API_BASE}/store/info`; // GET: {id, storeName}
-const STORES_URL = `${API_BASE}/stores`; // GET: [{id, name}]
+const MY_STORE_URL = `${API_BASE}/store/info`;
+const STORES_URL = `${API_BASE}/stores`;
 
 // Подсказка slug (если есть)
 const SLUG_SUGGEST_URL = `${API_BASE}/utils/slug?title=`;
 
 // Создание товара
-const CREATE_PRODUCT_URL = `${API_BASE}/api/products`; // POST: multipart/form-data
+const CREATE_PRODUCT_URL = `${API_BASE}/api/products`;
 const IMAGES_FIELD_NAME = "imageUrls";
 
 // Токен
@@ -74,20 +74,7 @@ const toggleDisabled = (disabled) => {
     });
 };
 
-// (Опц.) Жёсткий лимит на файлы (например, 5 МБ/файл, максимум 10 файлов) — чтобы не ловить 413 Nginx
-const MAX_FILES = 10;
-const MAX_FILE_MB = 5;
-function validateFiles(files) {
-  if (files.length > MAX_FILES)
-    return `Можно загрузить не более ${MAX_FILES} файлов.`;
-  const tooBig = Array.from(files).find(
-    (f) => f.size > MAX_FILE_MB * 1024 * 1024
-  );
-  if (tooBig) return `Файл "${tooBig.name}" превышает ${MAX_FILE_MB} МБ.`;
-  return null;
-}
-
-// ==================== ПОДГРУЗКА ДАННЫХ С БЭКА ====================
+// ==================== ПОДГРУЗКА ДАННЫХ ====================
 async function fetchCategories() {
   const sel = document.getElementById("categoryId");
   sel.innerHTML = `<option value="">Загрузка категорий…</option>`;
@@ -121,7 +108,7 @@ async function fetchStoreContext() {
   if (storeSelect)
     storeSelect.innerHTML = `<option value="">Загрузка магазина…</option>`;
 
-  // 1) Текущий магазин (по токену)
+  // Текущий магазин
   try {
     const me = await fetch(MY_STORE_URL, { headers: { ...authHeaders() } });
     if (me.ok) {
@@ -139,7 +126,7 @@ async function fetchStoreContext() {
     }
   } catch {}
 
-  // 2) Список магазинов (для админа)
+  // Список магазинов (админ)
   try {
     const res = await fetch(STORES_URL, { headers: { ...authHeaders() } });
     if (!res.ok) throw new Error(`Ошибка магазинов ${res.status}`);
@@ -178,7 +165,7 @@ async function suggestSlugFromBackend(title) {
   return null;
 }
 
-// ==================== ИНИЦИАЛИЗАЦИЯ UI ====================
+// ==================== UI / ЛОГИКА ФОРМЫ ====================
 let variantCounter = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -197,11 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const addPresetBtn = document.getElementById("addPresetBtn");
   const addCustomBtn = document.getElementById("addCustomBtn");
 
-  // Данные с бэка
   fetchCategories();
   fetchStoreContext();
 
-  // Авто-slug: локально + мягкая подсказка с бэка
+  // Авто-slug + подсказка с бэка
   let slugTimeout = null;
   titleEl?.addEventListener("input", () => {
     const base = slugifyLocal(titleEl.value);
@@ -216,16 +202,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   slugEl?.addEventListener("input", () => (slugEl.dataset.touched = "1"));
 
-  // Превью изображений + (опц.) валидация размеров
+  // Превью изображений
   imagesEl?.addEventListener("change", () => {
     previewEl.innerHTML = "";
     const files = Array.from(imagesEl.files || []);
-    const err = validateFiles(files);
-    if (err) {
-      setMsg(err);
-      imagesEl.value = ""; // сброс выбранных
-      return;
-    }
     files.forEach((file) => {
       const url = URL.createObjectURL(file);
       const img = document.createElement("img");
@@ -235,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Размеры (варианты)
+  // Варианты
   addPresetBtn?.addEventListener("click", () => {
     const val = (presetSizeEl.value || "").trim();
     if (!val) return;
@@ -251,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
     slugEl.dataset.touched = "";
   });
 
-  // Сабмит
+  // САБМИТ — ПЛОСКИЙ multipart/form-data
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     setMsg("");
@@ -273,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return setMsg("Некорректная цена со скидкой.");
     if (!categoryId) return setMsg("Выберите категорию.");
 
-    // Строгая проверка строк размеров
+    // Проверка строк вариантов
     const rows = document.querySelectorAll(".size-row");
     for (const row of rows) {
       const { sizeInput, qtyInput } = row._refs || {};
@@ -291,30 +271,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!variants.length)
       return setMsg("Добавьте хотя бы один размер и количество.");
 
-    // storeId (важно для проверки прав на стороне бэкенда)
+    // Если контроллер требует storeId — отправляем
     const storeSelect = document.getElementById("storeSelect");
     const selectedStoreId = storeSelect?.value
       ? Number(storeSelect.value)
       : null;
 
-    // JSON часть "product"
-    const productPayload = {
-      title,
-      slug,
-      description,
-      basePriceUSD: toBigDecimalString(basePriceUSD),
-      salePriceUSD:
-        salePriceUSD !== null ? toBigDecimalString(salePriceUSD) : null,
-      categoryId,
-      variants, // [{ size, quantity }]
-      storeId: selectedStoreId, // ← добавлено: бэкенду проще проверить права и владельца
-    };
-
+    // Сборка FormData ПО НОВОЙ СХЕМЕ (без JSON)
     const fd = new FormData();
-    fd.append(
-      "product",
-      new Blob([JSON.stringify(productPayload)], { type: "application/json" })
-    );
+
+    // Простые поля
+    fd.append("title", title);
+    fd.append("slug", slug);
+    fd.append("description", description);
+    fd.append("basePriceUSD", toBigDecimalString(basePriceUSD));
+    if (salePriceUSD !== null)
+      fd.append("salePriceUSD", toBigDecimalString(salePriceUSD));
+    fd.append("categoryId", String(categoryId));
+    if (selectedStoreId != null) fd.append("storeId", String(selectedStoreId));
+
+    // Варианты: variants[i].size / variants[i].stockQuantity
+    variants.forEach((v, i) => {
+      fd.append(`variants[${i}].size`, v.size);
+      fd.append(`variants[${i}].stockQuantity`, String(v.quantity));
+    });
+
+    // Картинки
     const files = Array.from(imagesEl.files || []);
     files.forEach((f) => fd.append(IMAGES_FIELD_NAME, f));
 
@@ -322,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleDisabled(true);
       const res = await fetch(CREATE_PRODUCT_URL, {
         method: "POST",
-        headers: { ...authHeaders() }, // НЕ ставим вручную Content-Type для FormData
+        headers: { ...authHeaders() }, // НЕ ставим Content-Type вручную
         body: fd,
       });
       if (!res.ok) {
@@ -331,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       setMsg("Товар успешно сохранён.", true);
       form.reset();
-      sizesWrapper.innerHTML = "";
+      document.getElementById("sizesWrapper").innerHTML = "";
       document.getElementById("imagePreview").innerHTML = "";
       document.getElementById("slug").dataset.touched = "";
     } catch (err) {
@@ -342,10 +324,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// ==== helpers для variants (с уникальными id/name) ====
+// ==== ВСПОМОГАТЕЛЬНОЕ: динамические строки вариантов ====
 function addSizeRow(initialSize = "") {
   variantCounter++;
 
+  const sizesWrapper = document.getElementById("sizesWrapper");
   const row = document.createElement("div");
   row.className = "size-row";
 
@@ -367,7 +350,7 @@ function addSizeRow(initialSize = "") {
   qtyInput.placeholder = "Количество";
   qtyInput.required = true;
   qtyInput.id = `variant_qty_${variantCounter}`;
-  qtyInput.name = `variants[${variantCounter}][quantity]`;
+  qtyInput.name = `variants[${variantCounter}][stockQuantity]`;
   qtyInput.autocomplete = "off";
 
   // Удалить
@@ -377,17 +360,11 @@ function addSizeRow(initialSize = "") {
   removeBtn.textContent = "Удалить";
   removeBtn.addEventListener("click", () => row.remove());
 
-  // Можно добавить скрытые <label> для доступности (если нужно)
-  // Оставляю компактно без визуального шума; id/name уже есть.
-
   row.appendChild(sizeInput);
   row.appendChild(qtyInput);
   row.appendChild(removeBtn);
 
-  // ссылки для collectVariants()
   row._refs = { sizeInput, qtyInput };
-
-  const sizesWrapper = document.getElementById("sizesWrapper");
   sizesWrapper.appendChild(row);
 }
 
@@ -399,8 +376,7 @@ function collectVariants() {
     const size = (sizeInput?.value || "").trim();
     const qty = Number(qtyInput?.value || "0");
     if (!size || !Number.isFinite(qty) || qty < 0) return;
-    list.push({ size, quantity: qty });
+    list.push({ size, stockQuantity: qty }); // quantity локально; при отправке маппим на stockQuantity
   });
-  // Если хотите объединять дубли — можно агрегировать. Тут оставляем как есть (каждая строка — отдельный вариант).
   return list;
 }
