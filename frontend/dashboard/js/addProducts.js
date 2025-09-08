@@ -91,7 +91,7 @@ async function fetchCategories() {
       if (!c || typeof c.id === "undefined") return;
       const opt = document.createElement("option");
       opt.value = String(c.id);
-      opt.textContent = c.name || `#${c.id}`;
+      opt.textContent = c.nameEn || `#${c.id}`;
       sel.appendChild(opt);
       count++;
     });
