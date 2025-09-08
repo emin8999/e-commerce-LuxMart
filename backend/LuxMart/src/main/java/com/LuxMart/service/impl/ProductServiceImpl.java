@@ -164,4 +164,13 @@ public class ProductServiceImpl implements ProductService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> getProductsByCategory(Long categoryId) {
+        List<ProductEntity> products = productRepository.findByCategoryId(categoryId);
+        return products.stream()
+                .map(productMapper::mapToProductResponseDto)
+                .toList();
+
+
+            }
 }
