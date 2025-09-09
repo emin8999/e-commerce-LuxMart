@@ -11,9 +11,38 @@
   <body>
     <div id="app-header"></div>
     <main class="container">
-      <div id="productsGrid" class="grid"></div>
-      <div id="emptyState" class="empty" hidden>No products found.</div>
+      <h1 class="page-title">Products</h1>
+
+      <section class="toolbar">
+        <div class="filters">
+          <label class="checkbox">
+            <input type="checkbox" id="onlySale" />
+            <span>Only with discount</span>
+          </label>
+          <div class="price-range">
+            <input type="number" id="minPrice" placeholder="Min price" />
+            <span class="dash">—</span>
+            <input type="number" id="maxPrice" placeholder="Max price" />
+            <button id="applyFilters" class="btn">Apply</button>
+            <button id="clearFilters" class="btn ghost">Clear</button>
+          </div>
+        </div>
+        <div class="sort">
+          <label for="sortSel">Sort:</label>
+          <select id="sortSel">
+            <option value="popular">Popular</option>
+            <option value="priceAsc">Price: Low → High</option>
+            <option value="priceDesc">Price: High → Low</option>
+            <option value="titleAsc">Title A→Z</option>
+            <option value="titleDesc">Title Z→A</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="productsGrid" class="grid"></section>
+      <div id="gridEmpty" class="empty" hidden>No products</div>
     </main>
+
     <div id="app-modal-root"></div>
     <script src="./assets/js/i18n.js"></script>
     <script src="./assets/js/currency.js"></script>

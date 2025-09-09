@@ -1,157 +1,82 @@
-// Backend base. Prefer global APP_CONFIG.apiBase (includes "/api"),
-// otherwise fallback to server context-path "/home".
-const FALLBACK_BASE = "http://116.203.51.133/luxmart/api";
-const API_ROOT =
-  window.APP_CONFIG && window.APP_CONFIG.apiBase
-    ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
-    : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
+const API_BASE = "http://116.203.51.133/luxmart";
 
-/** === Конфиг авторизации: если список закрыт, поставь true === */
-const USE_AUTH_FOR_PRODUCTS = false;
-const TOKEN_KEY = "storeJwt";
-function authHeaders() {
-  if (!USE_AUTH_FOR_PRODUCTS) return {};
-  const t = localStorage.getItem(TOKEN_KEY);
-  return t ? { Authorization: `Bearer ${t}` } : {};
-}
+const $$ = (sel, root = document) => root.querySelector(sel);
+const $$$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-/** === Mixed content guard === */
-(function () {
-  if (location.protocol === "https:" && !API_ROOT.startsWith("https:")) {
-    console.error(
-      "Mixed content: страница https, а API http — браузер блокирует запросы."
-    );
-  }
-})();
-
-/** === Утилиты === */
-function fmtUSD(v) {
-  if (v == null) return "";
-  const n = Number(v);
-  return isFinite(n) ? `$${n.toFixed(2)}` : "";
-}
-function pricePair(p) {
-  const base = Number(p.basePriceUSD ?? 0);
-  const sale = p.salePriceUSD != null ? Number(p.salePriceUSD) : null;
-  if (sale != null && isFinite(sale) && sale > 0 && sale < base)
-    return { current: fmtUSD(sale), old: fmtUSD(base) };
-  return { current: fmtUSD(base), old: "" };
-}
 function normalizeImg(src) {
   if (!src) return "";
   const s = String(src).trim();
   if (/^(https?:)?\/\//i.test(s) || /^data:/i.test(s)) return s;
-  const rawBase = API_ROOT.replace(/\/?api\/?$/, "");
-  return `${rawBase}/${s.replace(/^\/+/, "")}`;
+  return `${API_BASE}/${s.replace(/^\/+/, "")}`;
 }
 
-/** === Корзина === */
+// Simple cart in localStorage
 const CART_KEY = "cart";
-const Cart = {
-  _read() {
-    try {
-      return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
-    } catch {
-      return [];
-    }
-  },
-  _write(x) {
-    localStorage.setItem(CART_KEY, JSON.stringify(x));
-  },
-  add(it) {
-    const arr = this._read();
-    arr.push(it);
-    this._write(arr);
-    this.renderBadge();
-  },
-  count() {
-    return this._read().length;
-  },
-  renderBadge() {
-    const el = document.getElementById("cartBadge");
-    if (el) el.textContent = String(this.count());
-  },
-};
-
-/** === Загрузка товаров с fallback === */
-function normalizeList(raw) {
-  if (Array.isArray(raw)) return raw;
-  if (raw && Array.isArray(raw.content)) return raw.content; // Spring Page
-  if (raw && Array.isArray(raw.items)) return raw.items;
-  if (raw && Array.isArray(raw.data)) return raw.data;
-  return null; // намеренно null — чтобы понимать, что формат неизвестен
+function getCart() {
+  try {
+    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+function setCart(items) {
+  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  renderCartBadge();
+}
+function addToCart(item) {
+  const cart = getCart();
+  const idx = cart.findIndex(
+    (x) =>
+      String(x.productId) === String(item.productId) &&
+      String(x.variantId || "") === (item.variantId || "")
+  );
+  if (idx >= 0) cart[idx].qty += item.qty || 1;
+  else cart.push(item);
+  setCart(cart);
+  alert("Added to cart");
+}
+function renderCartBadge() {
+  const n = getCart().reduce((a, b) => a + (b.qty || 0), 0);
+  const badge = $$("#cartBadge");
+  if (badge) badge.textContent = String(n);
 }
 
-async function fetchJSON(url) {
-  const res = await fetch(url, {
-    headers: { Accept: "application/json", ...authHeaders() },
-  });
-  if (!res.ok) {
-    const t = await res.text().catch(() => "");
-    throw new Error(`[${res.status}] ${url}\n${t}`);
-  }
-  try {
-    return await res.json();
-  } catch {
-    const tt = await res.text().catch(() => "");
-    throw new Error(`Ответ не JSON от ${url}\n${tt.slice(0, 500)}`);
-  }
+// price helpers
+function computePriceUSD(p) {
+  const base = Number(p.basePriceUSD ?? 0);
+  const sale = p.salePriceUSD != null ? Number(p.salePriceUSD) : null;
+  const current = sale != null && sale >= 0 && sale < base ? sale : base;
+  return { current, old: sale != null && sale < base ? base : null };
+}
+function formatUSD(n) {
+  return `$${Number(n).toFixed(2)}`;
 }
 
 async function fetchAllProducts() {
-  if (location.protocol === "https:" && !API_ROOT.startsWith("https:")) {
-    throw new Error(
-      "Страница https, API http → запросы блокируются (mixed content). Используйте https для API или проксируйте через тот же домен."
-    );
+  const res = await fetch(`${API_BASE}/api/products/all-products`);
+  if (!res.ok) {
+    console.error("Products HTTP", res.status, await res.text());
+    return [];
   }
-  const urls = [
-    `${API_ROOT}/products/all-products`,
-    // `${API_ROOT}/api/products/all-products`,
-    `${API_ROOT}/products`,
-    `${API_ROOT}/v1/products`,
-    `${API_ROOT}/products/getAll`,
-  ];
-  const errors = [];
-  for (const u of urls) {
-    try {
-      const data = await fetchJSON(u);
-      const list = normalizeList(data);
-      if (list) return list; // массив (пусть даже пустой) — успех
-      // если пришёл объект без массива — попробуем следующий URL, но запишем подсказку
-      errors.push(
-        `OK ${u} но формат без массива (ключи: ${Object.keys(data || {}).join(
-          ", "
-        )})`
-      );
-    } catch (e) {
-      errors.push(e.message || String(e));
-    }
-  }
-  throw new Error(
-    `Не нашли валидный эндпоинт списка товаров:\n${errors.join("\n----\n")}`
-  );
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
 }
 
-/** === Рендер === */
-function renderProducts(products) {
-  const grid = document.getElementById("productsGrid");
-  const empty = document.getElementById("emptyState");
-  if (!grid || !empty) return;
-
-  if (!products.length) {
-    empty.hidden = false;
-    grid.innerHTML = "";
-    return;
-  }
-
-  empty.hidden = true;
+function renderGrid(list) {
+  const grid = $$("#productsGrid");
+  const empty = $$("#gridEmpty");
   grid.innerHTML = "";
 
-  products.forEach((p) => {
-    const { current, old } = pricePair(p);
+  if (!list.length) {
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
+
+  list.forEach((p) => {
+    const price = computePriceUSD(p);
     const img =
       p.imageUrls && p.imageUrls.length ? normalizeImg(p.imageUrls[0]) : "";
-
     const card = document.createElement("div");
     card.className = "card";
 
@@ -163,81 +88,124 @@ function renderProducts(products) {
     const body = document.createElement("div");
     body.className = "card-body";
 
-    const title = document.createElement("h3");
-    title.className = "title";
+    const title = document.createElement("a");
+    title.className = "title visit";
+    title.href = thumb.href;
     title.textContent = p.title ?? p.nameEn ?? `#${p.id}`;
 
-    const priceRow = document.createElement("div");
-    priceRow.className = "priceRow";
-    priceRow.innerHTML = `<span class="price">${current}</span>${
-      old ? ` <span class="old">${old}</span>` : ""
+    const priceDiv = document.createElement("div");
+    priceDiv.className = "price";
+    priceDiv.innerHTML = `${formatUSD(price.current)} ${
+      price.old ? `<span class="old">${formatUSD(price.old)}</span>` : ""
     }`;
 
     const actions = document.createElement("div");
-    actions.className = "actions";
+    actions.className = "card-actions";
 
-    const viewBtn = document.createElement("a");
-    viewBtn.className = "btn";
-    viewBtn.href = `./productView.html?id=${encodeURIComponent(p.id)}`;
-    viewBtn.textContent = "View";
+    const visit = document.createElement("a");
+    visit.className = "visit";
+    visit.href = thumb.href;
+    visit.textContent = "View";
 
-    const addBtn = document.createElement("button");
-    addBtn.className = "icon-btn";
-    addBtn.title = "Add to cart";
-    addBtn.innerHTML = `
-      <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M6 6h15l-1.5 9h-12z" stroke="currentColor" stroke-width="1.5" fill="none"/>
-        <circle cx="9" cy="20" r="1.5" fill="currentColor"/>
-        <circle cx="17" cy="20" r="1.5" fill="currentColor"/>
-        <path d="M6 6L5 3H2" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M12 7v6M9 10h6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-      </svg>`;
-
-    addBtn.addEventListener("click", (e) => {
+    const add = document.createElement("button");
+    add.className = "add-btn";
+    add.innerHTML = `
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.44A2 2 0 0 0 10 19h9v-2h-8.42a.25.25 0 0 1-.22-.37L11.1 14h6.45a2 2 0 0 0 1.8-1.11L22 7H7.42l-.7-1.4A1 1 0 0 0 6 5H3V3h3a2 2 0 0 1 1.8 1.1L9 8h11l-2 4H11.42"/>
+      </svg>
+      Add
+    `;
+    add.addEventListener("click", (e) => {
       e.preventDefault();
-      Cart.add({
+      addToCart({
         productId: p.id,
         variantId: null,
-        title: p.title ?? p.nameEn ?? `#${p.id}`,
+        storeId: p.storeId,
+        title: p.title,
         basePriceUSD: p.basePriceUSD,
         salePriceUSD: p.salePriceUSD,
         qty: 1,
       });
     });
 
-    actions.appendChild(viewBtn);
-    actions.appendChild(addBtn);
+    actions.appendChild(visit);
+    actions.appendChild(add);
+
     body.appendChild(title);
-    body.appendChild(priceRow);
+    body.appendChild(priceDiv);
     body.appendChild(actions);
+
     card.appendChild(thumb);
     card.appendChild(body);
+
     grid.appendChild(card);
   });
 }
 
-/** === Старт === */
+function applyFiltersTo(list) {
+  const onlySale = $$("#onlySale")?.checked;
+  const minP = Number($$("#minPrice")?.value || "");
+  const maxP = Number($$("#maxPrice")?.value || "");
+  const hasMin = !Number.isNaN(minP);
+  const hasMax = !Number.isNaN(maxP);
+
+  let out = list.slice();
+  if (onlySale) {
+    out = out.filter(
+      (p) =>
+        p.salePriceUSD != null &&
+        Number(p.salePriceUSD) < Number(p.basePriceUSD)
+    );
+  }
+  if (hasMin) {
+    out = out.filter((p) => (p.salePriceUSD ?? p.basePriceUSD) >= minP);
+  }
+  if (hasMax) {
+    out = out.filter((p) => (p.salePriceUSD ?? p.basePriceUSD) <= maxP);
+  }
+  const sort = $$("#sortSel")?.value || "popular";
+  if (sort === "priceAsc")
+    out.sort(
+      (a, b) =>
+        (a.salePriceUSD ?? a.basePriceUSD) - (b.salePriceUSD ?? b.basePriceUSD)
+    );
+  if (sort === "priceDesc")
+    out.sort(
+      (a, b) =>
+        (b.salePriceUSD ?? b.basePriceUSD) - (a.salePriceUSD ?? a.basePriceUSD)
+    );
+  if (sort === "titleAsc")
+    out.sort((a, b) =>
+      String(a.title || "").localeCompare(String(b.title || ""))
+    );
+  if (sort === "titleDesc")
+    out.sort((a, b) =>
+      String(b.title || "").localeCompare(String(a.title || ""))
+    );
+  return out;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
-  Cart.renderBadge();
-  const grid = document.getElementById("productsGrid");
-  const empty = document.getElementById("emptyState");
-  if (!grid || !empty) {
-    console.warn("productsGrid / emptyState не найдены");
-    return;
-  }
-  try {
-    const products = await fetchAllProducts();
-    renderProducts(products);
-  } catch (e) {
-    console.error("Products load failed:", e.message || e);
-    empty.hidden = false;
-    grid.innerHTML = `
-      <div class="card" style="grid-column: 1 / -1; padding:12px">
-        <div style="font-weight:700; color:#c00">Не удалось загрузить товары</div>
-        <pre style="white-space:pre-wrap; font-size:12px; color:#555; margin:6px 0 0">${(
-          e.message || ""
-        ).slice(0, 2000)}</pre>
-      </div>
-    `;
-  }
+  renderCartBadge();
+
+  let all = await fetchAllProducts();
+  let view = all;
+
+  // initial render
+  renderGrid(view);
+
+  // filters
+  $$("#applyFilters")?.addEventListener("click", () => {
+    renderGrid(applyFiltersTo(all));
+  });
+  $$("#clearFilters")?.addEventListener("click", () => {
+    $$("#onlySale").checked = false;
+    $$("#minPrice").value = "";
+    $$("#maxPrice").value = "";
+    $$("#sortSel").value = "popular";
+    renderGrid(all);
+  });
+  $$("#sortSel")?.addEventListener("change", () => {
+    renderGrid(applyFiltersTo(all));
+  });
 });
