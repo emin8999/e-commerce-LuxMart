@@ -4,27 +4,29 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Product</title>
+
+    <link rel="stylesheet" href="./assets/css/productView.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <div id="app-header"></div>
     <main class="container">
-      <section id="productView"></section>
-      <section class="carousel" id="similarByCategory">
-        <div class="section-head">
-          <h2 data-i18n="product.similar">Similar in category</h2>
-        </div>
-        <div class="row" id="similarRow"></div>
+      <div id="productView" class="product"></div>
+
+      <section class="similar">
+        <h2>Similar products</h2>
+        <div id="similarRow" class="grid"></div>
       </section>
     </main>
     <div id="app-modal-root"></div>
     <script src="./assets/js/i18n.js"></script>
     <script src="./assets/js/currency.js"></script>
     <script src="./assets/js/header.js"></script>
-    <script src="./assets/js/categories.js"></script>
-    <script src="./assets/js/pricing.js"></script>
+    <!-- <script src="./assets/js/categories.js"></script>
+    <script src="./assets/js/pricing.js"></script> -->
     <script src="./assets/js/cart.js"></script>
-    <script src="./assets/js/main.js"></script>
+    <script src="./assets/js/products.js"></script>
+    <script src="./assets/js/productView.js"></script>
     <div id="app-footer"></div>
     <script src="./assets/js/footer.js"></script>
   </body>
