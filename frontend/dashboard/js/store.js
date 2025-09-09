@@ -143,7 +143,7 @@
         <td>
           <button class="btn" data-act="edit">Edit</button>
           <button class="btn" data-act="delete">Delete</button>
-          <a class="btn" href="../product.html?id=${encodeURIComponent(
+          <a class="btn" href="../productView.html?id=${encodeURIComponent(
             p.id
           )}" target="_blank">View</a>
         </td>`;
