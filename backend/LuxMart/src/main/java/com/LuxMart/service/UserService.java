@@ -4,6 +4,7 @@ import com.LuxMart.dto.requestDto.LoginRequestDto;
 import com.LuxMart.dto.requestDto.RegisterRequestDto;
 import com.LuxMart.dto.responseDto.LoginResponseDto;
 import com.LuxMart.dto.responseDto.RegisterResponseDto;
+import com.LuxMart.dto.responseDto.UserResponseDto;
 
 public interface UserService {
 
@@ -14,5 +15,7 @@ public interface UserService {
      LoginResponseDto adminLogin(LoginRequestDto loginRequestDto);
 
       void logout(String token);
+
+       UserResponseDto getCurrentUser();
 }
 

@@ -15,6 +15,7 @@ import com.LuxMart.dto.requestDto.LoginRequestDto;
 import com.LuxMart.dto.requestDto.RegisterRequestDto;
 import com.LuxMart.dto.responseDto.LoginResponseDto;
 import com.LuxMart.dto.responseDto.RegisterResponseDto;
+import com.LuxMart.dto.responseDto.UserResponseDto;
 import com.LuxMart.entity.UserEntity;
 import com.LuxMart.enums.Roles;
 import com.LuxMart.exception.EmailAlreadyExistsException;
@@ -116,6 +117,17 @@ public class UserServiceImpl implements UserService {
     public void logout(String token) {
         tokenBlacklistService.blacklistToken(token);
         SecurityContextHolder.clearContext();
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDto getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return userMapper.mapToUserResponseDto(user);
     }
 
 

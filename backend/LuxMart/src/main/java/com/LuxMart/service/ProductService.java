@@ -18,4 +18,6 @@ public interface ProductService {
       public List<ProductResponseDto> getAllProducts();
 
        List<ProductResponseDto> getAllActiveProducts();
+
+         ProductResponseDto getActiveProductById(Long id);
 }

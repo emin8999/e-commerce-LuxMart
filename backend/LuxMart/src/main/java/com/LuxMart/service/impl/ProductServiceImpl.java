@@ -192,5 +192,17 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ProductResponseDto getActiveProductById(Long id) {
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (product.getStatus() != ProductStatus.ACTIVE) {
+            throw new RuntimeException("Product is not available");
+        }
+
+        return mapProductWithImages(product);
+    }
 
 }

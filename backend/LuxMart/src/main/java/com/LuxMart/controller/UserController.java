@@ -2,7 +2,9 @@ package com.LuxMart.controller;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +14,7 @@ import com.LuxMart.dto.requestDto.LoginRequestDto;
 import com.LuxMart.dto.requestDto.RegisterRequestDto;
 import com.LuxMart.dto.responseDto.LoginResponseDto;
 import com.LuxMart.dto.responseDto.RegisterResponseDto;
+import com.LuxMart.dto.responseDto.UserResponseDto;
 import com.LuxMart.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -22,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api")
+//@PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
 public class UserController {
 
      private final UserService userService;
@@ -47,5 +51,12 @@ public class UserController {
             return ResponseEntity.ok("Logged out successfully");
         }
         return ResponseEntity.badRequest().body("No valid token provided");
+    }
+
+     @GetMapping("/profile")
+    public ResponseEntity<UserResponseDto> getCurrentUserProfile() {
+        UserResponseDto userResponseDto = userService.getCurrentUser();
+        return ResponseEntity.ok(userResponseDto);
+
     }
 }
