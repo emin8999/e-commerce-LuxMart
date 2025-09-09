@@ -16,4 +16,6 @@ public interface ProductService {
      List<ProductResponseDto> getProductsByCategory(Long categoryId);
 
       public List<ProductResponseDto> getAllProducts();
+
+       List<ProductResponseDto> getAllActiveProducts();
 }

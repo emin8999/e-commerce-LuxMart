@@ -1,6 +1,5 @@
 package com.LuxMart.entity;
 
-import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

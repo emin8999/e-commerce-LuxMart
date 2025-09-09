@@ -16,6 +16,7 @@ import com.LuxMart.entity.ProductEntity;
 import com.LuxMart.entity.ProductImageEntity;
 import com.LuxMart.entity.ProductVariantEntity;
 import com.LuxMart.entity.StoreEntity;
+import com.LuxMart.enums.ProductStatus;
 import com.LuxMart.exception.AccessDeniedException;
 import com.LuxMart.mapper.ProductMapper;
 import com.LuxMart.repository.CategoryRepository;
@@ -180,5 +181,16 @@ public class ProductServiceImpl implements ProductService {
                 .map(this::mapProductWithImages)
                 .collect(Collectors.toList());
     }
+
+    
+        @Override
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> getAllActiveProducts() {
+        List<ProductEntity> products = productRepository.findByStatus(ProductStatus.ACTIVE);
+        return products.stream()
+                .map(this::mapProductWithImages)
+                .collect(Collectors.toList());
+    }
+
 
 }

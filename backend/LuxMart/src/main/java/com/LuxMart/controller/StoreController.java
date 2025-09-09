@@ -17,7 +17,6 @@ import com.LuxMart.dto.responseDto.StoreResponseDto;
 import com.LuxMart.service.StoreService;
 
 import java.nio.file.AccessDeniedException;
-import java.util.List;
 
 import org.apache.hc.core5.http.HttpHeaders;
 
@@ -37,23 +36,6 @@ public class StoreController {
         storeService.registerStore(request);
         return ResponseEntity.ok("register");
     }
-
-  //  @PostMapping(value = "/register", consumes = "multipart/form-data")
-//public ResponseEntity<String> register(@ModelAttribute @Valid StoreRegisterRequest request) {
-   // System.out.println("=== CONTROLLER REACHED ===");
-   // System.out.println("StoreName: " + request.getStoreName());
-   // System.out.println("Email: " + request.getEmail());
-    
-  //  try {
-   //     storeService.registerStore(request);
-  ///      System.out.println("=== SERVICE COMPLETED ===");
-    //    return ResponseEntity.ok("register");
-    //} catch (Exception e) {
-    //    System.out.println("=== SERVICE ERROR: " + e.getMessage() + " ===");
-    //    e.printStackTrace();
-   //     throw e;
-   // }
-//}
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
