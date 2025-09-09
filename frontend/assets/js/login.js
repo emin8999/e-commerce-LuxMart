@@ -37,8 +37,8 @@ form.addEventListener("submit", async (e) => {
         console.warn("Токен не получен от сервера!");
       }
 
-      // редирект на index.html
-      window.location.href = "index.html";
+      // редирект на профиль после успешного входа
+      window.location.href = "profile.html";
     } else {
       console.error("Ошибка входа:", result);
       alert(result.message || "Ошибка авторизации"); // можно выводить сообщение пользователю

@@ -27,12 +27,7 @@
             <option value="EUR">€</option>
             <option value="TRY">₺</option>
           </select>
-
-          <!-- ▼ ДОБАВЛЕНО: кнопка входа -->
-          <a href="./login.html" class="btn btn-outline" id="headerLoginBtn" data-i18n="auth.login">Sign In</a>
-          <!-- ▲ ДОБАВЛЕНО -->
-
-          <a href="./profile.html" title="Profile">👤</a>
+          <a href="javascript:void(0)" id="profileBtn" title="Profile">👤</a>
           <a href="./cart.html" class="header__cart" title="Cart">🛒<span class="header__badge" id="cartBadge" style="display:none">0</span></a>
           <button class="burger" id="burgerBtn">☰</button>
         </div>
@@ -47,9 +42,6 @@
       <a class="header__link" data-i18n="nav.about_us" href="./about.html">About Us</a>
       <a class="header__link" data-i18n="nav.customer_service" href="./customer.html">Customer Service</a>
       <a class="header__link" data-i18n="nav.category" id="openCatModalDrawer" href="javascript:void(0)">Category</a>
-      <!-- ▼ ДОБАВЛЕНО: кнопка входа в бургер-меню -->
-      <a class="header__link" href="./login.html" data-i18n="auth.login">Sign In</a>
-      <!-- ▲ ДОБАВЛЕНО -->
     </div>
   `;
 
@@ -124,4 +116,17 @@
   try {
     window.renderCartBadge();
   } catch (_) {}
+
+  // Profile button behavior: go to login if no token, else profile
+  const profileBtn = document.getElementById("profileBtn");
+  if (profileBtn) {
+    profileBtn.addEventListener("click", () => {
+      const token = localStorage.getItem("Jwt");
+      if (token && token.length > 0) {
+        window.location.href = "./profile.html";
+      } else {
+        window.location.href = "./login.html";
+      }
+    });
+  }
 })();
