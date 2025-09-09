@@ -29,33 +29,26 @@ function normalizeImg(src) {
   return `${rawBase}/${s.replace(/^\/+/, "")}`;
 }
 
-/* simple cart */
-const CART_KEY = "cart";
-const Cart = {
-  _read() {
+/* cart helpers (use global cart.js if available) */
+function addToGlobalCart(item) {
+  if (window.cart && typeof window.cart.add === "function") {
+    window.cart.add(item);
+    if (typeof window.renderCartBadge === "function") window.renderCartBadge();
+  } else {
+    // ultra-fallback: minimal localStorage push
+    const KEY = "cart";
+    let data;
     try {
-      return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+      data = JSON.parse(localStorage.getItem(KEY) || '{"items":[]}');
     } catch {
-      return [];
+      data = { items: [] };
     }
-  },
-  _write(x) {
-    localStorage.setItem(CART_KEY, JSON.stringify(x));
-  },
-  add(item) {
-    const it = this._read();
-    it.push(item);
-    this._write(it);
-    this.renderBadge();
-  },
-  count() {
-    return this._read().length;
-  },
-  renderBadge() {
+    data.items.push(item);
+    localStorage.setItem(KEY, JSON.stringify(data));
     const el = q("#cartBadge");
-    if (el) el.textContent = String(this.count());
-  },
-};
+    if (el) el.textContent = String(data.items.reduce((s,i)=>s+(i.qty||1),0));
+  }
+}
 
 async function getJSON(url) {
   const r = await fetch(url);
@@ -63,30 +56,40 @@ async function getJSON(url) {
   return r.json();
 }
 
-// Robust fetch by ID: try direct endpoint, fallback to all-products
+// Robust fetch by ID: try direct endpoint, fallback to public list
 async function getProductById(id) {
   // 1) Try direct endpoint if backend provides it (may be missing)
   try {
-    const r = await fetch(
-      `${API_VIEW_BASE}/products/${encodeURIComponent(id)}`
-    );
+    const r = await fetch(`${API_ROOT}/products/${encodeURIComponent(id)}`);
     if (r.ok) return await r.json();
   } catch (_) {}
 
-  // 2) Fallback: load all and find locally
-  const all = await getJSON(`${API_VIEW_BASE}api/products/public`);
-  const list = Array.isArray(all)
-    ? all
-    : Array.isArray(all?.content)
-    ? all.content
+  // 2) Fallback: load public products and find locally
+  try {
+    const all = await getJSON(`${API_ROOT}/products/public`);
+    const list = Array.isArray(all)
+      ? all
+      : Array.isArray(all?.content)
+      ? all.content
+      : [];
+    const found = list.find((x) => String(x.id) === String(id));
+    if (found) return found;
+  } catch (_) {}
+
+  // 3) Fallback: load all products and find locally
+  const all2 = await getJSON(`${API_ROOT}/products/all-products`);
+  const list2 = Array.isArray(all2)
+    ? all2
+    : Array.isArray(all2?.content)
+    ? all2.content
     : [];
-  const found = list.find((x) => String(x.id) === String(id));
-  if (!found) throw new Error("Product not found");
-  return found;
+  const found2 = list2.find((x) => String(x.id) === String(id));
+  if (!found2) throw new Error("Product not found");
+  return found2;
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  Cart.renderBadge();
+  try { if (typeof window.renderCartBadge === "function") window.renderCartBadge(); } catch(_){}
 
   const params = new URLSearchParams(location.search);
   const id = params.get("id");
@@ -182,16 +185,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       const vId = sel ? sel.value : null;
       const v =
         (variants || []).find((x) => String(x.id) === String(vId)) || {};
-      Cart.add({
+      addToGlobalCart({
         productId: p.id,
         variantId: v.id || null,
+        storeId: p.storeId || null,
         title: p.title,
         size: v.size,
-        basePriceUSD: p.basePriceUSD, // у варианта цен нет — используем цену товара
+        basePriceUSD: p.basePriceUSD,
         salePriceUSD: p.salePriceUSD,
         qty: 1,
       });
-      alert("Added");
+      alert("Added to cart");
     });
 
     // Similar (по категории, если есть; иначе по storeId)
@@ -200,15 +204,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (p.categoryId != null) {
         try {
           const list = await getJSON(
-            `${API_VIEW_BASE}/products/category/${encodeURIComponent(
-              p.categoryId
-            )}`
+            `${API_ROOT}/products/category/${encodeURIComponent(p.categoryId)}`
           );
           similar = (Array.isArray(list) ? list : [])
             .filter((x) => String(x.id) !== String(p.id))
             .slice(0, 12);
         } catch {
-          const all = await getJSON(`${API_VIEW_BASE}/products/all-products`);
+          const all = await getJSON(`${API_ROOT}/products/all-products`);
           similar = (Array.isArray(all) ? all : [])
             .filter(
               (x) =>
@@ -219,7 +221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } else {
         // Фоллбек: по тому же магазину
-        const all = await getJSON(`${API_VIEW_BASE}/products/all-products`);
+        const all = await getJSON(`${API_ROOT}/products/all-products`);
         similar = (Array.isArray(all) ? all : [])
           .filter(
             (x) =>
