@@ -74,7 +74,7 @@ async function getProductById(id) {
   } catch (_) {}
 
   // 2) Fallback: load all and find locally
-  const all = await getJSON(`${API_VIEW_BASE}api/products/all-products`);
+  const all = await getJSON(`${API_VIEW_BASE}api/products/public`);
   const list = Array.isArray(all)
     ? all
     : Array.isArray(all?.content)
@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (p.categoryId != null) {
         try {
           const list = await getJSON(
-            `${API_CATEGORIES_BASE}/products/category/${encodeURIComponent(
+            `${API_VIEW_BASE}/products/category/${encodeURIComponent(
               p.categoryId
             )}`
           );
