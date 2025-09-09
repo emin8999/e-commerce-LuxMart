@@ -56,11 +56,13 @@ async function getJSON(url) {
   return r.json();
 }
 
-// Robust fetch by ID: try direct endpoint, fallback to public list
+// Robust fetch by ID: use /api/products/public/{id}, then fallbacks
 async function getProductById(id) {
-  // 1) Try direct endpoint if backend provides it (may be missing)
+  // 1) Primary: public-by-id endpoint
   try {
-    const r = await fetch(`${API_ROOT}/products/${encodeURIComponent(id)}`);
+    const r = await fetch(
+      `${API_ROOT}/products/public/${encodeURIComponent(id)}`
+    );
     if (r.ok) return await r.json();
   } catch (_) {}
 
