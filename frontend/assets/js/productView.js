@@ -1,5 +1,8 @@
-// Match backend context-path "/home" so requests reach the API
-const API_BASE = "http://116.203.51.133/home";
+// Prefer global APP_CONFIG.apiBase (already includes "/api")
+const FALLBACK_BASE = "http://116.203.51.133/home";
+const API_ROOT = (window.APP_CONFIG && window.APP_CONFIG.apiBase)
+  ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
+  : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
 
 /* helpers */
 function q(sel) {
@@ -21,7 +24,8 @@ function normalizeImg(src) {
   if (!src) return "";
   const s = String(src).trim();
   if (/^(https?:)?\/\//i.test(s) || /^data:/i.test(s)) return s;
-  return `${API_BASE}/${s.replace(/^\/+/, "")}`;
+  const rawBase = API_ROOT.replace(/\/?api\/?$/, "");
+  return `${rawBase}/${s.replace(/^\/+/, "")}`;
 }
 
 /* simple cart */
@@ -62,12 +66,12 @@ async function getJSON(url) {
 async function getProductById(id) {
   // 1) Try direct endpoint if backend provides it (may be missing)
   try {
-    const r = await fetch(`${API_BASE}/api/products/${encodeURIComponent(id)}`);
+    const r = await fetch(`${API_ROOT}/products/${encodeURIComponent(id)}`);
     if (r.ok) return await r.json();
   } catch (_) {}
 
   // 2) Fallback: load all and find locally
-  const all = await getJSON(`${API_BASE}/api/products/all-products`);
+  const all = await getJSON(`${API_ROOT}/products/all-products`);
   const list = Array.isArray(all) ? all : Array.isArray(all?.content) ? all.content : [];
   const found = list.find((x) => String(x.id) === String(id));
   if (!found) throw new Error("Product not found");
@@ -189,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (p.categoryId != null) {
         try {
           const list = await getJSON(
-            `${API_BASE}/api/products/category/${encodeURIComponent(
+            `${API_ROOT}/products/category/${encodeURIComponent(
               p.categoryId
             )}`
           );
@@ -197,7 +201,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             .filter((x) => String(x.id) !== String(p.id))
             .slice(0, 12);
         } catch {
-          const all = await getJSON(`${API_BASE}/api/products/all-products`);
+          const all = await getJSON(`${API_ROOT}/products/all-products`);
           similar = (Array.isArray(all) ? all : [])
             .filter(
               (x) =>
@@ -208,7 +212,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } else {
         // Фоллбек: по тому же магазину
-        const all = await getJSON(`${API_BASE}/api/products/all-products`);
+        const all = await getJSON(`${API_ROOT}/products/all-products`);
         similar = (Array.isArray(all) ? all : [])
           .filter(
             (x) =>

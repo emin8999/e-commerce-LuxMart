@@ -108,7 +108,9 @@
   // Cart badge
   window.renderCartBadge = function () {
     const badge = document.getElementById("cartBadge");
-    const count = window.cart.getCount();
+    const count = (window.cart && typeof window.cart.getCount === 'function')
+      ? window.cart.getCount()
+      : 0;
     if (count > 0) {
       badge.textContent = count > 99 ? "99+" : String(count);
       badge.style.display = "flex";
@@ -116,5 +118,5 @@
       badge.style.display = "none";
     }
   };
-  window.renderCartBadge();
+  try { window.renderCartBadge(); } catch (_) {}
 })();

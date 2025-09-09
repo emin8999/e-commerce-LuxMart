@@ -1,6 +1,9 @@
-// Use backend context-path "/home" (see backend application.yml)
-// Keep local constant here since products.html doesn't load global config
-const API_BASE = "http://116.203.51.133/home";
+// Backend base. Prefer global APP_CONFIG.apiBase (includes "/api"),
+// otherwise fallback to server context-path "/home".
+const FALLBACK_BASE = "http://116.203.51.133/home";
+const API_ROOT = (window.APP_CONFIG && window.APP_CONFIG.apiBase)
+  ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
+  : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
 
 /** === Конфиг авторизации: если список закрыт, поставь true === */
 const USE_AUTH_FOR_PRODUCTS = false;
@@ -13,7 +16,7 @@ function authHeaders() {
 
 /** === Mixed content guard === */
 (function () {
-  if (location.protocol === "https:" && !API_BASE.startsWith("https:")) {
+  if (location.protocol === "https:" && !API_ROOT.startsWith("https:")) {
     console.error(
       "Mixed content: страница https, а API http — браузер блокирует запросы."
     );
@@ -37,7 +40,8 @@ function normalizeImg(src) {
   if (!src) return "";
   const s = String(src).trim();
   if (/^(https?:)?\/\//i.test(s) || /^data:/i.test(s)) return s;
-  return `${API_BASE}/${s.replace(/^\/+/, "")}`;
+  const rawBase = API_ROOT.replace(/\/?api\/?$/, "");
+  return `${rawBase}/${s.replace(/^\/+/, "")}`;
 }
 
 /** === Корзина === */
@@ -94,17 +98,16 @@ async function fetchJSON(url) {
 }
 
 async function fetchAllProducts() {
-  if (location.protocol === "https:" && !API_BASE.startsWith("https:")) {
+  if (location.protocol === "https:" && !API_ROOT.startsWith("https:")) {
     throw new Error(
       "Страница https, API http → запросы блокируются (mixed content). Используйте https для API или проксируйте через тот же домен."
     );
   }
   const urls = [
-    `${API_BASE}/api/products/all-products`,
-    `${API_BASE}/api/products`,
-    `${API_BASE}/api/v1/products`,
-    `${API_BASE}/api/products/getAll`,
-    `${API_BASE}/products`,
+    `${API_ROOT}/products/all-products`,
+    `${API_ROOT}/products`,
+    `${API_ROOT}/v1/products`,
+    `${API_ROOT}/products/getAll`,
   ];
   const errors = [];
   for (const u of urls) {
