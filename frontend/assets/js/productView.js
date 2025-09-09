@@ -1,4 +1,5 @@
-const API_BASE = "http://116.203.51.133/luxmart";
+// Match backend context-path "/home" so requests reach the API
+const API_BASE = "http://116.203.51.133/home";
 
 /* helpers */
 function q(sel) {
@@ -57,6 +58,22 @@ async function getJSON(url) {
   return r.json();
 }
 
+// Robust fetch by ID: try direct endpoint, fallback to all-products
+async function getProductById(id) {
+  // 1) Try direct endpoint if backend provides it (may be missing)
+  try {
+    const r = await fetch(`${API_BASE}/api/products/${encodeURIComponent(id)}`);
+    if (r.ok) return await r.json();
+  } catch (_) {}
+
+  // 2) Fallback: load all and find locally
+  const all = await getJSON(`${API_BASE}/api/products/all-products`);
+  const list = Array.isArray(all) ? all : Array.isArray(all?.content) ? all.content : [];
+  const found = list.find((x) => String(x.id) === String(id));
+  if (!found) throw new Error("Product not found");
+  return found;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   Cart.renderBadge();
 
@@ -68,9 +85,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const p = await getJSON(
-      `${API_BASE}/api/products/${encodeURIComponent(id)}`
-    );
+    const p = await getProductById(id);
 
     // Build gallery
     const imgs = Array.isArray(p.imageUrls)

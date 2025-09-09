@@ -1,4 +1,6 @@
-const API_BASE = "http://116.203.51.133/luxmart";
+// Use backend context-path "/home" (see backend application.yml)
+// Keep local constant here since products.html doesn't load global config
+const API_BASE = "http://116.203.51.133/home";
 
 /** === Конфиг авторизации: если список закрыт, поставь true === */
 const USE_AUTH_FOR_PRODUCTS = false;
