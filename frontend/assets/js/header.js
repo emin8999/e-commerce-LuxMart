@@ -44,8 +44,8 @@
       
       <a class="header__link" data-i18n="nav.products" href="./products.html">Products</a>
       <a class="header__link" data-i18n="nav.our_stores" href="./our-stores.html">Our Stores</a>
-      <a class="header__link" data-i18n="nav.about_us" href="./index.html#about">About Us</a>
-      <a class="header__link" data-i18n="nav.customer_service" href="./index.html#service">Customer Service</a>
+      <a class="header__link" data-i18n="nav.about_us" href="./about.html">About Us</a>
+      <a class="header__link" data-i18n="nav.customer_service" href="./customer.html">Customer Service</a>
       <a class="header__link" data-i18n="nav.category" id="openCatModalDrawer" href="javascript:void(0)">Category</a>
       <!-- ▼ ДОБАВЛЕНО: кнопка входа в бургер-меню -->
       <a class="header__link" href="./login.html" data-i18n="auth.login">Sign In</a>
