@@ -1,5 +1,7 @@
-const API_BASE = "http://116.203.51.133/luxmart";
+// -------- API base --------
+const API_PRODUCTS_BASE = "http://116.203.51.133/luxmart";
 
+// -------- Helpers --------
 const $$ = (sel, root = document) => root.querySelector(sel);
 const $$$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -7,7 +9,7 @@ function normalizeImg(src) {
   if (!src) return "";
   const s = String(src).trim();
   if (/^(https?:)?\/\//i.test(s) || /^data:/i.test(s)) return s;
-  return `${API_BASE}/${s.replace(/^\/+/, "")}`;
+  return `${API_PRODUCTS_BASE}/${s.replace(/^\/+/, "")}`;
 }
 
 // -------- Cart (localStorage) --------
@@ -54,13 +56,21 @@ function formatUSD(n) {
 
 // -------- Data fetch --------
 async function fetchAllProducts() {
-  const res = await fetch(`${API_BASE}/api/products/public`);
-  if (!res.ok) {
-    console.error("Products HTTP", res.status, await res.text());
+  try {
+    const res = await fetch(`${API_PRODUCTS_BASE}/api/products/all-products`);
+    if (!res.ok) {
+      console.error("Products HTTP", res.status, await res.text());
+      return [];
+    }
+    const data = await res.json();
+    // поддержка форматов [ {...}, {...} ] или { data: [ {...}, {...} ] }
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.data)) return data.data;
+    return [];
+  } catch (err) {
+    console.error("Fetch error", err);
     return [];
   }
-  const data = await res.json();
-  return Array.isArray(data) ? data : [];
 }
 
 // -------- Safe image pick --------
@@ -155,7 +165,7 @@ function renderGrid(list) {
   });
 }
 
-// -------- Filters & sorting (по фактической цене) --------
+// -------- Filters & sorting --------
 function applyFiltersTo(list) {
   const onlySale = $$("#onlySale")?.checked;
   const minP = Number($$("#minPrice")?.value || "");
@@ -194,6 +204,7 @@ function applyFiltersTo(list) {
   return out;
 }
 
+// -------- Init --------
 document.addEventListener("DOMContentLoaded", async () => {
   renderCartBadge();
 

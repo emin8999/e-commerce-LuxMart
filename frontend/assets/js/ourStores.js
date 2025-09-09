@@ -1,60 +1,57 @@
-const API_BASE = "http://116.203.51.133/luxmart";
-const PRODUCTS_ENDPOINT = `${API_BASE}/store/all-stores`;
+const API_STORES_BASE = "http://116.203.51.133/luxmart";
+const STORES_ENDPOINT = `${API_STORES_BASE}/store/all-stores`;
 
 /* ----------------- helpers ----------------- */
-async function fetchProducts() {
-  const res = await fetch(PRODUCTS_ENDPOINT, {
+async function fetchStores() {
+  const res = await fetch(STORES_ENDPOINT, {
     headers: { "Content-Type": "application/json" },
   });
-  if (!res.ok) throw new Error(`Products fetch failed: ${res.status}`);
+  if (!res.ok) throw new Error(`Stores fetch failed: ${res.status}`);
   const data = await res.json();
-  if (!Array.isArray(data)) throw new Error("Products must be an array");
-  // кеш на случай офлайна
-  localStorage.setItem("products", JSON.stringify(data));
+
+  if (!Array.isArray(data)) throw new Error("Data must be an array");
+
+  // Сохраняем в localStorage
+  localStorage.setItem("stores", JSON.stringify(data));
   return data;
 }
 
-function getLocalProducts() {
+function getLocalStores() {
   try {
-    return JSON.parse(localStorage.getItem("products") || "[]");
+    return JSON.parse(localStorage.getItem("stores") || "[]");
   } catch {
     return [];
   }
 }
 
 function firstImageOf(product) {
-  if (Array.isArray(product.images) && product.images.length > 0)
+  if (!product) return "";
+  if (Array.isArray(product.images) && product.images.length)
     return product.images[0];
-  if (Array.isArray(product.imageUrls) && product.imageUrls.length > 0)
+  if (Array.isArray(product.imageUrls) && product.imageUrls.length)
     return product.imageUrls[0];
   return product.image || "";
 }
 
 /* ----------------- render ----------------- */
-function renderStores(products) {
+function renderStores(stores) {
   const container = document.getElementById("shopContainer");
   container.innerHTML = "";
 
-  if (!products || products.length === 0) {
-    container.innerHTML = "<p style='padding:20px;'>No products available.</p>";
+  if (!stores || stores.length === 0) {
+    container.innerHTML = "<p style='padding:20px;'>No stores available.</p>";
     return;
   }
 
-  // группируем по магазину
-  const grouped = {};
-  products.forEach((p) => {
-    const storeName = p.storeName || p.store || p.shop || "Unknown Store";
-    if (!grouped[storeName]) grouped[storeName] = [];
-    grouped[storeName].push(p);
-  });
+  stores.forEach((store) => {
+    const storeName = store.storeName || store.name || "Unknown Store";
 
-  for (const store in grouped) {
     const storeBox = document.createElement("div");
     storeBox.className = "store-box";
-    storeBox.setAttribute("data-store", store);
+    storeBox.setAttribute("data-store", storeName);
 
     const storeHeader = document.createElement("h2");
-    storeHeader.textContent = store;
+    storeHeader.textContent = storeName;
     storeBox.appendChild(storeHeader);
 
     const sliderWrapper = document.createElement("div");
@@ -71,7 +68,9 @@ function renderStores(products) {
     const productsWrapper = document.createElement("div");
     productsWrapper.className = "products-wrapper";
 
-    grouped[store].forEach((product) => {
+    // проверяем, есть ли у магазина товары
+    const products = Array.isArray(store.products) ? store.products : [];
+    products.forEach((product) => {
       const productCard = document.createElement("div");
       productCard.className = "product-card";
 
@@ -103,7 +102,7 @@ function renderStores(products) {
 
     // клик по магазину — переход на страницу магазина
     storeBox.addEventListener("click", () => {
-      localStorage.setItem("selectedStore", store);
+      localStorage.setItem("selectedStore", storeName);
       window.location.href = "storePage.html";
     });
 
@@ -117,18 +116,18 @@ function renderStores(products) {
       e.stopPropagation();
       productsWrapper.scrollBy({ left: -scrollAmount, behavior: "smooth" });
     });
-  }
+  });
 }
 
-/* ----------------- init (backend → fallback) ----------------- */
+/* ----------------- init ----------------- */
 (async function bootstrapStores() {
-  let products = [];
+  let stores = [];
   try {
-    products = await fetchProducts(); // с бэкенда
+    stores = await fetchStores();
   } catch (e) {
-    console.warn("Backend unavailable, using localStorage products.", e);
-    products = getLocalProducts(); // fallback
+    console.warn("Backend unavailable, using localStorage stores.", e);
+    stores = getLocalStores();
   }
-  console.log("Loaded products:", products);
-  renderStores(products);
+  console.log("Loaded stores:", stores);
+  renderStores(stores);
 })();

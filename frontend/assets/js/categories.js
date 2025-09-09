@@ -1,4 +1,4 @@
-const API_BASE = "http://116.203.51.133/luxmart";
+const API_CATEGORIES_BASE = "http://116.203.51.133/luxmart";
 
 let CATEGORIES_CACHE = null;
 
@@ -64,7 +64,7 @@ function categoryTitle(cat, nameKey) {
 async function loadCategories() {
   if (CATEGORIES_CACHE) return CATEGORIES_CACHE;
   try {
-    const res = await fetch(`${API_BASE}/api/categories`, {
+    const res = await fetch(`${API_CATEGORIES_BASE}/api/categories`, {
       // headers: { ...authHeaders() },
     });
     if (!res.ok) {
