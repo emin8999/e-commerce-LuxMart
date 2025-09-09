@@ -1,5 +1,5 @@
-const API_BASE = "http://116.203.51.133:8080";
-const PRODUCTS_ENDPOINT = `${API_BASE}/products`;
+const API_BASE = "http://116.203.51.133/luxmart";
+const PRODUCTS_ENDPOINT = `${API_BASE}/store/all-stores`;
 
 /* ----------------- helpers ----------------- */
 async function fetchProducts() {
