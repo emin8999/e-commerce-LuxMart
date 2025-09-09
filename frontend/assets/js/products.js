@@ -54,7 +54,7 @@ function formatUSD(n) {
 
 // -------- Data fetch --------
 async function fetchAllProducts() {
-  const res = await fetch(`${API_BASE}/api/products/all-products`);
+  const res = await fetch(`${API_BASE}/api/products/public`);
   if (!res.ok) {
     console.error("Products HTTP", res.status, await res.text());
     return [];
