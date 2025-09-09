@@ -1,9 +1,9 @@
 // Prefer global APP_CONFIG.apiBase (already includes "/api")
-const FALLBACK_BASE = "http://116.203.51.133/luxmart";
+const API_VIEW_BASE = "http://116.203.51.133/luxmart";
 const API_ROOT =
   window.APP_CONFIG && window.APP_CONFIG.apiBase
     ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
-    : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
+    : `${API_VIEW_BASE.replace(/\/$/, "")}/api`;
 
 /* helpers */
 function q(sel) {
@@ -67,12 +67,14 @@ async function getJSON(url) {
 async function getProductById(id) {
   // 1) Try direct endpoint if backend provides it (may be missing)
   try {
-    const r = await fetch(`${API_ROOT}/products/${encodeURIComponent(id)}`);
+    const r = await fetch(
+      `${API_VIEW_BASE}/products/${encodeURIComponent(id)}`
+    );
     if (r.ok) return await r.json();
   } catch (_) {}
 
   // 2) Fallback: load all and find locally
-  const all = await getJSON(`${API_ROOT}/products/all-products`);
+  const all = await getJSON(`${API_VIEW_BASE}api/products/all-products`);
   const list = Array.isArray(all)
     ? all
     : Array.isArray(all?.content)
@@ -198,13 +200,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (p.categoryId != null) {
         try {
           const list = await getJSON(
-            `${API_ROOT}/products/category/${encodeURIComponent(p.categoryId)}`
+            `${API_CATEGORIES_BASE}/products/category/${encodeURIComponent(
+              p.categoryId
+            )}`
           );
           similar = (Array.isArray(list) ? list : [])
             .filter((x) => String(x.id) !== String(p.id))
             .slice(0, 12);
         } catch {
-          const all = await getJSON(`${API_ROOT}/products/all-products`);
+          const all = await getJSON(`${API_VIEW_BASE}/products/all-products`);
           similar = (Array.isArray(all) ? all : [])
             .filter(
               (x) =>
@@ -215,7 +219,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } else {
         // Фоллбек: по тому же магазину
-        const all = await getJSON(`${API_ROOT}/products/all-products`);
+        const all = await getJSON(`${API_VIEW_BASE}/products/all-products`);
         similar = (Array.isArray(all) ? all : [])
           .filter(
             (x) =>
