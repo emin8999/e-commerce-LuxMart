@@ -10,7 +10,7 @@ function normalizeImg(src) {
   return `${API_BASE}/${s.replace(/^\/+/, "")}`;
 }
 
-// Simple cart in localStorage
+// -------- Cart (localStorage) --------
 const CART_KEY = "cart";
 function getCart() {
   try {
@@ -41,7 +41,7 @@ function renderCartBadge() {
   if (badge) badge.textContent = String(n);
 }
 
-// price helpers
+// -------- Price helpers --------
 function computePriceUSD(p) {
   const base = Number(p.basePriceUSD ?? 0);
   const sale = p.salePriceUSD != null ? Number(p.salePriceUSD) : null;
@@ -52,8 +52,9 @@ function formatUSD(n) {
   return `$${Number(n).toFixed(2)}`;
 }
 
+// -------- Data fetch --------
 async function fetchAllProducts() {
-  const res = await fetch(`${API_BASE}/api/products/public`);
+  const res = await fetch(`${API_BASE}/api/products/all-products`);
   if (!res.ok) {
     console.error("Products HTTP", res.status, await res.text());
     return [];
@@ -62,6 +63,17 @@ async function fetchAllProducts() {
   return Array.isArray(data) ? data : [];
 }
 
+// -------- Safe image pick --------
+function firstImage(p) {
+  const arr = Array.isArray(p.imageUrls)
+    ? p.imageUrls
+    : typeof p.imageUrls === "string"
+    ? [p.imageUrls]
+    : [];
+  return arr.length ? normalizeImg(arr[0]) : "";
+}
+
+// -------- Render grid --------
 function renderGrid(list) {
   const grid = $$("#productsGrid");
   const empty = $$("#gridEmpty");
@@ -75,15 +87,16 @@ function renderGrid(list) {
 
   list.forEach((p) => {
     const price = computePriceUSD(p);
-    const img =
-      p.imageUrls && p.imageUrls.length ? normalizeImg(p.imageUrls[0]) : "";
+    const img = firstImage(p);
     const card = document.createElement("div");
     card.className = "card";
 
     const thumb = document.createElement("a");
     thumb.className = "thumb";
     thumb.href = `./productView.html?id=${encodeURIComponent(p.id)}`;
-    thumb.innerHTML = img ? `<img src="${img}" alt="${p.title}">` : "🛍️";
+    thumb.innerHTML = img
+      ? `<img src="${img}" alt="${p.title || p.nameEn || ""}">`
+      : "🛍️";
 
     const body = document.createElement("div");
     body.className = "card-body";
@@ -142,6 +155,7 @@ function renderGrid(list) {
   });
 }
 
+// -------- Filters & sorting (по фактической цене) --------
 function applyFiltersTo(list) {
   const onlySale = $$("#onlySale")?.checked;
   const minP = Number($$("#minPrice")?.value || "");
@@ -151,29 +165,23 @@ function applyFiltersTo(list) {
 
   let out = list.slice();
   if (onlySale) {
-    out = out.filter(
-      (p) =>
-        p.salePriceUSD != null &&
-        Number(p.salePriceUSD) < Number(p.basePriceUSD)
-    );
+    out = out.filter((p) => {
+      const { current, old } = computePriceUSD(p);
+      return old != null && current < old;
+    });
   }
   if (hasMin) {
-    out = out.filter((p) => (p.salePriceUSD ?? p.basePriceUSD) >= minP);
+    out = out.filter((p) => computePriceUSD(p).current >= minP);
   }
   if (hasMax) {
-    out = out.filter((p) => (p.salePriceUSD ?? p.basePriceUSD) <= maxP);
+    out = out.filter((p) => computePriceUSD(p).current <= maxP);
   }
+
   const sort = $$("#sortSel")?.value || "popular";
   if (sort === "priceAsc")
-    out.sort(
-      (a, b) =>
-        (a.salePriceUSD ?? a.basePriceUSD) - (b.salePriceUSD ?? b.basePriceUSD)
-    );
+    out.sort((a, b) => computePriceUSD(a).current - computePriceUSD(b).current);
   if (sort === "priceDesc")
-    out.sort(
-      (a, b) =>
-        (b.salePriceUSD ?? b.basePriceUSD) - (a.salePriceUSD ?? a.basePriceUSD)
-    );
+    out.sort((a, b) => computePriceUSD(b).current - computePriceUSD(a).current);
   if (sort === "titleAsc")
     out.sort((a, b) =>
       String(a.title || "").localeCompare(String(b.title || ""))
@@ -182,17 +190,17 @@ function applyFiltersTo(list) {
     out.sort((a, b) =>
       String(b.title || "").localeCompare(String(a.title || ""))
     );
+
   return out;
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
   renderCartBadge();
 
-  let all = await fetchAllProducts();
-  let view = all;
+  const all = await fetchAllProducts();
 
   // initial render
-  renderGrid(view);
+  renderGrid(all);
 
   // filters
   $$("#applyFilters")?.addEventListener("click", () => {
