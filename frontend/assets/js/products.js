@@ -106,6 +106,7 @@ async function fetchAllProducts() {
   }
   const urls = [
     `${API_ROOT}/products/all-products`,
+    `${API_ROOT}/api/products/all-products`,
     `${API_ROOT}/products`,
     `${API_ROOT}/v1/products`,
     `${API_ROOT}/products/getAll`,
