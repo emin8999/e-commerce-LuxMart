@@ -1,9 +1,10 @@
 // Backend base. Prefer global APP_CONFIG.apiBase (includes "/api"),
 // otherwise fallback to server context-path "/home".
-const FALLBACK_BASE = "http://116.203.51.133/home";
-const API_ROOT = (window.APP_CONFIG && window.APP_CONFIG.apiBase)
-  ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
-  : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
+const FALLBACK_BASE = "http://116.203.51.133/luxmart";
+const API_ROOT =
+  window.APP_CONFIG && window.APP_CONFIG.apiBase
+    ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
+    : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
 
 /** === Конфиг авторизации: если список закрыт, поставь true === */
 const USE_AUTH_FOR_PRODUCTS = false;

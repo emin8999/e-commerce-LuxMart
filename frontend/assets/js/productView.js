@@ -1,8 +1,9 @@
 // Prefer global APP_CONFIG.apiBase (already includes "/api")
-const FALLBACK_BASE = "http://116.203.51.133/home";
-const API_ROOT = (window.APP_CONFIG && window.APP_CONFIG.apiBase)
-  ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
-  : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
+const FALLBACK_BASE = "http://116.203.51.133/luxmart";
+const API_ROOT =
+  window.APP_CONFIG && window.APP_CONFIG.apiBase
+    ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
+    : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
 
 /* helpers */
 function q(sel) {
@@ -72,7 +73,11 @@ async function getProductById(id) {
 
   // 2) Fallback: load all and find locally
   const all = await getJSON(`${API_ROOT}/products/all-products`);
-  const list = Array.isArray(all) ? all : Array.isArray(all?.content) ? all.content : [];
+  const list = Array.isArray(all)
+    ? all
+    : Array.isArray(all?.content)
+    ? all.content
+    : [];
   const found = list.find((x) => String(x.id) === String(id));
   if (!found) throw new Error("Product not found");
   return found;
@@ -193,9 +198,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (p.categoryId != null) {
         try {
           const list = await getJSON(
-            `${API_ROOT}/products/category/${encodeURIComponent(
-              p.categoryId
-            )}`
+            `${API_ROOT}/products/category/${encodeURIComponent(p.categoryId)}`
           );
           similar = (Array.isArray(list) ? list : [])
             .filter((x) => String(x.id) !== String(p.id))
