@@ -49,7 +49,6 @@ public class ProductController {
 }
 
      @GetMapping("/all-products")
-     @CrossOrigin(origins = "*")
     public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
         List<ProductResponseDto> products = productService.getAllProducts();
         return ResponseEntity.ok(products);

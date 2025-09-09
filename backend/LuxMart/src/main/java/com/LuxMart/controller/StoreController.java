@@ -17,6 +17,7 @@ import com.LuxMart.dto.responseDto.StoreResponseDto;
 import com.LuxMart.service.StoreService;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 
 import org.apache.hc.core5.http.HttpHeaders;
 
@@ -62,7 +63,11 @@ public class StoreController {
         StoreResponseDto dto = storeService.getCurrentStoreInfo();
         return ResponseEntity.ok(dto);
     }
+    
+       @GetMapping("/all-stores")
+    public ResponseEntity<List<StoreResponseDto>> getAllStores() {
+        List<StoreResponseDto> stores = storeService.getAllStores();
+        return ResponseEntity.ok(stores);
 
-    
-    
+    }
 }
