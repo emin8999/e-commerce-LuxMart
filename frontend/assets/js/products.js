@@ -50,8 +50,11 @@ function computePriceUSD(p) {
   const current = sale != null && sale >= 0 && sale < base ? sale : base;
   return { current, old: sale != null && sale < base ? base : null };
 }
-function formatUSD(n) {
-  return `$${Number(n).toFixed(2)}`;
+function formatCurrencyFromUSD(nUSD) {
+  const cur = window.currency?.getCurrency?.() || 'USD';
+  const sym = window.currency?.symbol?.(cur) || '$';
+  const converted = window.currency?.convertUSD?.(Number(nUSD) || 0, cur) || Number(nUSD) || 0;
+  return `${sym}${converted.toFixed(2)}`;
 }
 
 // -------- Data fetch --------
@@ -118,8 +121,8 @@ function renderGrid(list) {
 
     const priceDiv = document.createElement("div");
     priceDiv.className = "price";
-    priceDiv.innerHTML = `${formatUSD(price.current)} ${
-      price.old ? `<span class="old">${formatUSD(price.old)}</span>` : ""
+    priceDiv.innerHTML = `${formatCurrencyFromUSD(price.current)} ${
+      price.old ? `<span class="old">${formatCurrencyFromUSD(price.old)}</span>` : ""
     }`;
 
     const actions = document.createElement("div");
@@ -227,4 +230,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   $$("#sortSel")?.addEventListener("change", () => {
     renderGrid(applyFiltersTo(all));
   });
+
+  // Re-render prices on currency change
+  window.onCurrencyChange = () => {
+    try {
+      renderGrid(applyFiltersTo(all));
+    } catch (_) {
+      // no-op
+    }
+  };
 });

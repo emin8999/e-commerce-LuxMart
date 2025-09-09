@@ -9,17 +9,23 @@ const API_ROOT =
 function q(sel) {
   return document.querySelector(sel);
 }
-function fmtUSD(v) {
-  if (v == null) return "";
-  const n = Number(v);
-  return isFinite(n) ? `$${n.toFixed(2)}` : "";
+function formatCurrencyFromUSD(nUSD) {
+  const cur = window.currency?.getCurrency?.() || 'USD';
+  const sym = window.currency?.symbol?.(cur) || '$';
+  const converted = window.currency?.convertUSD?.(Number(nUSD) || 0, cur) || Number(nUSD) || 0;
+  return `${sym}${converted.toFixed(2)}`;
 }
-function pricePair(p) {
+function computePriceUSD(p) {
   const base = Number(p.basePriceUSD ?? 0);
   const sale = p.salePriceUSD != null ? Number(p.salePriceUSD) : null;
-  if (sale != null && isFinite(sale) && sale > 0 && sale < base)
-    return { current: fmtUSD(sale), old: fmtUSD(base) };
-  return { current: fmtUSD(base), old: "" };
+  const hasSale = sale != null && isFinite(sale) && sale > 0 && sale < base;
+  return { currentUSD: hasSale ? sale : base, oldUSD: hasSale ? base : null };
+}
+function renderPriceHTML(p) {
+  const pair = computePriceUSD(p);
+  const cur = formatCurrencyFromUSD(pair.currentUSD);
+  const old = pair.oldUSD != null ? formatCurrencyFromUSD(pair.oldUSD) : null;
+  return `<span class="price">${cur}</span>${old ? ` <span class=\"old\">${old}</span>` : ''}`;
 }
 function normalizeImg(src) {
   if (!src) return "";
@@ -124,8 +130,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
       </div>`;
 
-    // Pricing
-    const pr = pricePair(p);
+    // Pricing (currency-aware)
+    const priceHTML = renderPriceHTML(p);
 
     // Variants (size + stockQuantity)
     const variants = Array.isArray(p.variants) ? p.variants : [];
@@ -141,10 +147,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const info = `
       <div class="info">
         <h1>${p.title}</h1>
-        <div class="priceRow">
-          <span class="price">${pr.current}</span>
-          ${pr.old ? `<span class="old">${pr.old}</span>` : ""}
-        </div>
+        <div class="priceRow" id="pvPriceRow">${priceHTML}</div>
         ${p.description ? `<p class="desc">${p.description}</p>` : ""}
 
         <div class="controls">
@@ -236,7 +239,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const sRow = q("#similarRow");
       sRow.innerHTML = "";
       similar.forEach((sp) => {
-        const pair = pricePair(sp);
         const img =
           sp.imageUrls && sp.imageUrls.length
             ? normalizeImg(sp.imageUrls[0])
@@ -250,9 +252,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           }</div>
           <div class="body">
             <div class="title">${sp.title}</div>
-            <div class="priceRow"><span class="price">${pair.current}</span> ${
-          pair.old ? `<span class="old">${pair.old}</span>` : ""
-        }</div>
+            <div class="priceRow" id="simPrice-${sp.id}">${renderPriceHTML(sp)}</div>
           </div>`;
         sRow.appendChild(a);
       });
@@ -267,4 +267,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   function qAll(sel) {
     return Array.from(document.querySelectorAll(sel));
   }
+  // Update displayed prices when currency changes
+  try {
+    const params2 = new URLSearchParams(location.search);
+    const id2 = params2.get("id");
+    const updatePrices = async () => {
+      try {
+        const pNow = await getProductById(id2);
+        const pv = q('#pvPriceRow');
+        if (pv) pv.innerHTML = renderPriceHTML(pNow);
+        const sRow = q('#similarRow');
+        if (sRow) {
+          const cards = Array.from(sRow.querySelectorAll('a.card'));
+          for (const card of cards) {
+            const m = card.href.match(/id=([^&]+)/);
+            if (!m) continue;
+            const pid = decodeURIComponent(m[1]);
+            try {
+              const spNow = await getProductById(pid);
+              const el = q(`#simPrice-${pid}`);
+              if (el) el.innerHTML = renderPriceHTML(spNow);
+            } catch(_){}
+          }
+        }
+      } catch(_){}
+    };
+    window.onCurrencyChange = updatePrices;
+  } catch(_){}
 });
