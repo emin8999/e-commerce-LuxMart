@@ -29,6 +29,7 @@ public class ProductResponseDto {
     private ProductStatus status;
     private Long storeId;
     private Long categoryId;
+    private String nameEn;
     private List<ProductVariantResponseDto>variants;
     private LocalDateTime createdAt;
     private LocalDateTime updateAt;

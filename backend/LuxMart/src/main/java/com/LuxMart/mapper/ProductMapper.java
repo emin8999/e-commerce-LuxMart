@@ -27,6 +27,7 @@ public interface ProductMapper {
     @Mapping(target = "imageUrls", expression = "java(product.getImages().stream().map(ProductImageEntity::getImageUrl).collect(Collectors.toList()))")
     @Mapping(target = "storeId", source = "store.id")
     @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "nameEn" , source = "category.nameEn")
     @Mapping(target = "updateAt", source = "updatedAt")
     ProductResponseDto mapToProductResponseDto(ProductEntity product);
 }
