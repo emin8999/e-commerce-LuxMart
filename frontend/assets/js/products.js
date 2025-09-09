@@ -1,6 +1,6 @@
 // Backend base. Prefer global APP_CONFIG.apiBase (includes "/api"),
 // otherwise fallback to server context-path "/home".
-const FALLBACK_BASE = "http://116.203.51.133/luxmart";
+const FALLBACK_BASE = "http://116.203.51.133/luxmart/api";
 const API_ROOT =
   window.APP_CONFIG && window.APP_CONFIG.apiBase
     ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
@@ -106,7 +106,7 @@ async function fetchAllProducts() {
   }
   const urls = [
     `${API_ROOT}/products/all-products`,
-    `${API_ROOT}/api/products/all-products`,
+    // `${API_ROOT}/api/products/all-products`,
     `${API_ROOT}/products`,
     `${API_ROOT}/v1/products`,
     `${API_ROOT}/products/getAll`,
