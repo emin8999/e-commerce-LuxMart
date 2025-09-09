@@ -7,9 +7,10 @@
       <div class="container header__row">
         <a href="./index.html" class="logo"><strong>LuxMart</strong></a>
         <nav class="header__nav">
-          <a class="header__link" data-i18n="nav.about_us" href="./index.html#about">About Us</a>
+         
           <a class="header__link" data-i18n="nav.products" href="./products.html">Products</a>
           <a class="header__link" data-i18n="nav.our_stores" href="./our-stores.html">Our Stores</a>
+           <a class="header__link" data-i18n="nav.about_us" href="./index.html#about">About Us</a>
           <a class="header__link" data-i18n="nav.customer_service" href="./index.html#service">Customer Service</a>
           <a class="header__link" data-i18n="nav.category" id="openCatModal" href="javascript:void(0)">Category</a>
         </nav>
@@ -40,9 +41,10 @@
     <div class="overlay" id="drawerOverlay"></div>
     <div class="drawer" id="drawer">
       <button id="drawerClose" class="btn">✖</button>
-      <a class="header__link" data-i18n="nav.about_us" href="./index.html#about">About Us</a>
+      
       <a class="header__link" data-i18n="nav.products" href="./products.html">Products</a>
       <a class="header__link" data-i18n="nav.our_stores" href="./our-stores.html">Our Stores</a>
+      <a class="header__link" data-i18n="nav.about_us" href="./index.html#about">About Us</a>
       <a class="header__link" data-i18n="nav.customer_service" href="./index.html#service">Customer Service</a>
       <a class="header__link" data-i18n="nav.category" id="openCatModalDrawer" href="javascript:void(0)">Category</a>
       <!-- ▼ ДОБАВЛЕНО: кнопка входа в бургер-меню -->
@@ -108,9 +110,10 @@
   // Cart badge
   window.renderCartBadge = function () {
     const badge = document.getElementById("cartBadge");
-    const count = (window.cart && typeof window.cart.getCount === 'function')
-      ? window.cart.getCount()
-      : 0;
+    const count =
+      window.cart && typeof window.cart.getCount === "function"
+        ? window.cart.getCount()
+        : 0;
     if (count > 0) {
       badge.textContent = count > 99 ? "99+" : String(count);
       badge.style.display = "flex";
@@ -118,5 +121,7 @@
       badge.style.display = "none";
     }
   };
-  try { window.renderCartBadge(); } catch (_) {}
+  try {
+    window.renderCartBadge();
+  } catch (_) {}
 })();
