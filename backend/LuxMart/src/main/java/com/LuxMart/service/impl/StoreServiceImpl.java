@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -15,6 +15,7 @@ import java.util.Set;
 import com.LuxMart.cloudinary.CloudinaryService;
 import com.LuxMart.dto.requestDto.LoginRequestDto;
 import com.LuxMart.dto.requestDto.StoreRegisterRequest;
+import com.LuxMart.dto.requestDto.StoreUpdateRequestDto;
 import com.LuxMart.dto.responseDto.LoginResponseDto;
 import com.LuxMart.dto.responseDto.StoreResponseDto;
 import com.LuxMart.entity.StoreEntity;
@@ -29,6 +30,7 @@ import com.LuxMart.security.util.StoreSecurityUtil;
 import com.LuxMart.service.StoreService;
 import com.LuxMart.service.TokenBlacklistService;
 import java.nio.file.AccessDeniedException;
+
 
 @Service
 @RequiredArgsConstructor
@@ -101,7 +103,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
       @Override
-    public StoreResponseDto getCurrentStoreInfo() throws AccessDeniedException {
+    public StoreResponseDto getCurrentStoreInfo() throws AccessDeniedException, java.nio.file.AccessDeniedException {
         StoreEntity store = storeSecurityUtil.getCurrentStore();
         return storeMapper.mapToStoreResponse(store);
     }
@@ -117,6 +119,36 @@ public class StoreServiceImpl implements StoreService {
         .stream()
         .map(storeMapper::mapToStoreResponse)
         .toList();
+    }
+
+
+   
+    @Transactional
+    public void updateStore(Long storeId, StoreUpdateRequestDto dto) throws AccessDeniedException {
+        StoreEntity store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+
+        StoreEntity currentStore = storeSecurityUtil.getCurrentStore();
+
+        if (!store.getId().equals(currentStore.getId())) {
+            throw new RuntimeException("Access denied: Only the store owner can update this store");
+        }
+
+        if (dto.getStoreName() != null) store.setStoreName(dto.getStoreName());
+        if (dto.getOwnerName() != null) store.setOwnerName(dto.getOwnerName());
+        if (dto.getPassword() != null) store.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+        if (dto.getStoreDescription() != null) store.setStoreDescription(dto.getStoreDescription());
+        if (dto.getPhone() != null) store.setPhone(dto.getPhone());
+        if (dto.getLocation() != null) store.setLocation(dto.getLocation());
+        if (dto.getCategory() != null) store.setCategory(dto.getCategory());
+
+        if (dto.getLogo() != null && !dto.getLogo().isEmpty()) {
+            String storeFolder = "image/store_" + store.getId();
+            String logoUrl = cloudinaryService.uploadFile(dto.getLogo(), storeFolder + "/logo", "logo");
+            store.setLogo(logoUrl);
+        }
+
+        storeRepository.save(store);
     }
    
 

@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 import com.LuxMart.dto.requestDto.product.ProductRequestDto;
+import com.LuxMart.dto.requestDto.product.ProductUpdateRequestDto;
 import com.LuxMart.dto.responseDto.product.ProductResponseDto;
 import com.LuxMart.service.ProductService;
 import jakarta.validation.Valid;
@@ -65,5 +67,14 @@ public class ProductController {
     public ResponseEntity<ProductResponseDto> getProductById(@PathVariable("id") Long id) {
         ProductResponseDto product = productService.getActiveProductById(id);
         return ResponseEntity.ok(product);
+    }
+
+     @PutMapping("/update/{id}")
+    public ResponseEntity<String> updateProduct(
+            @PathVariable("id") Long id,
+            @ModelAttribute ProductUpdateRequestDto dto) throws AccessDeniedException {
+
+        productService.updateProduct(id, dto);
+        return ResponseEntity.ok("Product updated successfully");
     }
 }

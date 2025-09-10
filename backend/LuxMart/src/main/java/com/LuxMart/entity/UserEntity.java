@@ -62,6 +62,13 @@ public class UserEntity {
     @OneToMany(mappedBy = "user")
     private List<OrderEntity> orders = new ArrayList<>();
 
+    @Column(unique = true)
+    private String phone;
+
+    private String surname;
+
+    private String address;
+
    
 }
 

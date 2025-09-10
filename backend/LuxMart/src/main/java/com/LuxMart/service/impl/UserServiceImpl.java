@@ -7,12 +7,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.LuxMart.dto.requestDto.LoginRequestDto;
 import com.LuxMart.dto.requestDto.RegisterRequestDto;
+import com.LuxMart.dto.requestDto.UserUpdateRequestDto;
 import com.LuxMart.dto.responseDto.LoginResponseDto;
 import com.LuxMart.dto.responseDto.RegisterResponseDto;
 import com.LuxMart.dto.responseDto.UserResponseDto;
@@ -45,6 +47,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final TokenBlacklistService tokenBlacklistService;
+    
 
      @Override
     public RegisterResponseDto register(RegisterRequestDto registerRequestDto) {
@@ -129,6 +132,29 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return userMapper.mapToUserResponseDto(user);
     }
+ 
+    @Override
+    @Transactional
+    public void updateUser(Long userId, UserUpdateRequestDto dto) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    UserDetails userDetails = (UserDetails) auth.getPrincipal();
 
+    String currentUserEmail = userDetails.getUsername();
+
+    UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    if (!user.getEmail().equals(currentUserEmail)) {
+        throw new RuntimeException("Access denied: You can only update your own data");
+    }
+
+    if (dto.getName() != null) user.setName(dto.getName());
+    if (dto.getPassword() != null) user.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+    if (dto.getSurname() != null) user.setSurname(dto.getSurname());
+    if (dto.getAddress() != null) user.setAddress(dto.getAddress());
+    if (dto.getPhone() != null) user.setPhone(dto.getPhone());
+
+    userRepository.save(user);
+}
 
 }

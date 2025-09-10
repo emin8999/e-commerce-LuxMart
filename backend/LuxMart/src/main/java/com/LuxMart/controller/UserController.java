@@ -5,13 +5,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.LuxMart.dto.requestDto.LoginRequestDto;
 import com.LuxMart.dto.requestDto.RegisterRequestDto;
+import com.LuxMart.dto.requestDto.UserUpdateRequestDto;
 import com.LuxMart.dto.responseDto.LoginResponseDto;
 import com.LuxMart.dto.responseDto.RegisterResponseDto;
 import com.LuxMart.dto.responseDto.UserResponseDto;
@@ -59,4 +62,14 @@ public class UserController {
         return ResponseEntity.ok(userResponseDto);
 
     }
+
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('CLIENT')")
+    public ResponseEntity<String> updateUser(
+        @PathVariable("id") Long id,
+        @Valid @RequestBody UserUpdateRequestDto dto) {
+
+    userService.updateUser(id, dto);
+    return ResponseEntity.ok("User updated successfully");
+}
 }

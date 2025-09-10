@@ -5,13 +5,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import com.LuxMart.dto.requestDto.LoginRequestDto;
 import com.LuxMart.dto.requestDto.StoreRegisterRequest;
+import com.LuxMart.dto.requestDto.StoreUpdateRequestDto;
 import com.LuxMart.dto.responseDto.LoginResponseDto;
 import com.LuxMart.dto.responseDto.StoreResponseDto;
 import com.LuxMart.service.StoreService;
@@ -69,5 +72,14 @@ public class StoreController {
         List<StoreResponseDto> stores = storeService.getAllStores();
         return ResponseEntity.ok(stores);
 
+    }
+
+     @PutMapping("/update/{id}")
+    public ResponseEntity<String> updateStore(
+            @PathVariable("id") Long id,
+            @ModelAttribute StoreUpdateRequestDto dto) throws AccessDeniedException {
+
+        storeService.updateStore(id, dto);
+        return ResponseEntity.ok("Store updated successfully");
     }
 }

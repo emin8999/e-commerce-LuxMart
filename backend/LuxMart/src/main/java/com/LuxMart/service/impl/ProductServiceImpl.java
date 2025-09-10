@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 import org.springframework.stereotype.Service;
 
 import com.LuxMart.dto.requestDto.product.ProductRequestDto;
+import com.LuxMart.dto.requestDto.product.ProductUpdateRequestDto;
 import com.LuxMart.dto.responseDto.product.ProductResponseDto;
 import com.LuxMart.entity.CategoryEntity;
 import com.LuxMart.entity.ProductEntity;
@@ -33,12 +34,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-       private final ProductRepository productRepository;
+    private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final StoreSecurityUtil storeSecurityUtil;
     private final ProductMapper productMapper;
     private final ProductUtility productUtility;
     private final ProductVariantRepository productVariantRepository;
+   
 
    @Override
     @Transactional
@@ -203,6 +205,41 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return mapProductWithImages(product);
+    }
+
+
+ @Transactional
+    public void updateProduct(Long productId, ProductUpdateRequestDto dto) throws java.nio.file.AccessDeniedException {
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        StoreEntity currentStore = storeSecurityUtil.getCurrentStore();
+        if (!product.getStore().getId().equals(currentStore.getId())) {
+            throw new RuntimeException("Access denied: Only the product owner can update this product");
+        }
+
+        if (dto.getTitle() != null) product.setTitle(dto.getTitle());
+        if (dto.getDescription() != null) product.setDescription(dto.getDescription());
+        if (dto.getBasePriceUSD() != null) product.setBasePriceUSD(dto.getBasePriceUSD());
+        if (dto.getSalePriceUSD() != null) product.setSalePriceUSD(dto.getSalePriceUSD());
+
+        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            List<String> imageUrls = productUtility.saveProductImages(
+                    dto.getImages(),
+                    currentStore.getId(),
+                    product.getId()
+            );
+            product.getImages().clear();
+
+            for (String imageUrl : imageUrls) {
+                ProductImageEntity imageEntity = ProductImageEntity.builder()
+                        .imageUrl(imageUrl) 
+                        .product(product)
+                        .build();
+                product.getImages().add(imageEntity);
+            }
+        }
+        productRepository.save(product);
     }
 
 }
