@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Отправляем на бэк:", dataToSend);
 
     try {
-      const response = await fetch(`${API_BASE}/admin/login`, {
+      const response = await fetch(`${API_BASE}/api/admin/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json", // обязательно для JSON
