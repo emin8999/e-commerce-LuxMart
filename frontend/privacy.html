@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy & Security Policy</title>
+
+    <meta
+      name="description"
+      content="Comprehensive Privacy & Security Policy (77 sections)"
+    />
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #0f1630;
+        --text: #e8ecf8;
+        --muted: #a7b0c6;
+        --accent: #c5a46d;
+        --accent-2: #9ad1ff;
+        --border: #1f2a4d;
+        --link: #88c2ff;
+        --maxw: 1100px;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #fafbfd;
+          --panel: #ffffff;
+          --text: #0f1530;
+          --muted: #46506a;
+          --accent: #c5a46d;
+          --accent-2: #4da3ff;
+          --border: #e7ecf7;
+          --link: #0b6bcb;
+        }
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+          Cantarell, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        background: linear-gradient(
+          180deg,
+          var(--bg),
+          color-mix(in oklab, var(--bg), black 8%)
+        );
+        color: var(--text);
+      }
+      .wrap {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 24px;
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 24px;
+      }
+      header.site {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        backdrop-filter: saturate(150%) blur(8px);
+        background: color-mix(in oklab, var(--bg), transparent 70%);
+        border-bottom: 1px solid var(--border);
+      }
+      header.site .bar {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 24px;
+      }
+      .title {
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        font-size: 18px;
+      }
+      .lang {
+        margin-left: auto;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      nav.toc {
+        position: sticky;
+        top: 64px;
+        align-self: start;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+        max-height: calc(100dvh - 96px);
+        overflow: auto;
+      }
+      nav.toc h2 {
+        font-size: 14px;
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      nav.toc ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        columns: 1;
+        column-gap: 16px;
+      }
+      nav.toc li {
+        break-inside: avoid;
+      }
+      nav.toc a {
+        display: block;
+        padding: 6px 8px;
+        margin: 2px 0;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 13px;
+        color: var(--link);
+      }
+      nav.toc a:hover {
+        background: color-mix(in oklab, var(--accent), transparent 90%);
+      }
+
+      main {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+      }
+      main h1 {
+        margin-top: 0;
+        font-size: 28px;
+        letter-spacing: 0.2px;
+      }
+      section {
+        padding: 18px 0;
+        border-top: 1px dashed var(--border);
+      }
+      section:first-of-type {
+        border-top: none;
+      }
+      section h2 {
+        margin: 0 0 8px;
+        font-size: 20px;
+        color: var(--accent-2);
+      }
+      p {
+        line-height: 1.6;
+        margin: 8px 0;
+        color: var(--text);
+      }
+      ul {
+        margin: 8px 0 8px 20px;
+      }
+      li {
+        margin: 6px 0;
+      }
+
+      .top {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 4;
+      }
+      .top a {
+        text-decoration: none;
+        background: var(--accent);
+        color: white;
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        box-shadow: 0 6px 24px color-mix(in oklab, var(--accent), black 50%);
+      }
+
+      @media (max-width: 980px) {
+        .wrap {
+          grid-template-columns: 1fr;
+        }
+        nav.toc {
+          position: relative;
+          top: unset;
+          max-height: none;
+        }
+      }
+      @media print {
+        header.site,
+        .top,
+        nav.toc {
+          display: none !important;
+        }
+        body {
+          background: white;
+          color: black;
+        }
+        main {
+          border: none;
+          padding: 0;
+        }
+        section {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <div id="app-header"></div>
+    <header class="site" id="top">
+      <div id="app-header"></div>
+      <!-- <div class="bar">
+        <div class="title">Privacy & Security Policy</div>
+
+        <div class="lang">English Version</div>
+      </div> -->
+    </header>
+
+    <div class="wrap">
+      <nav class="toc" aria-label="Table of Contents">
+        <h2>Contents</h2>
+        <ol>
+          <li><a href="#s1">1. Introduction</a></li>
+          <li><a href="#s2">2. Terms and Definitions</a></li>
+          <li><a href="#s3">3. Principles of Data Processing</a></li>
+          <li><a href="#s4">4. Categories of Data Collected</a></li>
+          <li><a href="#s5">5. Purposes of Data Processing</a></li>
+          <li><a href="#s6">6. Legal Bases for Processing</a></li>
+          <li><a href="#s7">7. Data Retention Periods</a></li>
+          <li><a href="#s8">8. Technical Security Measures</a></li>
+          <li><a href="#s9">9. Administrative Security Measures</a></li>
+          <li><a href="#s10">10. Physical Protection</a></li>
+          <li><a href="#s11">11. Payment Data</a></li>
+          <li><a href="#s12">12. Cookies and Similar Technologies</a></li>
+          <li><a href="#s13">13. Analytics and Monitoring</a></li>
+          <li><a href="#s14">14. Personalized Offers</a></li>
+          <li><a href="#s15">15. Fraud Protection</a></li>
+          <li><a href="#s16">16. User Rights</a></li>
+          <li><a href="#s17">17. Account Management</a></li>
+          <li><a href="#s18">18. Marketing Communications</a></li>
+          <li><a href="#s19">19. Push Notifications</a></li>
+          <li><a href="#s20">20. Geolocation</a></li>
+          <li><a href="#s21">21. Logging and Monitoring</a></li>
+          <li><a href="#s22">22. Security Incidents</a></li>
+          <li><a href="#s23">23. Use of APIs</a></li>
+          <li>
+            <a href="#s24">24. Social Networks and Third-Party Services</a>
+          </li>
+          <li><a href="#s25">25. Processing of Photos and Documents</a></li>
+          <li><a href="#s26">26. Automation and AI</a></li>
+          <li><a href="#s27">27. Judicial and Legal Requests</a></li>
+          <li><a href="#s28">28. Returns and Disputes</a></li>
+          <li>
+            <a href="#s29">29. Data Localization and Multilingual Support</a>
+          </li>
+          <li><a href="#s30">30. User Responsibilities</a></li>
+          <li><a href="#s31">31. Company Responsibility</a></li>
+          <li><a href="#s32">32. Employee Training and Certification</a></li>
+          <li>
+            <a href="#s33">33. Interaction with Government Authorities</a>
+          </li>
+          <li><a href="#s34">34. Partner Services</a></li>
+          <li><a href="#s35">35. Limitation of Liability</a></li>
+          <li><a href="#s36">36. Changes and Updates</a></li>
+          <li><a href="#s37">37. Log Retention Policy</a></li>
+          <li><a href="#s38">38. VPN and Remote Access</a></li>
+          <li><a href="#s39">39. Employee Access and Roles</a></li>
+          <li><a href="#s40">40. Employee Mobile Devices</a></li>
+          <li><a href="#s41">41. Network Protections</a></li>
+          <li><a href="#s42">42. DDoS Protection</a></li>
+          <li><a href="#s43">43. Protection Against Malware</a></li>
+          <li><a href="#s44">44. Bug Bounty Program</a></li>
+          <li><a href="#s45">45. Data Backups</a></li>
+          <li><a href="#s46">46. Database Encryption</a></li>
+          <li><a href="#s47">47. Code Change Control</a></li>
+          <li><a href="#s48">48. Vendor and Contractor Control</a></li>
+          <li><a href="#s49">49. DevOps and CI/CD Policy</a></li>
+          <li><a href="#s50">50. Vulnerability Management</a></li>
+          <li><a href="#s51">51. Vulnerability Management Plan</a></li>
+          <li><a href="#s52">52. Disaster Recovery Plan</a></li>
+          <li><a href="#s53">53. Business Continuity</a></li>
+          <li><a href="#s54">54. Use of Cloud Services</a></li>
+          <li><a href="#s55">55. Security Incident Management</a></li>
+          <li><a href="#s56">56. Risk Management</a></li>
+          <li>
+            <a href="#s57">57. Compliance with International Standards</a>
+          </li>
+          <li><a href="#s58">58. Audits and Assessments</a></li>
+          <li><a href="#s59">59. Customer Access Control</a></li>
+          <li><a href="#s60">60. API Key Usage Policy</a></li>
+          <li><a href="#s61">61. Email Security Policy</a></li>
+          <li><a href="#s62">62. Domain and Certificate Policy</a></li>
+          <li><a href="#s63">63. Big Data Processing</a></li>
+          <li><a href="#s64">64. Cloud Integration Policy</a></li>
+          <li><a href="#s65">65. Regular Security Scanning</a></li>
+          <li><a href="#s66">66. Software Update Policy</a></li>
+          <li><a href="#s67">67. Log Access Policy</a></li>
+          <li><a href="#s68">68. Internal Network Policy</a></li>
+          <li><a href="#s69">69. Backup Data Center Policy</a></li>
+          <li><a href="#s70">70. Cryptographic Key Storage Policy</a></li>
+          <li><a href="#s71">71. Software Testing Policy</a></li>
+          <li><a href="#s72">72. IoT Device Usage Policy</a></li>
+          <li><a href="#s73">73. Customer Data Handling Policy</a></li>
+          <li><a href="#s74">74. Mobile App Security Policy</a></li>
+          <li><a href="#s75">75. Customer and Partner Audit Policy</a></li>
+          <li>
+            <a href="#s76">76. International Trade and Sanctions Policy</a>
+          </li>
+          <li><a href="#s77">77. Contact Information</a></li>
+        </ol>
+      </nav>
+
+      <main>
+        <h1>Privacy & Security Policy</h1>
+
+        <section id="s1">
+          <h2>1. Introduction</h2>
+          <p>
+            Our company recognizes that the protection of personal data is a
+            fundamental right of every user. This Privacy and Security Policy
+            explains what data we collect, how we process it, what it is used
+            for, and what measures we take to protect it. We strive to ensure
+            users’ full trust in our services and implement international
+            security standards, including the GDPR (General Data Protection
+            Regulation), the CCPA (California Consumer Privacy Act), as well as
+            national requirements applicable in the jurisdictions where we
+            operate.
+          </p>
+        </section>
+
+        <section id="s2">
+          <h2>2. Terms and Definitions</h2>
+          <p>
+            For the purposes of this Policy, the following definitions apply:
+            <strong>Personal Data</strong> — any information that directly or
+            indirectly allows the identification of a user, including name,
+            contact details, residential address, payment data, and behavioral
+            information. <strong>Data Processing</strong> — any action related
+            to personal data: collection, recording, systematization, storage,
+            updating, use, transfer, anonymization, or deletion.
+            <strong>Cookies</strong> — small text files stored on the user’s
+            device that allow us to recognize their browser upon repeat visits
+            and to retain settings and enhance personalization.
+            <strong>Anonymization</strong> — actions that exclude the
+            possibility of identifying a user without using additional
+            information.
+          </p>
+        </section>
+
+        <section id="s3">
+          <h2>3. Principles of Data Processing</h2>
+          <p>
+            We follow strict principles based on international information
+            security standards: <strong>Lawfulness and Transparency</strong> —
+            we collect and process data only when there is a legal basis and
+            inform users of the purposes; <strong>Data Minimization</strong> —
+            we collect only what is necessary;
+            <strong>Accuracy and Relevance</strong> — data must be up to date;
+            <strong>Storage Limitation</strong> — data is not stored longer than
+            needed; <strong>Security and Confidentiality</strong> — we apply
+            technical and organizational measures to protect data from leaks and
+            unauthorized access.
+          </p>
+        </section>
+
+        <section id="s4">
+          <h2>4. Categories of Data Collected</h2>
+          <p>
+            We collect the following categories of information:
+            <strong>Identification Data</strong> (first name, last name, date of
+            birth, gender); <strong>Contact Data</strong> (email, phone,
+            delivery and billing address);
+            <strong>Financial Information</strong> (card data via payment
+            gateways, transactions, invoices — we do not store full card
+            details); <strong>Technical Data</strong> (IP address, cookies,
+            device model, browser type); <strong>Geolocation</strong> (with
+            consent for delivery optimization and personalization);
+            <strong>Purchase History</strong> (cart items, orders, returns);
+            <strong>Communications</strong> (support correspondence, reviews,
+            service requests).
+          </p>
+        </section>
+
+        <section id="s5">
+          <h2>5. Purposes of Data Processing</h2>
+          <p>
+            Data is collected and processed solely for specific, transparent,
+            and legitimate purposes:
+            <strong>Order Fulfillment</strong> (registration, purchase
+            processing, delivery, returns);
+            <strong>Customer Support</strong> (responding to requests, resolving
+            issues); <strong>Financial Settlements</strong> (payments, refunds,
+            invoicing); <strong>Marketing</strong> (personalized offers,
+            discount and promotion notifications);
+            <strong>Service Improvement</strong> (behavior analysis, feature
+            testing); <strong>Legal Obligations</strong> (retention under tax
+            and other laws).
+          </p>
+        </section>
+
+        <section id="s6">
+          <h2>6. Legal Bases for Processing</h2>
+          <p>
+            We process personal data only when a legal basis exists:
+            <strong>User Consent</strong> (e.g., newsletters or cookies);
+            <strong>Contract Performance</strong> (orders, delivery, payment);
+            <strong>Legal Obligations</strong> (retaining financial records);
+            <strong>Legitimate Interests</strong> (fraud prevention, service
+            security) provided these do not override user rights.
+          </p>
+        </section>
+
+        <section id="s7">
+          <h2>7. Data Retention Periods</h2>
+          <p>
+            We retain data only for as long as necessary:
+            <strong>Transaction Data</strong> — 5 years (tax requirements);
+            <strong>Account Data</strong> — until the account is deleted;
+            <strong>Support Correspondence</strong> — up to 3 years to improve
+            service quality. After retention ends, data is deleted or
+            anonymized.
+          </p>
+        </section>
+
+        <section id="s8">
+          <h2>8. Technical Security Measures</h2>
+          <p>
+            We apply <strong>SSL/TLS encryption</strong> for data in transit;
+            strong algorithms like <strong>AES-256</strong> and
+            <strong>bcrypt/Argon2</strong> for stored secrets; regular
+            vulnerability testing and <strong>penetration tests</strong>;
+            comprehensive <strong>system logging</strong>; and multi-layered
+            access controls for staff.
+          </p>
+        </section>
+
+        <section id="s9">
+          <h2>9. Administrative Security Measures</h2>
+          <p>
+            Organizational procedures complement technology: access is granted
+            only to staff who need it;
+            <strong>role-based access</strong> ensures managers see only
+            necessary data while administrators have broader rights; staff
+            receive regular security training; and
+            <strong>internal audits</strong> verify adherence to this Policy.
+          </p>
+        </section>
+
+        <section id="s10">
+          <h2>10. Physical Protection</h2>
+          <p>
+            Data is hosted in professional data centers with biometric and
+            card-based access control, 24/7 video surveillance, fire
+            suppression, backup power, and climate systems. Server-room access
+            is strictly limited and fully logged.
+          </p>
+        </section>
+
+        <section id="s11">
+          <h2>11. Payment Data</h2>
+          <p>
+            We do not store full card details on our servers. Transactions are
+            processed by PCI DSS–compliant providers.
+            <strong>Tokenization</strong> replaces real card data with unique
+            identifiers, reducing the risk of leaks and fraud. We record only
+            what is necessary for accounting and tax purposes.
+          </p>
+        </section>
+
+        <section id="s12">
+          <h2>12. Cookies and Similar Technologies</h2>
+          <p>
+            We use cookies and similar storage (LocalStorage, SessionStorage,
+            pixels) to ensure correct site operation, save preferences, simplify
+            sign-in, personalize offers, and analyze statistics. Cookies include
+            functional, analytical, and advertising types. Users can disable
+            cookies in the browser, which may affect some features.
+          </p>
+        </section>
+
+        <section id="s13">
+          <h2>13. Analytics and Monitoring</h2>
+          <p>
+            We use tools such as <strong>Google Analytics</strong>,
+            <strong>Meta Pixel</strong>, and <strong>Yandex.Metrica</strong> to
+            understand site usage and improve our services. Data is analyzed in
+            anonymized, aggregated form and not used to identify individuals.
+          </p>
+        </section>
+
+        <section id="s14">
+          <h2>14. Personalized Offers</h2>
+          <p>
+            Machine learning analyzes purchase history, views, and interests to
+            generate recommendations, promotions, and discounts. Personalization
+            aims to enhance convenience and can be disabled in account settings.
+          </p>
+        </section>
+
+        <section id="s15">
+          <h2>15. Fraud Protection</h2>
+          <p>
+            Multi-layer anti-fraud measures analyze transactions in real time,
+            detect suspicious activity, and may temporarily suspend operations
+            for verification. IP and geolocation monitoring helps flag unusual
+            logins; we may contact customers for additional checks.
+          </p>
+        </section>
+
+        <section id="s16">
+          <h2>16. User Rights</h2>
+          <p>
+            We uphold: <strong>Access</strong> (know what data is held and how
+            it is used); <strong>Rectification</strong>;
+            <strong>Erasure</strong> (where permitted);
+            <strong>Restriction</strong>; <strong>Portability</strong>; and
+            <strong>Objection</strong> (e.g., to marketing or analytics).
+            Requests are handled per applicable law.
+          </p>
+        </section>
+
+        <section id="s17">
+          <h2>17. Account Management</h2>
+          <p>
+            Users can update personal details, addresses, language/currency
+            preferences, and passwords; enable 2FA; or delete their account.
+            Upon deletion, data is removed or anonymized except where law
+            requires retention (e.g., tax records).
+          </p>
+        </section>
+
+        <section id="s18">
+          <h2>18. Marketing Communications</h2>
+          <p>
+            Marketing messages (promotions, discounts, personalized offers) are
+            sent only with consent. Every message includes an opt-out link.
+            Users control subscriptions and can opt out at any time.
+          </p>
+        </section>
+
+        <section id="s19">
+          <h2>19. Push Notifications</h2>
+          <p>
+            Mobile app users may opt in to push notifications for order
+            statuses, offers, and news. Notifications can be disabled in device
+            or app settings and never include sensitive data like passwords or
+            card details.
+          </p>
+        </section>
+
+        <section id="s20">
+          <h2>20. Geolocation</h2>
+          <p>
+            With consent, location data is used to improve service—delivery
+            estimates, nearest pickup points, regional promotions. Such data is
+            kept no longer than necessary and not shared without consent.
+          </p>
+        </section>
+
+        <section id="s21">
+          <h2>21. Logging and Monitoring</h2>
+          <p>
+            We log significant events (sign-ins, account changes, orders, failed
+            logins) for security and operational analysis. Access to logs is
+            restricted to authorized personnel. Logs are retained for defined
+            periods and then archived or anonymized.
+          </p>
+        </section>
+
+        <section id="s22">
+          <h2>22. Security Incidents</h2>
+          <p>
+            We follow a defined incident response protocol for unauthorized
+            access, leaks, or data alteration. Where required, we notify
+            affected users within <strong>72 hours</strong> of discovery (GDPR).
+            Post-incident, we implement additional safeguards to reduce
+            recurrence risk.
+          </p>
+        </section>
+
+        <section id="s23">
+          <h2>23. Use of APIs</h2>
+          <p>
+            API access uses authenticated, authorized requests over
+            <strong>HTTPS/TLS 1.3</strong> with unique API keys and rate limits.
+            Only vetted partners receive access, limited to agreed scopes.
+            Activity is monitored to prevent abuse.
+          </p>
+        </section>
+
+        <section id="s24">
+          <h2>24. Social Networks and Third-Party Services</h2>
+          <p>
+            Third-party login (e.g., Google, Facebook, Apple ID) provides only
+            minimal data (name, email, unique ID). We do not access passwords.
+            Usage is governed by third-party policies; users can limit
+            permissions granted.
+          </p>
+        </section>
+
+        <section id="s25">
+          <h2>25. Processing of Photos and Documents</h2>
+          <p>
+            Where users upload images or documents (e.g., for identity
+            verification), they are used solely for verification and stored
+            encrypted with strictly limited access. After verification,
+            materials are deleted or archived with restricted access.
+          </p>
+        </section>
+
+        <section id="s26">
+          <h2>26. Automation and AI</h2>
+          <p>
+            We use AI to personalize content and streamline support. Decisions
+            with potential legal effect (e.g., account blocking) are never fully
+            automated; a human reviews such cases.
+          </p>
+        </section>
+
+        <section id="s27">
+          <h2>27. Judicial and Legal Requests</h2>
+          <p>
+            We may disclose personal data only as required by law (court, law
+            enforcement, regulators). Requests are validated, and only the
+            minimum necessary data is provided. Where lawful, users are informed
+            of such disclosures.
+          </p>
+        </section>
+
+        <section id="s28">
+          <h2>28. Returns and Disputes</h2>
+          <p>
+            To process returns, exchanges, and disputes, we use order details,
+            contact data, and support history solely to resolve the issue. After
+            completion, data is kept for a limited time and then deleted or
+            anonymized.
+          </p>
+        </section>
+
+        <section id="s29">
+          <h2>29. Data Localization and Multilingual Support</h2>
+          <p>
+            Data may be stored and processed on servers in different countries
+            depending on user location and legal requirements, with protection
+            levels aligned to international standards. In case of discrepancies,
+            the Policy version in the operating jurisdiction’s language
+            prevails.
+          </p>
+        </section>
+
+        <section id="s30">
+          <h2>30. User Responsibilities</h2>
+          <p>
+            Users must keep passwords secret, use strong combinations, and avoid
+            sharing access. If an account is compromised due to user actions,
+            the company is not liable for resulting damage, though we will
+            assist with recovery.
+          </p>
+        </section>
+
+        <section id="s31">
+          <h2>31. Company Responsibility</h2>
+          <p>
+            We take all reasonable and technically feasible measures to protect
+            personal data, investing in encryption, monitoring, and protective
+            technologies. While we minimize incident impact, absolute security
+            cannot be guaranteed given inherent internet risks.
+          </p>
+        </section>
+
+        <section id="s32">
+          <h2>32. Employee Training and Certification</h2>
+          <p>
+            All employees undergo mandatory security and privacy training,
+            covering international standards and confidential data handling.
+            Annual certification is required; non-passing staff are retrained to
+            ensure only qualified specialists may access data.
+          </p>
+        </section>
+
+        <section id="s33">
+          <h2>33. Interaction with Government Authorities</h2>
+          <p>
+            We cooperate with authorities strictly under applicable law.
+            Disclosures occur only upon official, legally compliant requests,
+            and we provide the minimum required data. Where lawful, users are
+            informed of disclosures.
+          </p>
+        </section>
+
+        <section id="s34">
+          <h2>34. Partner Services</h2>
+          <p>
+            We work with delivery, payments, and analytics partners that pass
+            security due diligence. Contracts include NDAs and data protection
+            clauses. We collaborate only with entities providing security at or
+            above our standards.
+          </p>
+        </section>
+
+        <section id="s35">
+          <h2>35. Limitation of Liability</h2>
+          <p>
+            We are not responsible for the privacy practices of third-party
+            sites linked from our services. Users should review those policies
+            and exercise caution when sharing data, as we control only our
+            systems and processes.
+          </p>
+        </section>
+
+        <section id="s36">
+          <h2>36. Changes and Updates</h2>
+          <p>
+            We may update this Policy to reflect changes in law, business
+            processes, or technology. Updated versions are published with the
+            latest revision date and may be communicated via email or push
+            notifications.
+          </p>
+        </section>
+
+        <section id="s37">
+          <h2>37. Log Retention Policy</h2>
+          <p>
+            Activity logs are stored in secure systems that prevent unauthorized
+            alteration or deletion. Retention follows internal and legal
+            requirements; afterward, logs are archived or anonymized. Access is
+            limited to security personnel.
+          </p>
+        </section>
+
+        <section id="s38">
+          <h2>38. VPN and Remote Access</h2>
+          <p>
+            Remote access is allowed only through secure VPN channels using TLS
+            1.3. Public Wi‑Fi may not be used for confidential work without VPN.
+            Only corporate or pre-approved, security-compliant devices are
+            permitted.
+          </p>
+        </section>
+
+        <section id="s39">
+          <h2>39. Employee Access and Roles</h2>
+          <p>
+            We enforce least-privilege access via role-based models (managers,
+            support, admins). All actions are audited. Access rights are
+            periodically reviewed and revoked automatically upon role change or
+            termination.
+          </p>
+        </section>
+
+        <section id="s40">
+          <h2>40. Employee Mobile Devices</h2>
+          <p>
+            Under our BYOD policy, devices must have up-to-date software,
+            antivirus, and encryption. Risky third-party apps require approval.
+            If a device is lost, corporate data can be remotely wiped.
+          </p>
+        </section>
+
+        <section id="s41">
+          <h2>41. Network Protections</h2>
+          <p>
+            We deploy NGFWs, IDS/IPS, and application-layer filtering with
+            segmented networks that separate user data from admin systems.
+            Real-time monitoring blocks suspicious connections automatically.
+          </p>
+        </section>
+
+        <section id="s42">
+          <h2>42. DDoS Protection</h2>
+          <p>
+            Cloud scrubbing services (e.g., Cloudflare, AWS Shield) analyze
+            traffic patterns to mitigate DDoS, blocking suspicious IPs or
+            regions to keep the site stable under hostile load.
+          </p>
+        </section>
+
+        <section id="s43">
+          <h2>43. Protection Against Malware</h2>
+          <p>
+            Servers and workstations run modern, proactively updated
+            anti-malware with behavioral analysis and centralized monitoring to
+            detect and block suspicious files or processes.
+          </p>
+        </section>
+
+        <section id="s44">
+          <h2>44. Bug Bounty Program</h2>
+          <p>
+            We encourage external researchers to responsibly disclose
+            vulnerabilities. Submissions are validated, prioritized by severity,
+            and remediated promptly, with rewards aligned to impact.
+          </p>
+        </section>
+
+        <section id="s45">
+          <h2>45. Data Backups</h2>
+          <p>
+            Critical data is backed up on schedule and stored encrypted in
+            separate infrastructure and regions. Regular restore drills ensure
+            rapid recovery and minimal user impact during incidents.
+          </p>
+        </section>
+
+        <section id="s46">
+          <h2>46. Database Encryption</h2>
+          <p>
+            Personal data in databases is encrypted with AES‑256 at rest and TLS
+            in transit. Keys are stored in HSMs with strict, MFA‑gated access
+            and segregated duties.
+          </p>
+        </section>
+
+        <section id="s47">
+          <h2>47. Code Change Control</h2>
+          <p>
+            We use version control (e.g., Git) with mandatory code review and
+            security testing for critical modules. Repository access is
+            restricted and issued via personal access keys.
+          </p>
+        </section>
+
+        <section id="s48">
+          <h2>48. Vendor and Contractor Control</h2>
+          <p>
+            Suppliers undergo security due diligence before onboarding.
+            Contracts mandate confidentiality and data protection; periodic
+            reassessments ensure ongoing compliance.
+          </p>
+        </section>
+
+        <section id="s49">
+          <h2>49. DevOps and CI/CD Policy</h2>
+          <p>
+            Automated CI/CD pipelines run correctness and security tests to
+            reduce human error. All deployments are logged and can be rolled
+            back if needed.
+          </p>
+        </section>
+
+        <section id="s50">
+          <h2>50. Vulnerability Management</h2>
+          <p>
+            Automated and manual scans identify vulnerabilities. Findings are
+            categorized and remediated on defined timelines—critical issues
+            immediately, others in planned cycles. A registry tracks resolution
+            and recurrence prevention.
+          </p>
+        </section>
+
+        <section id="s51">
+          <h2>51. Vulnerability Management Plan</h2>
+          <p>
+            Each threat is logged, risk‑rated (low to critical), assigned to an
+            owner, and fixed per SLA timelines. Documentation enables
+            retrospective analysis and continuous improvement.
+          </p>
+        </section>
+
+        <section id="s52">
+          <h2>52. Disaster Recovery Plan</h2>
+          <p>
+            Our DR plan covers large‑scale failures and crises with encrypted
+            backups, regional failover, and prioritized system restoration.
+            Regular simulations validate readiness.
+          </p>
+        </section>
+
+        <section id="s53">
+          <h2>53. Business Continuity</h2>
+          <p>
+            BCP measures safeguard key processes via redundancy, backup sites,
+            and load distribution. Annual tests and updates align with evolving
+            business and infrastructure.
+          </p>
+        </section>
+
+        <section id="s54">
+          <h2>54. Use of Cloud Services</h2>
+          <p>
+            We use ISO/IEC 27001 and PCI DSS–aligned cloud providers (e.g.,
+            AWS/Azure/GCP). Data is encrypted; least‑privilege access and
+            permission reviews are enforced.
+          </p>
+        </section>
+
+        <section id="s55">
+          <h2>55. Security Incident Management</h2>
+          <p>
+            A dedicated team triages incidents by severity, executes containment
+            and remediation, and completes root‑cause analyses. Lessons learned
+            feed policy and control updates.
+          </p>
+        </section>
+
+        <section id="s56">
+          <h2>56. Risk Management</h2>
+          <p>
+            We maintain a living risk matrix to evaluate likelihood and impact,
+            driving mitigation via new controls, process changes, and staff
+            training. Risk management is continuous and embedded.
+          </p>
+        </section>
+
+        <section id="s57">
+          <h2>57. Compliance with International Standards</h2>
+          <p>
+            Our program aligns with <strong>ISO/IEC 27001</strong>,
+            <strong>PCI DSS</strong>, <strong>GDPR</strong>, and
+            <strong>CCPA</strong>, reinforcing trust with customers and
+            partners.
+          </p>
+        </section>
+
+        <section id="s58">
+          <h2>58. Audits and Assessments</h2>
+          <p>
+            Internal and external audits assess security posture. Findings
+            generate tracked improvement plans overseen by leadership to ensure
+            closure.
+          </p>
+        </section>
+
+        <section id="s59">
+          <h2>59. Customer Access Control</h2>
+          <p>
+            Accounts support strong passwords and optional <strong>2FA</strong>.
+            Sessions expire after inactivity; unusual logins may require
+            additional verification.
+          </p>
+        </section>
+
+        <section id="s60">
+          <h2>60. API Key Usage Policy</h2>
+          <p>
+            Unique API keys are issued to vetted partners, time‑limited, and
+            rotated regularly. Scopes restrict capabilities. Compromised keys
+            are revoked immediately.
+          </p>
+        </section>
+
+        <section id="s61">
+          <h2>61. Email Security Policy</h2>
+          <p>
+            We employ <strong>SPF</strong>, <strong>DKIM</strong>, and
+            <strong>DMARC</strong> to prevent spoofing; advanced spam and
+            phishing filters protect users. We advise verifying domains and
+            avoiding suspicious links.
+          </p>
+        </section>
+
+        <section id="s62">
+          <h2>62. Domain and Certificate Policy</h2>
+          <p>
+            Domains are protected with <strong>DNSSEC</strong>. All sites use
+            <strong>HTTPS</strong> with modern ciphers and proactively renewed
+            certificates. Configurations are routinely reviewed.
+          </p>
+        </section>
+
+        <section id="s63">
+          <h2>63. Big Data Processing</h2>
+          <p>
+            We analyze large datasets using anonymization so individuals cannot
+            be identified. Insights drive UX improvements, logistics
+            optimization, feature development, and demand forecasting.
+          </p>
+        </section>
+
+        <section id="s64">
+          <h2>64. Cloud Integration Policy</h2>
+          <p>
+            Cloud integrations require prior security assessment, tokenized
+            access, exhaustive logging, and least‑privilege scopes. Suspicious
+            activity triggers immediate blocks.
+          </p>
+        </section>
+
+        <section id="s65">
+          <h2>65. Regular Security Scanning</h2>
+          <p>
+            Scheduled automated scans and manual reviews cover servers,
+            databases, and applications. Reports are triaged and remediations
+            tracked to completion.
+          </p>
+        </section>
+
+        <section id="s66">
+          <h2>66. Software Update Policy</h2>
+          <p>
+            Servers and endpoints are kept current. Security patches receive
+            priority and are tested then deployed promptly. Legacy software is
+            prohibited.
+          </p>
+        </section>
+
+        <section id="s67">
+          <h2>67. Log Access Policy</h2>
+          <p>
+            Log data is confidential. Access is time‑boxed via temporary tokens
+            for authorized admins only. All access and changes are themselves
+            logged.
+          </p>
+        </section>
+
+        <section id="s68">
+          <h2>68. Internal Network Policy</h2>
+          <p>
+            We operate on a <strong>Zero Trust</strong> model with
+            authentication for every connection, segmented via VLANs. Monitoring
+            detects and blocks anomalous activity.
+          </p>
+        </section>
+
+        <section id="s69">
+          <h2>69. Backup Data Center Policy</h2>
+          <p>
+            Independent geographic regions host hot standbys. Real‑time data
+            sync enables automatic failover. Regular switchover tests validate
+            availability.
+          </p>
+        </section>
+
+        <section id="s70">
+          <h2>70. Cryptographic Key Storage Policy</h2>
+          <p>
+            Keys reside in <strong>HSMs</strong>, are rotated regularly, and
+            accessed via MFA by a limited set of admins. Compromised keys are
+            revoked and replaced immediately.
+          </p>
+        </section>
+
+        <section id="s71">
+          <h2>71. Software Testing Policy</h2>
+          <p>
+            Releases pass functional, load, and security testing. External
+            <strong>penetration tests</strong> supplement internal assurance
+            before production deployment.
+          </p>
+        </section>
+
+        <section id="s72">
+          <h2>72. IoT Device Usage Policy</h2>
+          <p>
+            Only certified devices are allowed, isolated on dedicated network
+            segments, and updated routinely. Unsupported or non‑encrypted
+            devices are prohibited.
+          </p>
+        </section>
+
+        <section id="s73">
+          <h2>73. Customer Data Handling Policy</h2>
+          <p>
+            We collect only what’s necessary for service delivery. Analytics
+            rely on anonymization; marketing use requires explicit consent.
+          </p>
+        </section>
+
+        <section id="s74">
+          <h2>74. Mobile App Security Policy</h2>
+          <p>
+            Apps use TLS 1.3, root/jailbreak detection, and anti‑spoofing
+            measures. We monitor app stores and act against counterfeit apps.
+          </p>
+        </section>
+
+        <section id="s75">
+          <h2>75. Customer and Partner Audit Policy</h2>
+          <p>
+            Partners and enterprise customers may be audited for security
+            compliance. Non‑conformities must be remediated to maintain
+            integration.
+          </p>
+        </section>
+
+        <section id="s76">
+          <h2>76. International Trade and Sanctions Policy</h2>
+          <p>
+            We comply with export controls and sanctions regimes. Transactions
+            are screened against sanctions lists to ensure lawful operations.
+          </p>
+        </section>
+
+        <section id="s77">
+          <h2>77. Contact Information</h2>
+          <p>
+            If you have questions about this Policy, personal data protection,
+            or service security, please contact: <br />📧
+            <strong>Email:</strong> support@yourdomain.com <br />📍
+            <strong>Address:</strong> Your legal address
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <div class="top"><a href="#top" aria-label="Back to top">↑ Top</a></div>
+
+    <script src="./assets/js/i18n.js"></script>
+    <script src="./assets/js/currency.js"></script>
+    <script src="./assets/js/header.js"></script>
+    <script src="./assets/js/categories.js"></script>
+    <script src="./assets/js/pricing.js"></script>
+    <script src="./assets/js/cart.js"></script>
+    <div id="app-footer"></div>
+    <script src="./assets/js/footer.js"></script>
+    <script>
+      // backtotop.js
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const topBtn = document.querySelector(".top");
+
+        if (!topBtn) return;
+
+        // Скрываем кнопку по умолчанию
+        topBtn.style.display = "none";
+
+        // Появление/скрытие при прокрутке
+        window.addEventListener("scroll", () => {
+          if (window.scrollY > 300) {
+            topBtn.style.display = "block";
+            topBtn.style.opacity = "1";
+          } else {
+            topBtn.style.opacity = "0";
+            setTimeout(() => {
+              if (window.scrollY <= 300) topBtn.style.display = "none";
+            }, 300);
+          }
+        });
+
+        // Плавный скролл наверх
+        const link = topBtn.querySelector("a");
+        if (link) {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
