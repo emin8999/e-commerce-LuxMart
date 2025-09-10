@@ -24,8 +24,8 @@
 
 // === CONFIG ===
 const API_BASE = "http://116.203.51.133/luxmart/api";
-const PROFILE_URL = `${API_BASE}/profile`;
-const UPDATE_URL = (id) => `${API_BASE}/update/${encodeURIComponent(id)}`;
+const PROFILE_URL = `${API_BASE}/api/profile`;
+const UPDATE_URL = (id) => `${API_BASE}/api/update/${encodeURIComponent(id)}`;
 
 // Если требуется авторизация — вставьте токен сюда.
 // Иначе оставьте пустым, и заголовок Authorization добавляться не будет.
@@ -73,7 +73,7 @@ async function loadProfile() {
     const data = await res.json();
     // Ожидаем, что сервер вернёт объект профиля. Подстройте поля под свой бэкенд:
     // Пример ожидаемых полей: { id, firstName, lastName, email, phone, address }
-    // $("id").value = data.id ?? data.userId ?? "";
+    $("id").value = data.id ?? data.userId ?? "";
     $("name").value = data.name ?? "";
     $("email").value = data.email ?? "";
 
