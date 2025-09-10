@@ -3,23 +3,60 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard (Admin)</title>
-    <link rel="stylesheet" href="../assets/css/style.css" />
-    <link rel="stylesheet" href="./css/dashboard.css" />
+    <title>Stores Management - Admin Panel</title>
+
+    <link rel="stylesheet" href="./css/baseadmin.css" />
   </head>
   <body>
     <header class="dashboard-header">
       <h1>Dashboard — Admin</h1>
       <nav>
-        <a href="./allStores.html">Stores</a>
-        <a href="./admin.html#rates">Exchange Rates</a>
-        <a href="./admin.html#shipping">Shipping</a>
-        <a href="./admin.html#analytics">Analytics</a>
-        <a href="./admin.html#translations">Translations</a>
+        <a href="#" class="active">Stores</a>
+        <a href="admin.html">Exchange Rates</a>
+        <a href="#">Shipping</a>
+        <a href="#">Analytics</a>
+        <a href="#">Translations</a>
       </nav>
     </header>
-    <main></main>
-    <div id="app-footer"></div>
+
+    <div class="container">
+      <div class="stores-section">
+        <div class="section-header">
+          <h2 class="section-title">All Stores Management</h2>
+          <div class="export-buttons">
+            <button class="export-btn" onclick="exportToExcel()">
+              📊 Export Excel
+            </button>
+            <button class="export-btn" onclick="exportToCSV()">
+              📄 Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="search-filter">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search stores by name, owner, or email..."
+            onkeyup="filterStores()"
+          />
+          <select class="category-filter" onchange="filterByCategory()">
+            <option value="">All Categories</option>
+            <option value="electronics">Electronics</option>
+            <option value="fashion">Fashion</option>
+            <option value="food">Food & Beverage</option>
+            <option value="books">Books</option>
+            <option value="sports">Sports</option>
+            <option value="home">Home & Garden</option>
+          </select>
+        </div>
+
+        <div id="stores-container">
+          <div class="loading">Loading stores data...</div>
+        </div>
+      </div>
+    </div>
+
     <script src="../assets/js/i18n.js"></script>
     <script src="./js/allStores.js"></script>
     <script src="../assets/js/currency.js"></script>
