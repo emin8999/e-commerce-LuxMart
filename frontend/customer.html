@@ -3,12 +3,151 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Customer Service</title>
+    <title data-i18n="customer.page_title">Customer Service</title>
+    <link rel="stylesheet" href="./assets/css/customer.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <div id="app-header"></div>
-    <main></main>
+    <main>
+      <div class="container">
+        <header>
+          <h1 data-i18n="customer.title">Customer Service</h1>
+          <p class="sub" data-i18n="customer.subtitle">
+            We’re here to help with orders, returns, delivery, and technical
+            issues.
+          </p>
+        </header>
+
+        <form id="csForm" novalidate>
+          <div>
+            <label for="name" data-i18n="customer.form_name_label"
+              >Full name</label
+            >
+            <input
+              id="name"
+              name="name"
+              type="text"
+              data-i18n-placeholder="customer.form_name_placeholder"
+              placeholder="Your name"
+              required
+            />
+          </div>
+
+          <div>
+            <label for="email" data-i18n="customer.form_email_label"
+              >Email</label
+            >
+            <input
+              id="email"
+              name="email"
+              type="email"
+              data-i18n-placeholder="customer.form_email_placeholder"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <div>
+            <label for="topic" data-i18n="customer.form_topic_label"
+              >Topic</label
+            >
+            <select id="topic" name="topic" required>
+              <option
+                value=""
+                selected
+                disabled
+                data-i18n="customer.topic_placeholder"
+              >
+                Choose a topic…
+              </option>
+              <option value="order" data-i18n="customer.topic_order">
+                Order & Delivery
+              </option>
+              <option value="returns" data-i18n="customer.topic_returns">
+                Returns & Refunds
+              </option>
+              <option value="account" data-i18n="customer.topic_account">
+                Account & Login
+              </option>
+              <option value="payment" data-i18n="customer.topic_payment">
+                Payment
+              </option>
+              <option value="tech" data-i18n="customer.topic_tech">
+                Technical Issue
+              </option>
+              <option value="other" data-i18n="customer.topic_other">
+                Other
+              </option>
+            </select>
+          </div>
+
+          <div class="full">
+            <label for="message" data-i18n="customer.form_message_label"
+              >Message</label
+            >
+            <textarea
+              id="message"
+              name="message"
+              data-i18n-placeholder="customer.form_message_placeholder"
+              placeholder="Describe your issue or question…"
+              required
+            ></textarea>
+          </div>
+
+          <div class="full">
+            <label for="attachment" data-i18n="customer.form_attachment_label"
+              >Attachment (optional)</label
+            >
+            <input id="attachment" name="attachment" type="file" />
+          </div>
+
+          <div class="full check">
+            <input id="consent" type="checkbox" required />
+            <label for="consent"
+              ><span data-i18n="customer.form_consent_text"
+                >I agree to the processing of my data to resolve this
+                request.</span
+              ></label
+            >
+          </div>
+
+          <div class="actions full">
+            <button type="submit" data-i18n="customer.form_submit">
+              Send request
+            </button>
+            <span id="status" aria-live="polite"></span>
+          </div>
+        </form>
+
+        <section class="faq" aria-labelledby="faq-title">
+          <h2 id="faq-title" data-i18n="customer.faq_title">FAQ</h2>
+          <details>
+            <summary data-i18n="customer.faq_q1">Where is my order?</summary>
+            <p data-i18n="customer.faq_a1">
+              Most orders ship within 24–48 hours. Use your order number to
+              track the parcel in your account or contact us above.
+            </p>
+          </details>
+          <details>
+            <summary data-i18n="customer.faq_q2">
+              How do I return an item?
+            </summary>
+            <p data-i18n="customer.faq_a2">
+              Initiate a return in your account within 14 days of delivery.
+              We’ll email a return label and next steps.
+            </p>
+          </details>
+          <details>
+            <summary data-i18n="customer.faq_q3">I can’t log in</summary>
+            <p data-i18n="customer.faq_a3">
+              Use “Forgot password” on the login page. If you still can’t access
+              the account, submit a request with your email address.
+            </p>
+          </details>
+        </section>
+      </div>
+    </main>
     <div id="app-modal-root"></div>
     <script src="./assets/js/i18n.js"></script>
     <script src="./assets/js/currency.js"></script>
@@ -16,8 +155,22 @@
     <script src="./assets/js/categories.js"></script>
     <script src="./assets/js/pricing.js"></script>
     <script src="./assets/js/cart.js"></script>
-    <script src="./assets/js/ourStores.jss"></script>
+    <script src="./assets/js/ourStores.js"></script>
     <div id="app-footer"></div>
     <script src="./assets/js/footer.js"></script>
+    <script>
+      // Без цветных эффектов, только функциональность статуса
+      document
+        .getElementById("csForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const status = document.getElementById("status");
+          // Здесь можно добавить ваш реальный submit (fetch/XHR). Сейчас — мок.
+          status.textContent = window.i18n
+            ? window.i18n.t("customer.submit_success")
+            : "Your request has been submitted. We’ll email you shortly.";
+          this.reset();
+        });
+    </script>
   </body>
 </html>

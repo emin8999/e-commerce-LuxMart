@@ -1,0 +1,76 @@
+:root {
+  --black: #000000;
+  --sand: #c2b280; /* песочный оттенок */
+}
+
+/* Общие стили */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.6;
+  background: transparent; /* фон без цвета */
+  color: var(--black);
+}
+
+main#about {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Заголовки */
+main#about h1,
+main#about h2,
+main#about h3 {
+  color: var(--black);
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+  font-weight: 700;
+}
+
+/* Подзаголовки или акценты — песочный цвет */
+main#about h2 {
+  border-bottom: 1px solid var(--sand);
+  padding-bottom: 4px;
+}
+
+main#about strong {
+  color: var(--sand);
+}
+
+/* Тексты */
+main#about p,
+main#about li,
+main#about dt,
+main#about dd,
+main#about blockquote {
+  color: var(--black);
+}
+
+/* Списки */
+main#about ul,
+main#about dl {
+  padding-left: 20px;
+}
+
+main#about dt {
+  font-weight: 600;
+  color: var(--sand);
+}
+
+/* Цитаты */
+main#about blockquote {
+  border-left: 3px solid var(--sand);
+  margin: 12px 0;
+  padding-left: 12px;
+  font-style: italic;
+}
+
+/* Ссылки */
+main#about a {
+  color: var(--black);
+  text-decoration: underline;
+}
+main#about a:hover {
+  color: var(--sand);
+}

@@ -5,7 +5,7 @@ window.i18n = (function(){
   const listeners = [];
 
   async function load(){
-    const namespaces = ['common','nav','catalog','checkout','dashboard','categories','home','product','auth','orders','profile'];
+    const namespaces = ['common','nav','catalog','checkout','dashboard','categories','home','product','auth','orders','profile','about','customer'];
     const loaded = {};
     for(const ns of namespaces){
       try{
@@ -24,9 +24,23 @@ window.i18n = (function(){
   }
 
   function translatePage(){
+    // text content
     document.querySelectorAll('[data-i18n]').forEach(el=>{
       const key = el.getAttribute('data-i18n');
       el.textContent = t(key);
+    });
+    // common attributes
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-placeholder');
+      el.setAttribute('placeholder', t(key));
+    });
+    document.querySelectorAll('[data-i18n-value]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-value');
+      el.setAttribute('value', t(key));
+    });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(el=>{
+      const key = el.getAttribute('data-i18n-aria-label');
+      el.setAttribute('aria-label', t(key));
     });
   }
 

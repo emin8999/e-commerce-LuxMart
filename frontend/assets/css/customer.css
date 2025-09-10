@@ -1,0 +1,175 @@
+/* ===== Monochrome: only black (#000) for text and borders ===== */
+:root {
+  --black: #000;
+  --white: #fff;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  color: var(--black);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* Layout */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+header {
+  border-bottom: 1px solid var(--black);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+h1 {
+  font-size: 28px;
+  margin: 0 0 6px;
+}
+.sub {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Form */
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+.full {
+  grid-column: 1 / -1;
+}
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="file"],
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--black);
+  background: var(--white);
+  color: var(--black);
+  padding: 10px 12px;
+  border-radius: 0; /* строгая геометрия */
+  outline: none;
+  appearance: none;
+}
+textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+::placeholder {
+  color: var(--black);
+  opacity: 0.6;
+}
+
+/* Focus (без цветных эффектов) */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--black);
+  outline-offset: 1px;
+}
+
+/* Checkbox & radios – только чёрный */
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--black);
+  accent-color: var(
+    --black
+  ); /* чёрная галочка (поддерживается современными браузерами) */
+}
+
+/* Button – контурный чёрный */
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--black);
+  margin-top: 8px;
+}
+button {
+  border: 1px solid var(--black);
+  background: var(--white);
+  color: var(--black);
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+button:focus {
+  outline: 2px solid var(--black);
+  outline-offset: 1px;
+}
+
+/* Links – только чёрный */
+a {
+  color: var(--black);
+  text-decoration: underline;
+}
+a:focus {
+  outline: 2px solid var(--black);
+  outline-offset: 2px;
+}
+
+/* Simple FAQ (details/summary) — без цветов */
+.faq {
+  margin-top: 28px;
+  border-top: 1px solid var(--black);
+  padding-top: 16px;
+}
+.faq h2 {
+  font-size: 20px;
+  margin: 0 0 12px;
+}
+details {
+  border: 1px solid var(--black);
+  padding: 12px;
+  margin-bottom: 10px;
+}
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  outline: none;
+}
+
+/* Footer – только чёрные линии и текст */
+footer {
+  margin-top: 32px;
+  border-top: 1px solid var(--black);
+  padding: 16px 0;
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+  form {
+    grid-template-columns: 1fr;
+  }
+}

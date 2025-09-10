@@ -70,6 +70,8 @@
     <div style="text-align:right;margin-top:8px"><button class="btn" id="closeCat">Close</button></div>
   </div>`;
   modalRoot.appendChild(modal);
+  // Ensure freshly injected markup is translated to current locale
+  try { window.i18n && window.i18n.setLocale(window.i18n.getLocale()); } catch(_) {}
   function openCat() {
     modal.classList.add("show");
     if (window.renderCategories) window.renderCategories("catList");

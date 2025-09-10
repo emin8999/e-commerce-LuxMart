@@ -3,12 +3,202 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>About us</title>
+    <title data-i18n="about.page_title">About us</title>
+    <link rel="stylesheet" href="./assets/css/about.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
     <div id="app-header"></div>
-    <main></main>
+
+    <main id="about" tabindex="-1">
+      <!-- Hero -->
+      <section aria-labelledby="about-title">
+        <h1 id="about-title" data-i18n="about.h1">About Us</h1>
+        <p data-i18n="about.hero_p">
+          We are a customer-first e-commerce brand focused on quality products,
+          honest pricing, and fast delivery. Our goal is to make shopping
+          effortless and delightful.
+        </p>
+      </section>
+
+      <!-- Mission & Vision -->
+      <section aria-labelledby="mission-title">
+        <h2 id="mission-title" data-i18n="about.mission_title">Our Mission</h2>
+        <p data-i18n="about.mission_p">
+          To deliver reliable products and a seamless experience through
+          innovation, transparency, and care at every step — from browsing to
+          post-purchase support.
+        </p>
+        <h3 data-i18n="about.vision_title">Our Vision</h3>
+        <p data-i18n="about.vision_p">
+          Build a trusted marketplace where every customer feels confident,
+          informed, and valued.
+        </p>
+      </section>
+
+      <!-- Story -->
+      <section aria-labelledby="story-title">
+        <h2 id="story-title" data-i18n="about.story_title">Our Story</h2>
+        <p data-i18n="about.story_p">
+          Founded by a small team of engineers and merchandisers, we started
+          with one simple promise: better everyday essentials, delivered fast.
+          Today, we partner with vetted suppliers and local couriers to bring
+          that promise to more people.
+        </p>
+        <ul>
+          <li data-i18n="about.story_item1">
+            2019 — Prototype store and first 100 orders
+          </li>
+          <li data-i18n="about.story_item2">
+            2021 — Nationwide delivery and 24/7 support
+          </li>
+          <li data-i18n="about.story_item3">
+            2024 — Private-label products and sustainable packaging
+          </li>
+        </ul>
+      </section>
+
+      <!-- Values -->
+      <section aria-labelledby="values-title">
+        <h2 id="values-title" data-i18n="about.values_title">Our Values</h2>
+        <ul>
+          <li>
+            <strong data-i18n="about.values_customer_obsession"
+              >Customer Obsession:</strong
+            >
+            <span data-i18n="about.values_customer_obsession_desc"
+              >We design every feature around real needs and feedback.</span
+            >
+          </li>
+          <li>
+            <strong data-i18n="about.values_quality_transparency"
+              >Quality & Transparency:</strong
+            >
+            <span data-i18n="about.values_quality_transparency_desc"
+              >Clear specs, fair pricing, and honest reviews.</span
+            >
+          </li>
+          <li>
+            <strong data-i18n="about.values_security_privacy"
+              >Security & Privacy:</strong
+            >
+            <span data-i18n="about.values_security_privacy_desc"
+              >Data protection by default, compliant with global
+              standards.</span
+            >
+          </li>
+          <li>
+            <strong data-i18n="about.values_sustainability"
+              >Sustainability:</strong
+            >
+            <span data-i18n="about.values_sustainability_desc"
+              >Smarter logistics and recyclable packaging.</span
+            >
+          </li>
+        </ul>
+      </section>
+
+      <!-- Fast facts -->
+      <section aria-labelledby="facts-title">
+        <h2 id="facts-title" data-i18n="about.facts_title">Fast Facts</h2>
+        <dl>
+          <dt data-i18n="about.facts_orders_title">Orders delivered</dt>
+          <dd data-i18n="about.facts_orders_val">500k+ and counting</dd>
+          <dt data-i18n="about.facts_time_title">Average delivery time</dt>
+          <dd data-i18n="about.facts_time_val">24–48 hours in most regions</dd>
+          <dt data-i18n="about.facts_cs_title">Customer satisfaction</dt>
+          <dd data-i18n="about.facts_cs_val">4.8/5 average rating</dd>
+          <dt data-i18n="about.facts_support_title">Support</dt>
+          <dd data-i18n="about.facts_support_val">24/7 live chat & email</dd>
+        </dl>
+      </section>
+
+      <!-- Team -->
+      <section aria-labelledby="team-title">
+        <h2 id="team-title" data-i18n="about.team_title">Meet the Team</h2>
+        <p data-i18n="about.team_p">
+          We’re a cross-functional crew of product makers, operators, and
+          support specialists focused on outcomes.
+        </p>
+        <ul aria-label="Leadership (examples)">
+          <li>
+            <strong data-i18n="about.team_ceo">CEO:</strong>
+            <span data-i18n="about.team_ceo_desc"
+              >Spearheads strategy and partnerships</span
+            >
+          </li>
+          <li>
+            <strong data-i18n="about.team_ops">Head of Operations:</strong>
+            <span data-i18n="about.team_ops_desc"
+              >Owns fulfillment and delivery quality</span
+            >
+          </li>
+          <li>
+            <strong data-i18n="about.team_care">Head of Customer Care:</strong>
+            <span data-i18n="about.team_care_desc"
+              >Ensures fast, human support</span
+            >
+          </li>
+          <li>
+            <strong data-i18n="about.team_eng">Head of Engineering:</strong>
+            <span data-i18n="about.team_eng_desc"
+              >Builds secure, reliable systems</span
+            >
+          </li>
+        </ul>
+      </section>
+
+      <!-- Testimonials -->
+      <section aria-labelledby="testimonials-title">
+        <h2 id="testimonials-title" data-i18n="about.testimonials_title">
+          What Customers Say
+        </h2>
+        <blockquote>
+          <p data-i18n="about.testimonial1_p">
+            “Checkout was effortless and delivery beat the estimate. Support was
+            quick and kind.”
+          </p>
+          <footer>— A. Smith</footer>
+        </blockquote>
+        <blockquote>
+          <p data-i18n="about.testimonial2_p">
+            “Transparent pricing and solid quality. I switched most of my
+            staples here.”
+          </p>
+          <footer>— J. Lee</footer>
+        </blockquote>
+      </section>
+
+      <!-- Partners / Trust -->
+      <section aria-labelledby="trust-title">
+        <h2 id="trust-title" data-i18n="about.trust_title">Trusted By</h2>
+        <p data-i18n="about.trust_p">
+          We collaborate with vetted suppliers and logistics partners to keep
+          products in stock and deliveries on time.
+        </p>
+        <!-- Placeholder logos (replace with <img> or SVGs) -->
+        <ul aria-label="Partner logos (placeholders)">
+          <li data-i18n="about.partner1">Partner One</li>
+          <li data-i18n="about.partner2">Partner Two</li>
+          <li data-i18n="about.partner3">Partner Three</li>
+        </ul>
+      </section>
+
+      <!-- CTA -->
+      <section aria-labelledby="cta-title">
+        <h2 id="cta-title" data-i18n="about.cta_title">Join Us</h2>
+        <p data-i18n="about.cta_p">
+          Have questions, feedback, or want to partner? We’d love to hear from
+          you.
+        </p>
+        <p>
+          <a href="./customer.html" rel="nofollow" data-i18n="about.cta_link"
+            >Contact Us</a
+          >
+        </p>
+      </section>
+    </main>
+
     <div id="app-modal-root"></div>
     <script src="./assets/js/i18n.js"></script>
     <script src="./assets/js/currency.js"></script>
@@ -16,7 +206,7 @@
     <script src="./assets/js/categories.js"></script>
     <script src="./assets/js/pricing.js"></script>
     <script src="./assets/js/cart.js"></script>
-    <script src="./assets/js/ourStores.jss"></script>
+    <script src="./assets/js/ourStores.js"></script>
     <div id="app-footer"></div>
     <script src="./assets/js/footer.js"></script>
   </body>

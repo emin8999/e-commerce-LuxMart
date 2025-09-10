@@ -23,13 +23,10 @@
 })();
 
 // === CONFIG ===
-const API_BASE = "http://116.203.51.133/luxmart/api";
-const PROFILE_URL = `${API_BASE}/api/profile`;
-const UPDATE_URL = (id) => `${API_BASE}/api/update/${encodeURIComponent(id)}`;
-
-// Если требуется авторизация — вставьте токен сюда.
-// Иначе оставьте пустым, и заголовок Authorization добавляться не будет.
-const AUTH_TOKEN = "Bearer YOUR_JWT_TOKEN"; // "Bearer YOUR_JWT_TOKEN"
+// Backend endpoints per comment in HTML: GET /luxmart/api/profile
+const API_ROOT = "http://116.203.51.133/luxmart/api";
+const PROFILE_URL = `${API_ROOT}/profile`;
+const UPDATE_URL = (id) => `${API_ROOT}/update/${encodeURIComponent(id)}`;
 
 // === HELPERS ===
 const $ = (id) => document.getElementById(id);
@@ -47,7 +44,10 @@ function setStatus(type, msg) {
 
 function buildHeaders() {
   const h = { "Content-Type": "application/json" };
-  if (AUTH_TOKEN) h["Authorization"] = AUTH_TOKEN;
+  try {
+    const token = localStorage.getItem("Jwt");
+    if (token) h["Authorization"] = `Bearer ${token}`;
+  } catch (_) {}
   return h;
 }
 
@@ -74,10 +74,10 @@ async function loadProfile() {
     // Ожидаем, что сервер вернёт объект профиля. Подстройте поля под свой бэкенд:
     // Пример ожидаемых полей: { id, firstName, lastName, email, phone, address }
     $("id").value = data.id ?? data.userId ?? "";
-    $("name").value = data.name ?? "";
+    $("firstName").value = data.firstName ?? data.name ?? "";
     $("email").value = data.email ?? "";
 
-    $("surname").value = data.surname ?? "";
+    $("lastName").value = data.lastName ?? data.surname ?? "";
     $("address").value = data.address ?? "";
     $("phone").value = data.phone ?? "";
 
@@ -104,8 +104,7 @@ async function saveProfile(e) {
 
   // Берём только редактируемые/добавляемые поля
   const payload = {
-    name: $("name").value.trim() || null,
-    surname: $("surname").value.trim() || null,
+    lastName: $("lastName").value.trim() || null,
     address: $("address").value.trim() || null,
     phone: normalizePhone($("phone").value) || null,
   };
@@ -132,10 +131,8 @@ async function saveProfile(e) {
 
     // Обновим форму (если сервер вернул новые значения)
     if (updated) {
-      if (typeof updated.name !== "undefined")
-        $("name").value = updated.name ?? "";
       if (typeof updated.lastName !== "undefined")
-        $("surname").value = updated.surname ?? "";
+        $("lastName").value = updated.lastName ?? "";
       if (typeof updated.address !== "undefined")
         $("address").value = updated.address ?? "";
       if (typeof updated.phone !== "undefined")
