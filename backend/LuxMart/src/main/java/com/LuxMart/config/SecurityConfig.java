@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/admin/login").permitAll()
                         .requestMatchers("/api/products/all-products").permitAll()
                         .requestMatchers("/api/products/public/**").permitAll()
+                        .requestMatchers("/api/products/my-store").permitAll()
                         .requestMatchers("/store/register").permitAll()
                         .requestMatchers("/store/login").permitAll()
                         .requestMatchers("/store/all-stores").permitAll()
