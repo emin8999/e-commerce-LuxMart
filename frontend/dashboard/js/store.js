@@ -2,8 +2,8 @@
 (function () {
   const API_BASE = "http://116.203.51.133/luxmart";
   const TOKEN_KEY = "storeJwt";
-  const STORE_INFO_URL = `${API_BASE}/api/store/info`;
-  const STORE_UPDATE_URL = `${API_BASE}/api/store/update`;
+  const STORE_INFO_URL = `${API_BASE}/store/info`;
+  const STORE_UPDATE_URL = `${API_BASE}/store/update/{id}`;
   // Products
   const PRODUCTS_URL = `${API_BASE}/api/products`;
   const PRODUCTS_MY_STORE_URL = `${API_BASE}/api/products/my-store`;
