@@ -73,11 +73,11 @@ async function loadProfile() {
     const data = await res.json();
     // Ожидаем, что сервер вернёт объект профиля. Подстройте поля под свой бэкенд:
     // Пример ожидаемых полей: { id, firstName, lastName, email, phone, address }
-    $("id").value = data.id ?? data.userId ?? "";
-    $("firstName").value = data.firstName ?? "";
+    // $("id").value = data.id ?? data.userId ?? "";
+    $("name").value = data.name ?? "";
     $("email").value = data.email ?? "";
 
-    $("lastName").value = data.lastName ?? "";
+    $("surname").value = data.surname ?? "";
     $("address").value = data.address ?? "";
     $("phone").value = data.phone ?? "";
 
@@ -104,7 +104,8 @@ async function saveProfile(e) {
 
   // Берём только редактируемые/добавляемые поля
   const payload = {
-    lastName: $("lastName").value.trim() || null,
+    name: $("name").value.trim() || null,
+    surname: $("surname").value.trim() || null,
     address: $("address").value.trim() || null,
     phone: normalizePhone($("phone").value) || null,
   };
@@ -131,8 +132,10 @@ async function saveProfile(e) {
 
     // Обновим форму (если сервер вернул новые значения)
     if (updated) {
+      if (typeof updated.name !== "undefined")
+        $("name").value = updated.name ?? "";
       if (typeof updated.lastName !== "undefined")
-        $("lastName").value = updated.lastName ?? "";
+        $("surname").value = updated.surname ?? "";
       if (typeof updated.address !== "undefined")
         $("address").value = updated.address ?? "";
       if (typeof updated.phone !== "undefined")
