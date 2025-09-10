@@ -1,155 +1,242 @@
-// Simple profile page behavior
-(function () {
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      try {
-        localStorage.removeItem("Jwt");
-      } catch (_) {}
-      // After logout, go to login
-      window.location.href = "./login.html";
-    });
-  }
-
-  // Optional: protect page if not logged in
-  try {
-    const token = localStorage.getItem("Jwt");
-    if (!token || token.length === 0) {
-      // redirect to login if not authenticated
-      // Comment out if you want to allow anonymous view
-      window.location.replace("./login.html");
-    }
-  } catch (_) {}
-})();
-
-// === CONFIG ===
-// Backend endpoints per comment in HTML: GET /luxmart/api/profile
-const API_ROOT = "http://116.203.51.133/luxmart/api";
-const PROFILE_URL = `${API_ROOT}/profile`;
-const UPDATE_URL = (id) => `${API_ROOT}/update/${encodeURIComponent(id)}`;
-
-// === HELPERS ===
-const $ = (id) => document.getElementById(id);
-
-function setLoading(isLoading, msg = "") {
-  $("saveBtn").disabled = isLoading;
-  $("loading").textContent = isLoading ? msg || "Loading…" : "";
-}
-
-function setStatus(type, msg) {
-  const el = $("status");
-  el.className = "status " + (type || "");
-  el.textContent = msg || "";
-}
-
-function buildHeaders() {
-  const h = { "Content-Type": "application/json" };
-  try {
-    const token = localStorage.getItem("Jwt");
-    if (token) h["Authorization"] = `Bearer ${token}`;
-  } catch (_) {}
-  return h;
-}
-
-// Небольшая валидация телефона (мягкая)
-function normalizePhone(v) {
-  return String(v || "").trim();
-}
-
-// === FETCH PROFILE ===
-async function loadProfile() {
-  setLoading(true, "Loading profile…");
-  setStatus("", "");
-  try {
-    const res = await fetch(PROFILE_URL, {
-      method: "GET",
-      headers: buildHeaders(),
-    });
-
-    if (!res.ok) {
-      throw new Error(`GET /profile failed: ${res.status} ${res.statusText}`);
-    }
-
-    const data = await res.json();
-    // Ожидаем, что сервер вернёт объект профиля. Подстройте поля под свой бэкенд:
-    // Пример ожидаемых полей: { id, firstName, lastName, email, phone, address }
-    $("id").value = data.id ?? data.userId ?? "";
-    $("firstName").value = data.firstName ?? data.name ?? "";
-    $("email").value = data.email ?? "";
-
-    $("lastName").value = data.lastName ?? data.surname ?? "";
-    $("address").value = data.address ?? "";
-    $("phone").value = data.phone ?? "";
-
-    setStatus("ok", "Profile loaded.");
-    $("debug").textContent = ""; // можно вывести JSON для отладки
-  } catch (err) {
-    console.error(err);
-    setStatus("err", err.message || "Failed to load profile.");
-    $("debug").textContent = String(err);
-  } finally {
-    setLoading(false);
-  }
-}
-
-// === UPDATE / UPSERT PROFILE FIELDS ===
-async function saveProfile(e) {
-  e.preventDefault();
-  setStatus("", "");
-  const id = $("id").value.trim();
-  if (!id) {
-    setStatus("err", "User ID is missing. Cannot update.");
-    return;
-  }
-
-  // Берём только редактируемые/добавляемые поля
-  const payload = {
-    lastName: $("lastName").value.trim() || null,
-    address: $("address").value.trim() || null,
-    phone: normalizePhone($("phone").value) || null,
+// Profile.js - Sizin backend API-nız üçün tam hazır kod
+// GET: http://116.203.51.133/luxmart/api/profile
+// PUT: http://116.203.51.133/luxmart/api/update/{id}
+document.addEventListener("DOMContentLoaded", function () {
+  // ===== API KONFİQURASİYASI =====
+  const API_BASE_URL = "http://116.203.51.133/luxmart/api";
+  const API_ENDPOINTS = {
+    getProfile: API_BASE_URL + "/profile",
+    updateProfile: function (userId) {
+      return API_BASE_URL + "/update/" + userId;
+    },
   };
-
-  setLoading(true, "Saving…");
-  try {
-    const res = await fetch(UPDATE_URL(id), {
-      method: "PUT",
-      headers: buildHeaders(),
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `PUT /update/${id} failed: ${res.status} ${res.statusText} ${
-          text || ""
-        }`
-      );
-    }
-
-    // Предположим, что API возвращает обновлённый профиль
-    const updated = await res.json().catch(() => ({}));
-
-    // Обновим форму (если сервер вернул новые значения)
-    if (updated) {
-      if (typeof updated.lastName !== "undefined")
-        $("lastName").value = updated.lastName ?? "";
-      if (typeof updated.address !== "undefined")
-        $("address").value = updated.address ?? "";
-      if (typeof updated.phone !== "undefined")
-        $("phone").value = updated.phone ?? "";
-    }
-
-    setStatus("ok", "Profile updated successfully.");
-  } catch (err) {
-    console.error(err);
-    setStatus("err", err.message || "Failed to update profile.");
-  } finally {
-    setLoading(false);
+  // ===== UTILITY FUNKSIYALARI =====
+  function getElement(elementId) {
+    return document.getElementById(elementId);
   }
-}
-
-// === INIT ===
-document.addEventListener("DOMContentLoaded", () => {
-  $("profileForm").addEventListener("submit", saveProfile);
-  loadProfile();
+  function getJwtToken() {
+    try {
+      return localStorage.getItem("Jwt");
+    } catch (error) {
+      console.error("JWT token alınmadı:", error);
+      return null;
+    }
+  }
+  function createApiHeaders() {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    const token = getJwtToken();
+    if (token) {
+      headers["Authorization"] = "Bearer " + token;
+    }
+    return headers;
+  }
+  function setLoadingState(isLoading, message) {
+    const loadingEl = getElement("loading");
+    const saveBtn = getElement("saveBtn");
+    if (loadingEl) {
+      loadingEl.textContent = isLoading ? message || "Yüklənir..." : "";
+    }
+    if (saveBtn) {
+      saveBtn.disabled = isLoading;
+    }
+  }
+  function showMessage(type, text) {
+    const statusEl = getElement("status");
+    if (statusEl) {
+      statusEl.className = "status " + (type || "");
+      statusEl.textContent = text || "";
+    }
+  }
+  function clearDebug() {
+    const debugEl = getElement("debug");
+    if (debugEl) {
+      debugEl.textContent = "";
+    }
+  }
+  function showDebug(info) {
+    const debugEl = getElement("debug");
+    if (debugEl) {
+      debugEl.textContent = info;
+    }
+  }
+  // ===== AUTHENTİKASİYA YOXLAMASI =====
+  function checkAuth() {
+    const token = getJwtToken();
+    if (!token) {
+      console.warn("JWT token yoxdur, login səhifəsinə yönləndirilir");
+      window.location.replace("./login.html");
+      return false;
+    }
+    return true;
+  }
+  // ===== LOGOUT =====
+  function handleLogout() {
+    try {
+      localStorage.removeItem("Jwt");
+    } catch (error) {
+      console.error("Logout xətası:", error);
+    }
+    window.location.href = "./login.html";
+  }
+  // ===== PROFİL MƏLUMATLARINI YÜKLƏMƏ =====
+  function loadProfile() {
+    console.log("Profil yüklənir...");
+    setLoadingState(true, "Profil məlumatları alınır...");
+    showMessage("", "");
+    clearDebug();
+    fetch(API_ENDPOINTS.getProfile, {
+      method: "GET",
+      headers: createApiHeaders(),
+    })
+      .then(function (response) {
+        console.log("GET /profile - Status:", response.status);
+        if (!response.ok) {
+          throw new Error(
+            "Server xətası: " + response.status + " " + response.statusText
+          );
+        }
+        return response.json();
+      })
+      .then(function (profileData) {
+        console.log("Profil məlumatları alındı:", profileData);
+        // Backend response: {id, email, name, surname, address, phone, roles, createdAt, updatedAt}
+        fillForm(profileData);
+        showMessage("success", "Profil məlumatları yükləndi");
+      })
+      .catch(function (error) {
+        console.error("Profil yükləmə xətası:", error);
+        showMessage("error", "Profil yüklənə bilmədi: " + error.message);
+        showDebug("Xəta: " + error.toString());
+      })
+      .finally(function () {
+        setLoadingState(false);
+      });
+  }
+  // ===== FORMU DOLDURMA =====
+  function fillForm(data) {
+    console.log("Form doldurulur...");
+    // HTML field mappings
+    const fieldMappings = [
+      { htmlId: "id", backendKey: "id" },
+      { htmlId: "email", backendKey: "email" },
+      { htmlId: "name", backendKey: "name" },
+      { htmlId: "surname", backendKey: "surname" },
+      { htmlId: "address", backendKey: "address" },
+      { htmlId: "phone", backendKey: "phone" },
+    ];
+    fieldMappings.forEach(function (mapping) {
+      const element = getElement(mapping.htmlId);
+      if (element) {
+        const value = data[mapping.backendKey];
+        element.value =
+          value !== null && value !== undefined ? String(value) : "";
+        console.log("Field set:", mapping.htmlId, "=", element.value);
+      } else {
+        console.warn("HTML element tapılmadı:", mapping.htmlId);
+      }
+    });
+  }
+  // ===== PROFİL YENİLƏMƏ =====
+  function saveProfile(event) {
+    event.preventDefault();
+    console.log("Profil yadda saxlanılır...");
+    // User ID götür
+    const idElement = getElement("id");
+    if (!idElement || !idElement.value.trim()) {
+      showMessage("error", "User ID tapılmadı");
+      return;
+    }
+    const userId = idElement.value.trim();
+    // Update payload hazırla - Backend qəbul edən sahələr: name, surname, address, phone
+    const updateData = {
+      name: getFieldValue("name"),
+      surname: getFieldValue("surname"),
+      address: getFieldValue("address"),
+      phone: getFieldValue("phone"),
+    };
+    // Null/empty dəyərləri də göndəririk (backend-də null ola bilər)
+    console.log("Göndəriləcək məlumat:", updateData);
+    setLoadingState(true, "Profil yenilənir...");
+    showMessage("", "");
+    fetch(API_ENDPOINTS.updateProfile(userId), {
+      method: "PUT",
+      headers: createApiHeaders(),
+      body: JSON.stringify(updateData),
+    })
+      .then(function (response) {
+        console.log("PUT /update/" + userId + " - Status:", response.status);
+        if (!response.ok) {
+          return response.text().then(function (errorText) {
+            throw new Error(
+              "Yeniləmə xətası: " + response.status + " - " + errorText
+            );
+          });
+        }
+        // Response JSON olaraq parse et (mətn də ola bilər)
+        return response.json().catch(function () {
+          return { success: true }; // Əgər JSON deyilsə, müvəffəqiyyətli say
+        });
+      })
+      .then(function (result) {
+        console.log("Yeniləmə nəticəsi:", result);
+        showMessage("success", "Profil uğurla yeniləndi!");
+        // Profili yenidən yükləyək ki, yenilənmiş məlumatları göstərək
+        setTimeout(function () {
+          loadProfile();
+        }, 1500);
+      })
+      .catch(function (error) {
+        console.error("Profil yeniləmə xətası:", error);
+        showMessage("error", "Yeniləmə uğursuz oldu: " + error.message);
+        showDebug("Xəta: " + error.toString());
+      })
+      .finally(function () {
+        setLoadingState(false);
+      });
+  }
+  // ===== FIELD DƏYƏRİ GÖTÜRMƏ =====
+  function getFieldValue(elementId) {
+    const element = getElement(elementId);
+    if (element) {
+      const value = element.value.trim();
+      return value.length > 0 ? value : null;
+    }
+    return null;
+  }
+  // ===== EVENT LISTENER QURMA =====
+  function setupEvents() {
+    // Profile form submit
+    const form = getElement("profileForm");
+    if (form) {
+      form.addEventListener("submit", saveProfile);
+      console.log("Form submit event əlavə edildi");
+    } else {
+      console.error("profileForm elementi tapılmadı!");
+    }
+    // Logout button
+    const logoutBtn = getElement("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", handleLogout);
+      console.log("Logout button event əlavə edildi");
+    } else {
+      console.warn("logoutBtn elementi tapılmadı");
+    }
+  }
+  // ===== SƏHIFƏ BAŞLANGICı =====
+  function initPage() {
+    console.log("=== Profile səhifəsi başlanır ===");
+    // Auth yoxla
+    if (!checkAuth()) {
+      return;
+    }
+    // Events qur
+    setupEvents();
+    // Profili yüklə
+    loadProfile();
+    console.log("=== Profile səhifəsi hazır ===");
+  }
+  // Başlat
+  initPage();
 });
