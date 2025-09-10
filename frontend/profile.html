@@ -5,18 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Profile</title>
     <link rel="stylesheet" href="./assets/css/style.css" />
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #111a3a;
+        --text: #e9eefb;
+        --muted: #a8b1c9;
+        --ok: #39d98a;
+        --err: #ff6565;
+        --border: #24325f;
+        --accent: #4aa9ff;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 820px;
+        margin: 32px auto;
+        padding: 20px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 22px;
+      }
+      p.desc {
+        margin: 0 0 16px;
+        color: var(--muted);
+      }
+      form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .full {
+        grid-column: 1 / -1;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        margin: 2px 0 6px;
+      }
+      input {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #0e1734;
+        color: var(--text);
+        outline: none;
+      }
+      input[readonly] {
+        opacity: 0.7;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      button {
+        appearance: none;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: var(--accent);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .status {
+        margin-top: 14px;
+        font-size: 14px;
+      }
+      .status.ok {
+        color: var(--ok);
+      }
+      .status.err {
+        color: var(--err);
+      }
+      .small {
+        font-size: 12px;
+        color: var(--muted);
+      }
+    </style>
   </head>
   <body>
     <div id="app-header"></div>
+    <button class="btn" id="logoutBtn">Log out</button>
     <main class="container">
-      <h1 data-i18n="profile.title">My Profile</h1>
-      <div style="margin: 12px 0">
-        <button class="btn" id="logoutBtn">Log out</button>
+      <div class="wrap">
+        <h1>User Profile</h1>
+        <p class="desc">
+          View and update your profile. If last name, address, or phone are
+          missing, you can add them here.
+        </p>
+
+        <form id="profileForm" class="full" autocomplete="on" novalidate>
+          <div class="full">
+            <label for="id">User ID</label>
+            <input id="id" name="id" type="text" readonly />
+            <div class="small">Taken from GET /luxmart/api/profile</div>
+          </div>
+
+          <div>
+            <label for="firstName">First name</label>
+            <input id="firstName" name="firstName" type="text" readonly />
+          </div>
+
+          <div>
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" readonly />
+          </div>
+
+          <div>
+            <label for="lastName">Last name (add or edit)</label>
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              placeholder="e.g., Smith"
+            />
+          </div>
+
+          <div>
+            <label for="phone">Phone (add or edit)</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="+1 555 123 4567"
+            />
+          </div>
+
+          <div class="full">
+            <label for="address">Address (add or edit)</label>
+            <input
+              id="address"
+              name="address"
+              type="text"
+              placeholder="Street, house, apt., city, ZIP"
+            />
+          </div>
+
+          <div class="row full">
+            <button id="saveBtn" type="submit">Save changes</button>
+            <span id="loading" class="small" aria-live="polite"></span>
+          </div>
+          <div id="status" class="status" aria-live="polite"></div>
+        </form>
+
+        <p id="debug" class="small" style="margin-top: 10px"></p>
       </div>
-      <section>
-        <h3 data-i18n="orders.title">Orders</h3>
-        <div id="ordersList"></div>
-      </section>
     </main>
     <div id="app-modal-root"></div>
     <script src="./assets/js/i18n.js"></script>
