@@ -71,5 +71,7 @@ public class UserController {
 
     userService.updateUser(id, dto);
     return ResponseEntity.ok("User updated successfully");
+
+    
 }
 }
