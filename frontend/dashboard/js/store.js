@@ -2,9 +2,8 @@
 (function () {
   const API_BASE = "http://116.203.51.133/luxmart";
   const TOKEN_KEY = "storeJwt";
-  const STORE_INFO_URL = `${API_BASE}/store/info`;
-  // NOTE: Backend currently has no update endpoint; this is prepared for future use
-  const STORE_UPDATE_URL = `${API_BASE}/store/update`;
+  const STORE_INFO_URL = `${API_BASE}/api/store/info`;
+  const STORE_UPDATE_URL = `${API_BASE}/api/store/update`;
   // Products
   const PRODUCTS_URL = `${API_BASE}/api/products`;
   const PRODUCTS_MY_STORE_URL = `${API_BASE}/api/products/my-store`;
@@ -14,6 +13,21 @@
   const authHeaders = () => {
     const t = localStorage.getItem(TOKEN_KEY);
     return t ? { Authorization: `Bearer ${t}` } : {};
+  };
+
+  // Debug function to check token
+  const debugAuth = () => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    console.log("Token exists:", !!token);
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        console.log("Token payload:", payload);
+        console.log("Token expired:", payload.exp < Date.now() / 1000);
+      } catch (e) {
+        console.log("Token parse error:", e);
+      }
+    }
   };
 
   const $ = (id) => document.getElementById(id);
@@ -71,21 +85,59 @@
   let productsCache = [];
 
   async function loadStoreInfo() {
-    setMsg("");
+    setMsg("Loading store info...");
+    debugAuth(); // Debug için
+
     try {
       const res = await fetch(STORE_INFO_URL, {
-        headers: { ...authHeaders() },
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders(),
+        },
       });
-      if (!res.ok) throw new Error(`Ошибка загрузки: ${res.status}`);
+
+      console.log("Store info response status:", res.status);
+
+      if (res.status === 401) {
+        setMsg("Oturumunuz sona erdi. Lütfen tekrar giriş yapın.");
+        // Redirect to login or clear token
+        localStorage.removeItem(TOKEN_KEY);
+        window.location.href = "../login.html";
+        return;
+      }
+
+      if (res.status === 403) {
+        setMsg("Bu işlem için yetkiniz yok.");
+        return;
+      }
+
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
+
       const data = await res.json();
+      console.log("Store data received:", data);
+
+      // Role kontrolü için debug
+      if (data.roles) {
+        console.log("User roles:", data.roles);
+        const hasStoreRole = Array.isArray(data.roles)
+          ? data.roles.some((role) => role === "STORE" || role === "ROLE_STORE")
+          : false;
+        console.log("Has STORE role:", hasStoreRole);
+      }
+
       originalData = data;
       if (data && (data.id || data.storeId)) {
         storeId = data.id ?? data.storeId;
       }
       fillForm(data);
+      setMsg("Store info loaded successfully", true);
     } catch (e) {
-      console.error(e);
-      setMsg("Не удалось загрузить информацию о магазине");
+      console.error("Store info load error:", e);
+      setMsg(`Не удалось загрузить информацию о магазине: ${e.message}`);
     }
   }
 
@@ -165,29 +217,52 @@
   }
 
   async function loadProducts() {
-    setProductsMsg("Loading…");
+    setProductsMsg("Loading products...");
     try {
       // Prefer server-side filter for current store
       let res = await fetch(PRODUCTS_MY_STORE_URL, {
-        headers: { ...authHeaders() },
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders(),
+        },
       });
+
+      if (res.status === 401) {
+        setProductsMsg("Oturumunuz sona erdi. Lütfen tekrar giriş yapın.");
+        return;
+      }
+
+      if (res.status === 403) {
+        setProductsMsg("Bu işlem için yetkiniz yok.");
+        return;
+      }
+
       if (!res.ok) {
         // Fallback to legacy endpoint if specific one is unavailable
-        res = await fetch(PRODUCTS_URL, { headers: { ...authHeaders() } });
+        res = await fetch(PRODUCTS_URL, {
+          headers: {
+            "Content-Type": "application/json",
+            ...authHeaders(),
+          },
+        });
       }
+
       if (!res.ok) throw new Error(`Ошибка продуктов: ${res.status}`);
+
       const all = await res.json();
       const list = Array.isArray(all)
         ? all
         : Array.isArray(all?.content)
         ? all.content
         : [];
+
       // If backend already scopes to store, no extra filtering needed
       productsCache = list;
       renderProducts(productsCache);
-      setProductsMsg(`Loaded: ${productsCache.length}`, true);
+      setProductsMsg(`Loaded: ${productsCache.length} products`, true);
     } catch (e) {
-      console.error(e);
+      console.error("Products load error:", e);
       setProductsMsg("Не удалось загрузить товары");
     }
   }
@@ -242,15 +317,25 @@
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
-    // Build payload: send multipart to allow image updates
-    // If backend doesn't accept PUT multipart, try POST fallback with method override
+
     let ok = false;
     try {
       const res = await fetch(PRODUCT_BY_ID(id), {
         method: "PUT",
-        headers: { ...authHeaders() }, // do not set content-type
+        headers: { ...authHeaders() }, // do not set content-type for FormData
         body: fd,
       });
+
+      if (res.status === 401) {
+        setProductsMsg("Oturumunuz sona erdi. Lütfen tekrar giriş yapın.");
+        return;
+      }
+
+      if (res.status === 403) {
+        setProductsMsg("Bu işlem için yetkiniz yok.");
+        return;
+      }
+
       if (!res.ok) throw new Error(String(res.status));
       ok = true;
     } catch (err) {
@@ -280,14 +365,28 @@
     try {
       const res = await fetch(PRODUCT_BY_ID(id), {
         method: "DELETE",
-        headers: { ...authHeaders() },
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders(),
+        },
       });
+
+      if (res.status === 401) {
+        setProductsMsg("Oturumunuz sona erdi. Lütfen tekrar giriş yapın.");
+        return;
+      }
+
+      if (res.status === 403) {
+        setProductsMsg("Bu işlem için yetkiniz yok.");
+        return;
+      }
+
       if (!res.ok) throw new Error(String(res.status));
       setProductsMsg("Товар удалён", true);
       productsCache = productsCache.filter((p) => String(p.id) !== String(id));
       renderProducts(productsCache);
     } catch (e) {
-      console.error(e);
+      console.error("Product delete error:", e);
       setProductsMsg("Не удалось удалить товар");
     }
   }
@@ -325,46 +424,79 @@
 
   async function onSave(e) {
     e.preventDefault();
-    setMsg("");
+    setMsg("Saving...");
 
-    const payload = {
-      storeName: $("storeName").value.trim(),
-      ownerName: $("ownerName").value.trim(),
-      phone: $("phone").value.trim(),
-      location: $("location").value.trim(),
-      category: $("category").value.trim(),
-      storeDescription: $("storeDescription").value.trim(),
-      slug: $("slug").value.trim(),
-    };
+    // FormData kullan çünkü logo upload olabilir
+    const formData = new FormData();
+    formData.append("storeName", $("storeName").value.trim());
+    formData.append("ownerName", $("ownerName").value.trim());
+    formData.append("phone", $("phone").value.trim());
+    formData.append("location", $("location").value.trim());
+    formData.append("category", $("category").value.trim());
+    formData.append("storeDescription", $("storeDescription").value.trim());
 
-    // If backend update endpoint is not available, inform user gracefully
+    // Slug alanını ekle (eğer backend'de slug update yapılıyorsa)
+    const slugValue = $("slug").value.trim();
+    if (slugValue) {
+      formData.append("slug", slugValue);
+    }
+
+    // Logo file varsa ekle
+    const logoInput = document.querySelector('input[name="logo"]');
+    if (logoInput && logoInput.files.length > 0) {
+      formData.append("logo", logoInput.files[0]);
+    }
+
     try {
       const res = await fetch(STORE_UPDATE_URL, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify(payload),
+        headers: { ...authHeaders() }, // Content-Type header'ını ekleme, FormData otomatik ayarlar
+        body: formData,
       });
-      if (!res.ok) {
-        throw new Error(
-          `Endpoint недоступен (${res.status}). Свяжитесь с разработчиком.`
-        );
+
+      console.log("Update response status:", res.status);
+
+      if (res.status === 401) {
+        setMsg("Oturumunuz sona erdi. Lütfen tekrar giriş yapın.");
+        localStorage.removeItem(TOKEN_KEY);
+        window.location.href = "../login.html";
+        return;
       }
-      const updated = await res.json().catch(() => payload);
-      originalData = { ...originalData, ...updated };
-      fillForm(originalData);
+
+      if (res.status === 403) {
+        setMsg("Bu işlem için yetkiniz yok.");
+        return;
+      }
+
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => "");
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
+
+      const updated = await res.json().catch(() => null);
+      console.log("Update response:", updated);
+
+      if (updated) {
+        originalData = { ...originalData, ...updated };
+        fillForm(originalData);
+      }
+
       setDisabled(true);
       setMsg("Данные магазина сохранены", true);
     } catch (err) {
-      console.warn("Store update skipped:", err.message);
-      setMsg(
-        "Сохранение пока недоступно. Отображение работает, endpoint для обновления отсутствует."
-      );
+      console.error("Store update error:", err);
+      setMsg(`Ошибка сохранения: ${err.message}`);
     }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     if (!location.pathname.endsWith("/store.html")) return;
+
     setDisabled(true);
+
+    // Debug için token kontrolü
+    debugAuth();
+
     loadStoreInfo().then(() => loadProducts());
 
     $("editStoreBtn")?.addEventListener("click", enterEditMode);
