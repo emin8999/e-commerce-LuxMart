@@ -3,6 +3,63 @@ let storesData = [];
 let filteredData = [];
 
 // Sample data - Backend API-dən gələcək
+// const mockStoresData = [
+//   {
+//     storeName: "Tech Haven",
+//     ownerName: "Anar Mammadov",
+//     slug: "tech-haven",
+//     email: "anar@techhaven.az",
+//     storeDescription: "Premium electronics and gadgets store",
+//     logo: "https://via.placeholder.com/100x100/667eea/ffffff?text=TH",
+//     phone: "+994 12 555 0101",
+//     location: "Baku, Azerbaijan",
+//     category: "electronics",
+//   },
+//   {
+//     storeName: "Fashion Forward",
+//     ownerName: "Leyla Hasanova",
+//     slug: "fashion-forward",
+//     email: "leyla@fashionforward.az",
+//     storeDescription: "Trendy clothing and accessories",
+//     logo: "https://via.placeholder.com/100x100/764ba2/ffffff?text=FF",
+//     phone: "+994 12 555 0102",
+//     location: "Baku, Azerbaijan",
+//     category: "fashion",
+//   },
+//   {
+//     storeName: "Book Paradise",
+//     ownerName: "Rashad Aliyev",
+//     slug: "book-paradise",
+//     email: "rashad@bookparadise.az",
+//     storeDescription: "Wide collection of books and educational materials",
+//     logo: "https://via.placeholder.com/100x100/28a745/ffffff?text=BP",
+//     phone: "+994 12 555 0103",
+//     location: "Baku, Azerbaijan",
+//     category: "books",
+//   },
+//   {
+//     storeName: "Gourmet Corner",
+//     ownerName: "Nigar Qasimova",
+//     slug: "gourmet-corner",
+//     email: "nigar@gourmetcorner.az",
+//     storeDescription: "Organic foods and specialty ingredients",
+//     logo: "https://via.placeholder.com/100x100/ffc107/ffffff?text=GC",
+//     phone: "+994 12 555 0104",
+//     location: "Baku, Azerbaijan",
+//     category: "food",
+//   },
+//   {
+//     storeName: "Sport Zone",
+//     ownerName: "Elvin Huseynov",
+//     slug: "sport-zone",
+//     email: "elvin@sportzone.az",
+//     storeDescription: "Sports equipment and fitness gear",
+//     logo: "https://via.placeholder.com/100x100/dc3545/ffffff?text=SZ",
+//     phone: "+994 12 555 0105",
+//     location: "Baku, Azerbaijan",
+//     category: "sports",
+//   },
+// ];
 
 // Initialize data
 function initializeStores() {
@@ -49,24 +106,35 @@ function renderStoresTable() {
                             (store) => `
                             <tr>
                                 <td>
-                                    <img src="${store.logo}" alt="${
-                              store.storeName
-                            }" class="store-logo" 
-                                         onerror="this.src='https://via.placeholder.com/50x50/667eea/ffffff?text=${store.storeName.charAt(
-                                           0
-                                         )}'">
+                                    <img src="${
+                                      store.logo ||
+                                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                        store.storeName || "S"
+                                      )}&background=667eea&color=fff&size=100`
+                                    }" 
+                                         alt="${store.storeName}" 
+                                         class="store-logo" 
+                                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                           (store.storeName || "Store").charAt(
+                                             0
+                                           )
+                                         )}&background=667eea&color=fff&size=100'">
                                 </td>
                                 <td><strong>${
-                                  store.storeName
-                                }</strong><br><small>${store.slug}</small></td>
-                                <td>${store.ownerName}</td>
-                                <td>${store.email}</td>
-                                <td>${store.phone}</td>
-                                <td>${store.location}</td>
+                                  store.storeName || "N/A"
+                                }</strong><br><small>${
+                              store.slug || "no-slug"
+                            }</small></td>
+                                <td>${store.ownerName || "N/A"}</td>
+                                <td>${store.email || "N/A"}</td>
+                                <td>${store.phone || "N/A"}</td>
+                                <td>${store.location || "N/A"}</td>
                                 <td><span class="store-category">${
-                                  store.category
+                                  store.category || "general"
                                 }</span></td>
-                                <td>${store.storeDescription}</td>
+                                <td>${
+                                  store.storeDescription || "No description"
+                                }</td>
                             </tr>
                         `
                           )
@@ -76,6 +144,36 @@ function renderStoresTable() {
             `;
 
   container.innerHTML = tableHTML;
+
+  // Populate category filter with unique categories from real data
+  populateCategoryFilter();
+}
+
+// Populate category filter with actual categories from API data
+function populateCategoryFilter() {
+  const categoryFilter = document.querySelector(".category-filter");
+  const currentValue = categoryFilter.value;
+
+  // Get unique categories from stores data
+  const categories = [
+    ...new Set(
+      storesData
+        .map((store) => store.category)
+        .filter((cat) => cat && cat !== "general" && cat !== "")
+    ),
+  ].sort();
+
+  // Clear and repopulate options
+  categoryFilter.innerHTML = '<option value="">All Categories</option>';
+  categories.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = category.toLowerCase();
+    option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+    categoryFilter.appendChild(option);
+  });
+
+  // Restore previous selection
+  categoryFilter.value = currentValue;
 }
 
 // Filter stores by search
