@@ -29,7 +29,7 @@ const UPDATE_URL = (id) => `${API_BASE}/update/${encodeURIComponent(id)}`;
 
 // Если требуется авторизация — вставьте токен сюда.
 // Иначе оставьте пустым, и заголовок Authorization добавляться не будет.
-const AUTH_TOKEN = ""; // "Bearer YOUR_JWT_TOKEN"
+const AUTH_TOKEN = "Bearer YOUR_JWT_TOKEN"; // "Bearer YOUR_JWT_TOKEN"
 
 // === HELPERS ===
 const $ = (id) => document.getElementById(id);
