@@ -46,6 +46,8 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
                         .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("api/profile").permitAll()
+                        .requestMatchers("/api/update/**").permitAll()
                         .requestMatchers("/admin/login").permitAll()
                         .requestMatchers("/api/products/all-products").permitAll()
                         .requestMatchers("/api/products/public/**").permitAll()
