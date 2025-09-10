@@ -3,22 +3,248 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Product</title>
-
+    <title>Product View</title>
     <link rel="stylesheet" href="./assets/css/productView.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
+    <style>
+      /* Əsas product view stilləri */
+      .product-container {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .gallery {
+        flex: 1;
+      }
+
+      .gallery-main {
+        width: 100%;
+        height: 400px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .gallery-main img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .no-image {
+        font-size: 2rem;
+        color: #ccc;
+      }
+
+      .gallery-thumbs {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .thumb {
+        width: 80px;
+        height: 80px;
+        border: 2px solid transparent;
+        border-radius: 4px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+
+      .thumb.active {
+        border-color: #007bff;
+      }
+
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .product-info {
+        flex: 1;
+      }
+
+      .product-info h1 {
+        margin-bottom: 1rem;
+        font-size: 2rem;
+      }
+
+      .price-section {
+        margin-bottom: 1rem;
+      }
+
+      .price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #007bff;
+      }
+
+      .old-price {
+        font-size: 1.2rem;
+        color: #999;
+        text-decoration: line-through;
+        margin-left: 0.5rem;
+      }
+
+      .description {
+        margin-bottom: 2rem;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .product-controls {
+        margin-bottom: 2rem;
+      }
+
+      .variant-selector {
+        margin-bottom: 1rem;
+      }
+
+      .variant-selector label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+
+      .variant-selector select {
+        width: 100%;
+        max-width: 300px;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .btn-primary {
+        background-color: #007bff;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+      }
+
+      .btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+
+      /* Similar products */
+      .similar {
+        margin-top: 3rem;
+      }
+
+      .similar h2 {
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+
+      .product-card {
+        text-decoration: none;
+        color: inherit;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .product-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-image {
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+      }
+
+      .card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .card-body {
+        padding: 1rem;
+      }
+
+      .card-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+      }
+
+      .card-price {
+        color: #007bff;
+        font-weight: 600;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .product-container {
+          flex-direction: column;
+        }
+
+        .gallery-main {
+          height: 300px;
+        }
+
+        .product-info h1 {
+          font-size: 1.5rem;
+        }
+
+        .grid {
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="app-header"></div>
-    <main class="container">
-      <div id="productView" class="product"></div>
 
+    <main class="container">
+      <!-- Product details yeri -->
+      <div id="productView" class="product">
+        <p>Məhsul yüklənir...</p>
+      </div>
+
+      <!-- Oxşar məhsullar bölməsi -->
       <section class="similar">
-        <h2>Similar products</h2>
+        <h2>Oxşar məhsullar</h2>
         <div id="similarRow" class="grid"></div>
       </section>
     </main>
+
     <div id="app-modal-root"></div>
+
+    <!-- Scripts -->
     <script src="./assets/js/i18n.js"></script>
     <script src="./assets/js/currency.js"></script>
     <script src="./assets/js/header.js"></script>
@@ -27,6 +253,7 @@
     <script src="./assets/js/cart.js"></script>
     <script src="./assets/js/products.js"></script>
     <script src="./assets/js/productView.js"></script>
+
     <div id="app-footer"></div>
     <script src="./assets/js/footer.js"></script>
   </body>

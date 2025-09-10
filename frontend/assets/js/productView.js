@@ -1,297 +1,472 @@
-// Prefer global APP_CONFIG.apiBase (already includes "/api")
-const API_VIEW_BASE = "http://116.203.51.133/luxmart";
-const API_ROOT =
-  window.APP_CONFIG && window.APP_CONFIG.apiBase
-    ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
-    : `${API_VIEW_BASE.replace(/\/$/, "")}/api`;
+// ProductView.js - Düzəldilmiş versiya
+// Backend API: http://116.203.51.133/luxmart/api
 
-/* helpers */
-function q(sel) {
-  return document.querySelector(sel);
-}
-function formatCurrencyFromUSD(nUSD) {
-  const cur = window.currency?.getCurrency?.() || 'USD';
-  const sym = window.currency?.symbol?.(cur) || '$';
-  const converted = window.currency?.convertUSD?.(Number(nUSD) || 0, cur) || Number(nUSD) || 0;
-  return `${sym}${converted.toFixed(2)}`;
-}
-function computePriceUSD(p) {
-  const base = Number(p.basePriceUSD ?? 0);
-  const sale = p.salePriceUSD != null ? Number(p.salePriceUSD) : null;
-  const hasSale = sale != null && isFinite(sale) && sale > 0 && sale < base;
-  return { currentUSD: hasSale ? sale : base, oldUSD: hasSale ? base : null };
-}
-function renderPriceHTML(p) {
-  const pair = computePriceUSD(p);
-  const cur = formatCurrencyFromUSD(pair.currentUSD);
-  const old = pair.oldUSD != null ? formatCurrencyFromUSD(pair.oldUSD) : null;
-  return `<span class="price">${cur}</span>${old ? ` <span class=\"old\">${old}</span>` : ''}`;
-}
-function normalizeImg(src) {
-  if (!src) return "";
-  const s = String(src).trim();
-  if (/^(https?:)?\/\//i.test(s) || /^data:/i.test(s)) return s;
-  const rawBase = API_ROOT.replace(/\/?api\/?$/, "");
-  return `${rawBase}/${s.replace(/^\/+/, "")}`;
-}
+document.addEventListener("DOMContentLoaded", async function () {
+  // ===== KONFİQURASİYA =====
+  const API_BASE = "http://116.203.51.133/luxmart/api";
+  const API_ENDPOINTS = {
+    productById: function (id) {
+      return API_BASE + "/products/public/" + encodeURIComponent(id);
+    },
+    allProducts: API_BASE + "/products/public",
+    categoryProducts: function (categoryId) {
+      return API_BASE + "/products/category/" + encodeURIComponent(categoryId);
+    },
+  };
 
-/* cart helpers (use global cart.js if available) */
-function addToGlobalCart(item) {
-  if (window.cart && typeof window.cart.add === "function") {
-    window.cart.add(item);
-    if (typeof window.renderCartBadge === "function") window.renderCartBadge();
-  } else {
-    // ultra-fallback: minimal localStorage push
-    const KEY = "cart";
-    let data;
+  // ===== HELPER FUNKSIYALARI =====
+  function getElement(selector) {
+    return document.querySelector(selector);
+  }
+
+  function getAllElements(selector) {
+    return Array.from(document.querySelectorAll(selector));
+  }
+
+  function getJwtToken() {
     try {
-      data = JSON.parse(localStorage.getItem(KEY) || '{"items":[]}');
-    } catch {
-      data = { items: [] };
+      return localStorage.getItem("Jwt");
+    } catch (error) {
+      return null;
     }
-    data.items.push(item);
-    localStorage.setItem(KEY, JSON.stringify(data));
-    const el = q("#cartBadge");
-    if (el) el.textContent = String(data.items.reduce((s,i)=>s+(i.qty||1),0));
   }
-}
 
-async function getJSON(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
-}
+  function createApiHeaders() {
+    const headers = {
+      "Content-Type": "application/json",
+    };
 
-// Robust fetch by ID: use /api/products/public/{id}, then fallbacks
-async function getProductById(id) {
-  // 1) Primary: public-by-id endpoint
-  try {
-    const r = await fetch(
-      `${API_ROOT}/products/public/${encodeURIComponent(id)}`
+    const token = getJwtToken();
+    if (token) {
+      headers["Authorization"] = "Bearer " + token;
+    }
+
+    return headers;
+  }
+
+  // Currency formatting
+  function formatPrice(priceUSD) {
+    const currency = window.currency?.getCurrency?.() || "USD";
+    const symbol = window.currency?.symbol?.(currency) || "$";
+    const converted =
+      window.currency?.convertUSD?.(Number(priceUSD) || 0, currency) ||
+      Number(priceUSD) ||
+      0;
+    return symbol + converted.toFixed(2);
+  }
+
+  // Price hesablaması (sale price vs normal price)
+  function calculatePrice(product) {
+    const basePrice = Number(product.basePriceUSD || 0);
+    const salePrice =
+      product.salePriceUSD != null ? Number(product.salePriceUSD) : null;
+    const hasDiscount =
+      salePrice != null && salePrice > 0 && salePrice < basePrice;
+
+    return {
+      currentPrice: hasDiscount ? salePrice : basePrice,
+      oldPrice: hasDiscount ? basePrice : null,
+    };
+  }
+
+  // Price HTML yaratma
+  function createPriceHTML(product) {
+    const prices = calculatePrice(product);
+    const currentFormatted = formatPrice(prices.currentPrice);
+    const oldFormatted = prices.oldPrice ? formatPrice(prices.oldPrice) : null;
+
+    return (
+      '<span class="price">' +
+      currentFormatted +
+      "</span>" +
+      (oldFormatted
+        ? ' <span class="old-price">' + oldFormatted + "</span>"
+        : "")
     );
-    if (r.ok) return await r.json();
-  } catch (_) {}
-
-  // 2) Fallback: load public products and find locally
-  try {
-    const all = await getJSON(`${API_ROOT}/products/public`);
-    const list = Array.isArray(all)
-      ? all
-      : Array.isArray(all?.content)
-      ? all.content
-      : [];
-    const found = list.find((x) => String(x.id) === String(id));
-    if (found) return found;
-  } catch (_) {}
-
-  // 3) Fallback: load all products and find locally
-  const all2 = await getJSON(`${API_ROOT}/products/all-products`);
-  const list2 = Array.isArray(all2)
-    ? all2
-    : Array.isArray(all2?.content)
-    ? all2.content
-    : [];
-  const found2 = list2.find((x) => String(x.id) === String(id));
-  if (!found2) throw new Error("Product not found");
-  return found2;
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  try { if (typeof window.renderCartBadge === "function") window.renderCartBadge(); } catch(_){}
-
-  const params = new URLSearchParams(location.search);
-  const id = params.get("id");
-  if (!id) {
-    q("#productView").innerHTML = "<p>Product not found.</p>";
-    return;
   }
 
-  try {
-    const p = await getProductById(id);
+  // Image URL normallaşdırma
+  function normalizeImageUrl(imageUrl) {
+    if (!imageUrl) return "";
 
-    // Build gallery
-    const imgs = Array.isArray(p.imageUrls)
-      ? p.imageUrls.map(normalizeImg)
+    const url = String(imageUrl).trim();
+    if (/^(https?:)?\/\//i.test(url) || /^data:/i.test(url)) {
+      return url;
+    }
+
+    const baseUrl = API_BASE.replace(/\/api\/?$/, "");
+    return baseUrl + "/" + url.replace(/^\/+/, "");
+  }
+
+  // Cart-a əlavə etmə
+  function addToCart(item) {
+    if (window.cart && typeof window.cart.add === "function") {
+      window.cart.add(item);
+      if (typeof window.renderCartBadge === "function") {
+        window.renderCartBadge();
+      }
+    } else {
+      // Fallback: localStorage
+      const cartKey = "cart";
+      let cartData;
+      try {
+        cartData = JSON.parse(localStorage.getItem(cartKey) || '{"items":[]}');
+      } catch (error) {
+        cartData = { items: [] };
+      }
+      cartData.items.push(item);
+      localStorage.setItem(cartKey, JSON.stringify(cartData));
+
+      const cartBadge = getElement("#cartBadge");
+      if (cartBadge) {
+        const totalQty = cartData.items.reduce(
+          (sum, item) => sum + (item.qty || 1),
+          0
+        );
+        cartBadge.textContent = String(totalQty);
+      }
+    }
+  }
+
+  // ===== API ÇAĞIRILARI =====
+  async function fetchJSON(url) {
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: createApiHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status + ": " + response.statusText);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("API xətası:", error);
+      throw error;
+    }
+  }
+
+  // Product by ID alınması
+  async function getProductById(productId) {
+    try {
+      // Birinci cəhd: specific endpoint
+      const productData = await fetchJSON(API_ENDPOINTS.productById(productId));
+      return productData;
+    } catch (error) {
+      console.warn("Product by ID endpoint uğursuz, fallback...");
+
+      try {
+        // İkinci cəhd: bütün products arasında axtarış
+        const allProducts = await fetchJSON(API_ENDPOINTS.allProducts);
+        const productList = Array.isArray(allProducts)
+          ? allProducts
+          : allProducts.content && Array.isArray(allProducts.content)
+          ? allProducts.content
+          : [];
+
+        const foundProduct = productList.find(
+          (p) => String(p.id) === String(productId)
+        );
+        if (!foundProduct) {
+          throw new Error("Product tapılmadı");
+        }
+
+        return foundProduct;
+      } catch (fallbackError) {
+        console.error("Fallback də uğursuz:", fallbackError);
+        throw new Error("Product yüklənə bilmədi");
+      }
+    }
+  }
+
+  // ===== PRODUCT DISPLAY =====
+  function createGalleryHTML(product) {
+    const images = Array.isArray(product.imageUrls)
+      ? product.imageUrls.map(normalizeImageUrl)
       : [];
-    const main = imgs[0] || "";
-    const gallery = `
+    const mainImage = images[0] || "";
+
+    const galleryHTML = `
       <div class="gallery">
-        <div class="gallery-main" id="gMain">${
-          main ? `<img src="${main}" alt="${p.title}">` : "🛍️"
-        }</div>
-        <div class="gallery-thumbs" id="gThumbs">${imgs
-          .map(
-            (url, idx) =>
-              `<div class="thumb ${
-                idx === 0 ? "active" : ""
-              }" data-src="${url}"><img src="${url}" alt=""></div>`
-          )
-          .join("")}
+        <div class="gallery-main" id="galleryMain">
+          ${
+            mainImage
+              ? '<img src="' +
+                mainImage +
+                '" alt="' +
+                (product.title || "Product") +
+                '">'
+              : '<div class="no-image">🛍️</div>'
+          }
+        </div>
+        <div class="gallery-thumbs" id="galleryThumbs">
+          ${images
+            .map(
+              (url, index) =>
+                '<div class="thumb ' +
+                (index === 0 ? "active" : "") +
+                '" data-src="' +
+                url +
+                '">' +
+                '<img src="' +
+                url +
+                '" alt="">' +
+                "</div>"
+            )
+            .join("")}
         </div>
       </div>`;
 
-    // Pricing (currency-aware)
-    const priceHTML = renderPriceHTML(p);
+    return galleryHTML;
+  }
 
-    // Variants (size + stockQuantity)
-    const variants = Array.isArray(p.variants) ? p.variants : [];
-    const options = variants
-      .map((v) => {
-        const stock = Number(v.stockQuantity ?? v.stock ?? 0);
+  function createProductInfoHTML(product) {
+    const priceHTML = createPriceHTML(product);
+    const variants = Array.isArray(product.variants) ? product.variants : [];
+
+    const variantOptions = variants
+      .map((variant) => {
+        const stock = Number(variant.stockQuantity || variant.stock || 0);
         const disabled = stock <= 0 ? "disabled" : "";
-        const label = `${v.size ?? ""} — stock: ${stock}`;
-        return `<option value="${v.id}" ${disabled}>${label}</option>`;
+        const label = (variant.size || "Default") + " — Stok: " + stock;
+        return (
+          '<option value="' +
+          variant.id +
+          '" ' +
+          disabled +
+          ">" +
+          label +
+          "</option>"
+        );
       })
       .join("");
 
-    const info = `
-      <div class="info">
-        <h1>${p.title}</h1>
-        <div class="priceRow" id="pvPriceRow">${priceHTML}</div>
-        ${p.description ? `<p class="desc">${p.description}</p>` : ""}
+    const infoHTML = `
+      <div class="product-info">
+        <h1>${product.title || "Unnamed Product"}</h1>
+        <div class="price-section" id="priceSection">${priceHTML}</div>
+        ${
+          product.description
+            ? '<p class="description">' + product.description + "</p>"
+            : ""
+        }
 
-        <div class="controls">
+        <div class="product-controls">
           ${
-            variants.length
+            variants.length > 0
               ? `
-            <div class="select">
-              <label for="variantSel">Size</label>
-              <select id="variantSel">${options}</select>
+            <div class="variant-selector">
+              <label for="variantSelect">Ölçü seçin:</label>
+              <select id="variantSelect">${variantOptions}</select>
             </div>`
               : ""
           }
 
           <div class="actions">
-            <button id="addToCart" class="btn btn-primary">Add to cart</button>
+            <button id="addToCartBtn" class="btn btn-primary">Səbətə əlavə et</button>
           </div>
         </div>
       </div>`;
 
-    q("#productView").innerHTML = `
-      <div class="product">
-        ${gallery}
-        ${info}
-      </div>`;
+    return infoHTML;
+  }
 
-    // Thumbs click
-    const gMain = q("#gMain");
-    qAll("#gThumbs .thumb").forEach((el) => {
-      el.addEventListener("click", () => {
-        qAll("#gThumbs .thumb").forEach((x) => x.classList.remove("active"));
-        el.classList.add("active");
-        const src = el.getAttribute("data-src");
-        gMain.innerHTML = src ? `<img src="${src}" alt="${p.title}">` : "🛍️";
-      });
-    });
+  // ===== EVENT HANDLERS =====
+  function setupGalleryEvents(product) {
+    const mainGallery = getElement("#galleryMain");
+    const thumbs = getAllElements("#galleryThumbs .thumb");
 
-    // Add to cart
-    q("#addToCart").addEventListener("click", () => {
-      const sel = q("#variantSel");
-      const vId = sel ? sel.value : null;
-      const v =
-        (variants || []).find((x) => String(x.id) === String(vId)) || {};
-      addToGlobalCart({
-        productId: p.id,
-        variantId: v.id || null,
-        storeId: p.storeId || null,
-        title: p.title,
-        size: v.size,
-        basePriceUSD: p.basePriceUSD,
-        salePriceUSD: p.salePriceUSD,
-        qty: 1,
-      });
-      alert("Added to cart");
-    });
+    thumbs.forEach((thumb) => {
+      thumb.addEventListener("click", function () {
+        thumbs.forEach((t) => t.classList.remove("active"));
+        thumb.classList.add("active");
 
-    // Similar (по категории, если есть; иначе по storeId)
-    try {
-      let similar = [];
-      if (p.categoryId != null) {
-        try {
-          const list = await getJSON(
-            `${API_ROOT}/products/category/${encodeURIComponent(p.categoryId)}`
-          );
-          similar = (Array.isArray(list) ? list : [])
-            .filter((x) => String(x.id) !== String(p.id))
-            .slice(0, 12);
-        } catch {
-          const all = await getJSON(`${API_ROOT}/products/all-products`);
-          similar = (Array.isArray(all) ? all : [])
-            .filter(
-              (x) =>
-                String(x.categoryId) === String(p.categoryId) &&
-                String(x.id) !== String(p.id)
-            )
-            .slice(0, 12);
+        const imageSrc = thumb.getAttribute("data-src");
+        if (mainGallery && imageSrc) {
+          mainGallery.innerHTML =
+            '<img src="' +
+            imageSrc +
+            '" alt="' +
+            (product.title || "Product") +
+            '">';
         }
-      } else {
-        // Фоллбек: по тому же магазину
-        const all = await getJSON(`${API_ROOT}/products/all-products`);
-        similar = (Array.isArray(all) ? all : [])
+      });
+    });
+  }
+
+  function setupAddToCartEvent(product) {
+    const addToCartBtn = getElement("#addToCartBtn");
+    if (!addToCartBtn) return;
+
+    addToCartBtn.addEventListener("click", function () {
+      const variantSelect = getElement("#variantSelect");
+      const selectedVariantId = variantSelect ? variantSelect.value : null;
+
+      const selectedVariant =
+        (product.variants || []).find(
+          (v) => String(v.id) === String(selectedVariantId)
+        ) || {};
+
+      const cartItem = {
+        productId: product.id,
+        variantId: selectedVariant.id || null,
+        storeId: product.storeId || null,
+        title: product.title,
+        size: selectedVariant.size || null,
+        basePriceUSD: product.basePriceUSD,
+        salePriceUSD: product.salePriceUSD,
+        qty: 1,
+      };
+
+      addToCart(cartItem);
+      alert("Məhsul səbətə əlavə edildi!");
+    });
+  }
+
+  // ===== SIMILAR PRODUCTS =====
+  async function loadSimilarProducts(product) {
+    try {
+      let similarProducts = [];
+
+      // Əgər category var isə, həmin kateqoriyadan məhsullar gətir
+      if (product.categoryId) {
+        try {
+          const categoryProducts = await fetchJSON(
+            API_ENDPOINTS.categoryProducts(product.categoryId)
+          );
+          similarProducts = (
+            Array.isArray(categoryProducts) ? categoryProducts : []
+          )
+            .filter((p) => String(p.id) !== String(product.id))
+            .slice(0, 12);
+        } catch (error) {
+          console.warn("Category products yüklənmədi, fallback...");
+        }
+      }
+
+      // Əgər category products yox isə, eyni store-dan məhsullar gətir
+      if (similarProducts.length === 0) {
+        const allProducts = await fetchJSON(API_ENDPOINTS.allProducts);
+        const productList = Array.isArray(allProducts)
+          ? allProducts
+          : allProducts.content && Array.isArray(allProducts.content)
+          ? allProducts.content
+          : [];
+
+        similarProducts = productList
           .filter(
-            (x) =>
-              String(x.storeId) === String(p.storeId) &&
-              String(x.id) !== String(p.id)
+            (p) =>
+              String(p.storeId) === String(product.storeId) &&
+              String(p.id) !== String(product.id)
           )
           .slice(0, 12);
       }
 
-      const sRow = q("#similarRow");
-      sRow.innerHTML = "";
-      similar.forEach((sp) => {
-        const img =
-          sp.imageUrls && sp.imageUrls.length
-            ? normalizeImg(sp.imageUrls[0])
+      const similarRow = getElement("#similarRow");
+      if (!similarRow) return;
+
+      similarRow.innerHTML = "";
+
+      similarProducts.forEach((similarProduct) => {
+        const productImage =
+          similarProduct.imageUrls && similarProduct.imageUrls.length
+            ? normalizeImageUrl(similarProduct.imageUrls[0])
             : "";
-        const a = document.createElement("a");
-        a.className = "card";
-        a.href = `./productView.html?id=${encodeURIComponent(sp.id)}`;
-        a.innerHTML = `
-          <div class="thumb">${
-            img ? `<img src="${img}" alt="${sp.title}">` : "🛍️"
-          }</div>
-          <div class="body">
-            <div class="title">${sp.title}</div>
-            <div class="priceRow" id="simPrice-${sp.id}">${renderPriceHTML(sp)}</div>
+
+        const productCard = document.createElement("a");
+        productCard.className = "product-card";
+        productCard.href =
+          "./productView.html?id=" + encodeURIComponent(similarProduct.id);
+
+        productCard.innerHTML = `
+          <div class="card-image">
+            ${
+              productImage
+                ? '<img src="' +
+                  productImage +
+                  '" alt="' +
+                  similarProduct.title +
+                  '">'
+                : '<div class="no-image">🛍️</div>'
+            }
+          </div>
+          <div class="card-body">
+            <div class="card-title">${similarProduct.title}</div>
+            <div class="card-price">${createPriceHTML(similarProduct)}</div>
           </div>`;
-        sRow.appendChild(a);
+
+        similarRow.appendChild(productCard);
       });
-    } catch (e) {
-      /* ignore similar errors */
+    } catch (error) {
+      console.error("Similar products yüklənmədi:", error);
     }
-  } catch (e) {
-    q("#productView").innerHTML = "<p>Product not found or failed to load.</p>";
-    console.error(e);
   }
 
-  function qAll(sel) {
-    return Array.from(document.querySelectorAll(sel));
-  }
-  // Update displayed prices when currency changes
+  // ===== MAIN EXECUTION =====
   try {
-    const params2 = new URLSearchParams(location.search);
-    const id2 = params2.get("id");
-    const updatePrices = async () => {
-      try {
-        const pNow = await getProductById(id2);
-        const pv = q('#pvPriceRow');
-        if (pv) pv.innerHTML = renderPriceHTML(pNow);
-        const sRow = q('#similarRow');
-        if (sRow) {
-          const cards = Array.from(sRow.querySelectorAll('a.card'));
-          for (const card of cards) {
-            const m = card.href.match(/id=([^&]+)/);
-            if (!m) continue;
-            const pid = decodeURIComponent(m[1]);
-            try {
-              const spNow = await getProductById(pid);
-              const el = q(`#simPrice-${pid}`);
-              if (el) el.innerHTML = renderPriceHTML(spNow);
-            } catch(_){}
-          }
+    // Cart badge render et
+    if (typeof window.renderCartBadge === "function") {
+      window.renderCartBadge();
+    }
+  } catch (error) {
+    console.warn("Cart badge render edilmədi:", error);
+  }
+
+  // URL-dən product ID-ni al
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get("id");
+
+  if (!productId) {
+    getElement("#productView").innerHTML = "<p>Məhsul tapılmadı.</p>";
+    return;
+  }
+
+  try {
+    console.log("Product yüklənir, ID:", productId);
+
+    // Product məlumatlarını yüklə
+    const product = await getProductById(productId);
+    console.log("Product yükləndi:", product);
+
+    // Product view-ı yarat
+    const galleryHTML = createGalleryHTML(product);
+    const infoHTML = createProductInfoHTML(product);
+
+    const productView = getElement("#productView");
+    productView.innerHTML = `
+      <div class="product-container">
+        ${galleryHTML}
+        ${infoHTML}
+      </div>`;
+
+    // Event listener-ləri quraşdır
+    setupGalleryEvents(product);
+    setupAddToCartEvent(product);
+
+    // Similar products yüklə
+    loadSimilarProducts(product);
+  } catch (error) {
+    console.error("Product yükləmə xətası:", error);
+    getElement("#productView").innerHTML =
+      "<p>Məhsul yüklənə bilmədi: " + error.message + "</p>";
+  }
+
+  // Currency dəyişiklikləri üçün handler
+  window.onCurrencyChange = async function () {
+    try {
+      const currentProductId = new URLSearchParams(window.location.search).get(
+        "id"
+      );
+      if (currentProductId) {
+        const updatedProduct = await getProductById(currentProductId);
+        const priceSection = getElement("#priceSection");
+        if (priceSection) {
+          priceSection.innerHTML = createPriceHTML(updatedProduct);
         }
-      } catch(_){}
-    };
-    window.onCurrencyChange = updatePrices;
-  } catch(_){}
+      }
+    } catch (error) {
+      console.warn("Price update xətası:", error);
+    }
+  };
 });
