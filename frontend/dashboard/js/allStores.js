@@ -3,63 +3,7 @@ let storesData = [];
 let filteredData = [];
 
 // Sample data - Backend API-dən gələcək
-// const mockStoresData = [
-//   {
-//     storeName: "Tech Haven",
-//     ownerName: "Anar Mammadov",
-//     slug: "tech-haven",
-//     email: "anar@techhaven.az",
-//     storeDescription: "Premium electronics and gadgets store",
-//     logo: "https://via.placeholder.com/100x100/667eea/ffffff?text=TH",
-//     phone: "+994 12 555 0101",
-//     location: "Baku, Azerbaijan",
-//     category: "electronics",
-//   },
-//   {
-//     storeName: "Fashion Forward",
-//     ownerName: "Leyla Hasanova",
-//     slug: "fashion-forward",
-//     email: "leyla@fashionforward.az",
-//     storeDescription: "Trendy clothing and accessories",
-//     logo: "https://via.placeholder.com/100x100/764ba2/ffffff?text=FF",
-//     phone: "+994 12 555 0102",
-//     location: "Baku, Azerbaijan",
-//     category: "fashion",
-//   },
-//   {
-//     storeName: "Book Paradise",
-//     ownerName: "Rashad Aliyev",
-//     slug: "book-paradise",
-//     email: "rashad@bookparadise.az",
-//     storeDescription: "Wide collection of books and educational materials",
-//     logo: "https://via.placeholder.com/100x100/28a745/ffffff?text=BP",
-//     phone: "+994 12 555 0103",
-//     location: "Baku, Azerbaijan",
-//     category: "books",
-//   },
-//   {
-//     storeName: "Gourmet Corner",
-//     ownerName: "Nigar Qasimova",
-//     slug: "gourmet-corner",
-//     email: "nigar@gourmetcorner.az",
-//     storeDescription: "Organic foods and specialty ingredients",
-//     logo: "https://via.placeholder.com/100x100/ffc107/ffffff?text=GC",
-//     phone: "+994 12 555 0104",
-//     location: "Baku, Azerbaijan",
-//     category: "food",
-//   },
-//   {
-//     storeName: "Sport Zone",
-//     ownerName: "Elvin Huseynov",
-//     slug: "sport-zone",
-//     email: "elvin@sportzone.az",
-//     storeDescription: "Sports equipment and fitness gear",
-//     logo: "https://via.placeholder.com/100x100/dc3545/ffffff?text=SZ",
-//     phone: "+994 12 555 0105",
-//     location: "Baku, Azerbaijan",
-//     category: "sports",
-//   },
-// ];
+const mockStoresData = [];
 
 // Initialize data
 function initializeStores() {
