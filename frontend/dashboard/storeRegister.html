@@ -4,13 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dashboard (Store Owner)</title>
-    <link rel="stylesheet" href="../assets/css/style.css" />
-    <link rel="stylesheet" href="./css/dashboard.css" />
+
     <link rel="stylesheet" href="./css/storeRegister.css" />
   </head>
   <body>
     <header class="dashboard-header">
       <h1>Dashboard — Store Register</h1>
+      <button id="goBtn" class="btn btn-primary">Shop Place</button>
     </header>
     <main class="container">
       <form id="tab-store" class="auth-form">
@@ -49,13 +49,16 @@
         <button class="btn btn-primary" data-i18n="auth.register">
           Register Store
         </button>
+        <p style="margin-top: 10px">
+          Already have a store?
+          <a href="./storeLogin.html" class="btn btn-outline">Sigin In</a>
+        </p>
       </form>
-  </main>
-    <div id="app-footer"></div>
+    </main>
+
     <script src="../assets/js/i18n.js"></script>
     <script src="./js/storeRegister.js"></script>
     <script src="../assets/js/currency.js"></script>
     <script src="./js/dashboard.js"></script>
-    <script src="../assets/js/footer.js"></script>
   </body>
 </html>

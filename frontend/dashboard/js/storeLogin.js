@@ -26,7 +26,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!res.ok) {
         const errBody = await parseBody();
-        const errMsg = typeof errBody === "string" ? errBody : errBody?.message || "Неверный email или пароль";
+        const errMsg =
+          typeof errBody === "string"
+            ? errBody
+            : errBody?.message || "Неверный email или пароль";
         throw new Error(errMsg);
       }
 
@@ -44,4 +47,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (submitBtn) submitBtn.textContent = initialText || "Sign In";
     }
   });
+});
+//store place düyməsi
+// Находим кнопку
+const goBtn = document.getElementById("goBtn");
+
+// Клик → переход
+goBtn.addEventListener("click", () => {
+  // Измени адрес назначения
+  window.location.href = "../index.html";
 });

@@ -50,3 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+//store place düyməsi
+// Находим кнопку
+const goBtn = document.getElementById("goBtn");
+
+// Клик → переход
+goBtn.addEventListener("click", () => {
+  // Измени адрес назначения
+  window.location.href = "../index.html";
+});

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard · Users</title>
+    <link rel="stylesheet" href="./css/users.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="dashboard-header">
+      <div class="container">
+        <h1>Users</h1>
+        <nav>
+          <a href="./allStores.html">Stores</a>
+          <a href="./Users.html">Users</a>
+          <a href="./admin.html">Exchange Rates</a>
+          <a href="./admin.html#shipping">Shipping</a>
+          <a href="./admin.html#analytics">Analytics</a>
+          <a href="./translations.html" class="active">Translations</a>
+          <a href="javascript:void(0)" id="adminLogoutBtn" class="logout"
+            >Logout</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Toolbar / Filters -->
+      <section
+        class="panel toolbar"
+        id="usersToolbar"
+        data-api-base="http://116.203.51.133/luxmart"
+        data-auth-storage-key="storeJwt"
+        data-endpoints='{
+        "list":      "/api/admin/users",
+        "exportCsv": "/api/admin/users/export/csv",
+        "exportXls": "/api/admin/users/export/xlsx",
+        "one":       "/api/admin/users/{id}",
+        "ban":       "/api/admin/users/{id}/ban",
+        "unban":     "/api/admin/users/{id}/unban",
+        "note":      "/api/admin/users/{id}/note",
+        "setRole":   "/api/admin/users/{id}/role",
+        "bulkRole":  "/api/admin/users/role/bulk"
+      }'
+      >
+        <div class="filters">
+          <div class="field">
+            <label for="roleSel">Role</label>
+            <select id="roleSel" name="role">
+              <option value="">Any</option>
+              <option value="CUSTOMER" selected>Customer</option>
+              <option value="SELLER">Seller</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="statusSel">Status</label>
+            <select id="statusSel" name="status">
+              <option value="">Any</option>
+              <option value="ACTIVE" selected>Active</option>
+              <option value="BANNED">Banned</option>
+              <option value="PENDING">Pending</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="regFrom">Registered from</label>
+            <input id="regFrom" type="date" name="from" />
+          </div>
+          <div class="field">
+            <label for="regTo">Registered to</label>
+            <input id="regTo" type="date" name="to" />
+          </div>
+
+          <div class="field grow">
+            <label for="searchUsers">Search</label>
+            <input
+              id="searchUsers"
+              type="search"
+              placeholder="name, email, phone, order id…"
+            />
+          </div>
+
+          <div class="field">
+            <label for="sortSel">Sort</label>
+            <select id="sortSel" name="sort">
+              <option value="createdDesc" selected>Newest</option>
+              <option value="createdAsc">Oldest</option>
+              <option value="nameAsc">Name A→Z</option>
+              <option value="nameDesc">Name Z→A</option>
+              <option value="spendDesc">Spend high→low</option>
+              <option value="ordersDesc">Orders high→low</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>&nbsp;</label>
+            <button class="btn" id="applyFilters">Apply</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn ghost" id="exportCsvBtn" title="Export to CSV">
+            Export CSV
+          </button>
+          <button class="btn ghost" id="exportXlsBtn" title="Export to Excel">
+            Export Excel
+          </button>
+          <button
+            class="btn ghost"
+            id="openBulkRoleBtn"
+            title="Bulk change role"
+          >
+            Bulk Role
+          </button>
+        </div>
+      </section>
+
+      <!-- Stats -->
+      <section class="panel stats">
+        <div class="stat">
+          <div class="stat__label">Total</div>
+          <div class="stat__value" id="stTotal">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Active</div>
+          <div class="stat__value" id="stActive">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Banned</div>
+          <div class="stat__value" id="stBanned">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">New this month</div>
+          <div class="stat__value" id="stNew">—</div>
+        </div>
+        <div class="progress">
+          <div class="progress__head">
+            <span>Retention</span>
+            <span id="retentionPct">—%</span>
+          </div>
+          <div class="progress__bar">
+            <div
+              class="progress__fill"
+              id="retentionFill"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sticky bulk actions -->
+      <section class="sticky-actions" id="stickyActions" aria-hidden="true">
+        <div class="sticky-actions__inner">
+          <div class="sticky-actions__left">
+            <span id="selectionBadge" class="chip chip-warn" hidden
+              >0 selected</span
+            >
+            <button class="btn xs ghost" id="bulkBan">Ban selected</button>
+            <button class="btn xs ghost" id="bulkUnban">Unban selected</button>
+            <button class="btn xs" id="bulkRoleChange">Set role…</button>
+          </div>
+          <div class="sticky-actions__right">
+            <button class="btn xs ghost" id="clearSelection">Clear</button>
+            <button class="btn xs" id="bulkExport">Export selected</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section class="panel table-wrap" id="usersTableWrap" aria-live="polite">
+        <div class="table-head">
+          <div class="th col-check">
+            <input id="checkAll" type="checkbox" aria-label="Select all" />
+          </div>
+          <div class="th col-id">ID</div>
+          <div class="th col-user">User</div>
+          <div class="th col-email">Email</div>
+          <div class="th col-phone">Phone</div>
+          <div class="th col-reg">Registered</div>
+          <div class="th col-orders">Orders</div>
+          <div class="th col-spend">Spend</div>
+          <div class="th col-status">Status</div>
+          <div class="th col-role">Role</div>
+          <div class="th col-actions">Actions</div>
+        </div>
+
+        <div id="usersRows" class="rows">
+          <!-- JS rows go here
+        Пример строки (для ориентира):
+        <div class="row" data-id="42">
+          <div class="td col-check"><input type="checkbox" class="rowCheck"></div>
+          <div class="td col-id mono">42</div>
+          <div class="td col-user">
+            <div class="user-cell">
+              <img class="user-avatar" src="./assets/avatar-ph.png" alt="avatar">
+              <div>
+                <div class="user-name">Jane Doe</div>
+                <div class="user-meta">AZ, Baku</div>
+              </div>
+            </div>
+          </div>
+          <div class="td col-email">jane@example.com</div>
+          <div class="td col-phone">+994 50 000 00 00</div>
+          <div class="td col-reg muted">2025-09-10 12:30</div>
+          <div class="td col-orders mono">12</div>
+          <div class="td col-spend mono">$845.20</div>
+          <div class="td col-status"><span class="badge active">active</span></div>
+          <div class="td col-role">
+            <span class="role-chip role-customer" title="Change role in drawer">CUSTOMER</span>
+          </div>
+          <div class="td col-actions">
+            <div class="action-group">
+              <button class="btn xs ghost openDrawer">Details</button>
+              <button class="btn xs ghost editRole">Change role</button>
+            </div>
+          </div>
+        </div>
+      -->
+        </div>
+
+        <div id="emptyState" class="empty" hidden>No users found</div>
+
+        <div class="table-foot">
+          <div class="pager">
+            <button class="btn xs ghost" id="prevPage">Prev</button>
+            <span id="pageInfo" class="muted">Page 1 of 1</span>
+            <button class="btn xs ghost" id="nextPage">Next</button>
+          </div>
+          <div class="bulk">
+            <button class="btn xs ghost" id="pageExportCsv">
+              Export page (CSV)
+            </button>
+            <button class="btn xs ghost" id="pageExportXls">
+              Export page (Excel)
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Toaster -->
+    <div
+      id="toaster"
+      class="toaster"
+      aria-live="assertive"
+      aria-atomic="true"
+    ></div>
+
+    <!-- User details drawer -->
+    <aside id="userDrawer" class="drawer" aria-hidden="true">
+      <div class="drawer__head">
+        <h3 id="drawerTitle">User details</h3>
+        <button class="icon closeUserDrawer" aria-label="Close">×</button>
+      </div>
+      <div class="drawer__body" id="drawerBody">
+        <!-- Профиль -->
+        <section class="u-section">
+          <div class="u-header">
+            <img class="user-avatar lg" id="udAvatar" alt="avatar" />
+            <div>
+              <div class="user-name" id="udName">—</div>
+              <div class="user-meta" id="udEmail">—</div>
+            </div>
+          </div>
+          <div class="u-grid">
+            <div>
+              <div class="label">Phone</div>
+              <div id="udPhone" class="mono">—</div>
+            </div>
+            <div>
+              <div class="label">Registered</div>
+              <div id="udReg" class="mono">—</div>
+            </div>
+            <div>
+              <div class="label">Orders</div>
+              <div id="udOrders" class="mono">—</div>
+            </div>
+            <div>
+              <div class="label">Spend</div>
+              <div id="udSpend" class="mono">—</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Редактирование роли -->
+        <section class="u-section">
+          <h4>Role management</h4>
+          <form id="roleForm" class="role-form" novalidate>
+            <div class="field">
+              <label for="udRole">Role</label>
+              <select id="udRole" name="role">
+                <option value="CUSTOMER">Customer</option>
+                <option value="SELLER">Seller</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="udNote">Admin note</label>
+              <textarea
+                id="udNote"
+                rows="3"
+                placeholder="Reason / internal note…"
+              ></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn ghost" id="closeRole">
+                Cancel
+              </button>
+              <button type="submit" class="btn" id="saveRole">Save role</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Адреса/Заметки (опционально расширим в JS) -->
+        <section class="u-section">
+          <h4>Addresses</h4>
+          <div id="udAddresses" class="muted">—</div>
+        </section>
+      </div>
+    </aside>
+
+    <!-- Export modal -->
+    <div id="dlgExport" class="modal" aria-hidden="true">
+      <div class="modal__dialog">
+        <div class="modal__head">
+          <h3>Export Users</h3>
+          <button class="icon closeExport" aria-label="Close">×</button>
+        </div>
+        <div class="modal__content grid-2">
+          <div class="field">
+            <label for="expFormat">Format</label>
+            <select id="expFormat">
+              <option value="csv" selected>CSV</option>
+              <option value="xlsx">Excel (XLSX)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="expScope">Scope</label>
+            <select id="expScope">
+              <option value="all" selected>All (with filters)</option>
+              <option value="page">Current page</option>
+              <option value="selected">Selected</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal__actions">
+          <button class="btn ghost closeExport">Cancel</button>
+          <button class="btn" id="expSubmit">Export</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk role modal -->
+    <div id="dlgRoleBulk" class="modal" aria-hidden="true">
+      <div class="modal__dialog">
+        <div class="modal__head">
+          <h3>Bulk Change Role</h3>
+          <button class="icon closeRoleBulk" aria-label="Close">×</button>
+        </div>
+        <div class="modal__content">
+          <p class="muted">
+            Apply the selected role to all currently selected users.
+          </p>
+          <div class="field">
+            <label for="bulkRoleSel">Role</label>
+            <select id="bulkRoleSel">
+              <option value="CUSTOMER">Customer</option>
+              <option value="SELLER">Seller</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="bulkRoleNote">Admin note</label>
+            <textarea
+              id="bulkRoleNote"
+              rows="3"
+              placeholder="Reason / internal note…"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal__actions">
+          <button class="btn ghost closeRoleBulk">Cancel</button>
+          <button class="btn" id="bulkRoleSubmit">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/js/i18n.js"></script>
+    <script src="./js/allStores.js"></script>
+    <script src="../assets/js/currency.js"></script>
+    <script src="./js/dashboard.js"></script>
+    <script src="./js/translation.js"></script>
+    <script src="./js/users.js"></script>
+  </body>
+</html>

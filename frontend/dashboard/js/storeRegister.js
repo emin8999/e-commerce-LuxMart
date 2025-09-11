@@ -124,3 +124,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+const err = document.getElementById("passwordError");
+if (password.value !== confirmPassword.value) {
+  err.classList.add("show");
+} else {
+  err.classList.remove("show");
+}
+
+//store place düyməsi
+// Находим кнопку
+const goBtn = document.getElementById("goBtn");
+
+// Клик → переход
+goBtn.addEventListener("click", () => {
+  // Измени адрес назначения
+  window.location.href = "../index.html";
+});

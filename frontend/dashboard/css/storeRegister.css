@@ -1,9 +1,242 @@
-.error-msg {
-  color: red;
-  font-size: 12px;
-  margin-top: 4px;
-  display: none;
+/* storeRegister.css */
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-.error-input {
-  border: 1px solid red !important;
+html,
+body {
+  height: 100%;
+}
+
+:root {
+  --bg1: #667eea;
+  --bg2: #764ba2;
+  --line: #e9ecef;
+  --text: #1a1a1a;
+  --muted: #6c757d;
+  --accent: #c5a46d; /* песочно-золотой акцент */
+  --good: #2ecc71;
+  --bad: #e74c3c;
+}
+
+/* Base */
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.dashboard-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+.dashboard-header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* Layout */
+.container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+/* Card Form */
+.auth-form {
+  width: 100%;
+  max-width: 720px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 1.6rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  display: grid;
+  gap: 1rem;
+  animation: fadeIn 0.5s ease;
+}
+
+/* Grid on wide screens */
+@media (min-width: 760px) {
+  .auth-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  .auth-form button,
+  .auth-form .checkbox,
+  .auth-form #passwordError,
+  .auth-form textarea {
+    grid-column: 1 / 3; /* full width rows */
+  }
+}
+
+/* Inputs */
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="tel"],
+.auth-form input[type="password"],
+.auth-form input[type="file"],
+.auth-form textarea {
+  width: 100%;
+  padding: 0.95rem 1.05rem;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  font-size: 1rem;
+  background: #fff;
+  transition: all 0.25s ease;
+}
+
+.auth-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Focus + valid/invalid hints */
+.auth-form input:focus,
+.auth-form textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+.auth-form input:valid,
+.auth-form textarea:valid {
+  border-color: rgba(46, 204, 113, 0.5);
+}
+.auth-form input:invalid:focus,
+.auth-form textarea:invalid:focus {
+  border-color: rgba(231, 76, 60, 0.7);
+}
+
+/* File input (logo) */
+.auth-form input[type="file"] {
+  padding: 0.75rem 1.05rem;
+  background: #fff;
+  cursor: pointer;
+}
+.auth-form input[type="file"]::-webkit-file-upload-button {
+  border: none;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  color: #fff;
+  font-weight: 700;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  margin-right: 0.8rem;
+  cursor: pointer;
+}
+
+/* Password error / helper */
+.error-msg {
+  display: none;
+  color: #fff;
+  background: var(--bad);
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(231, 76, 60, 0.25);
+}
+.error-msg.show {
+  display: block;
+}
+
+/* Checkbox (Terms) */
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  user-select: none;
+  color: #2c3e50;
+  font-weight: 600;
+}
+.checkbox input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  display: inline-block;
+  position: relative;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.checkbox input:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 4px 14px rgba(197, 164, 109, 0.35);
+}
+.checkbox input:checked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E")
+    center/14px no-repeat;
+}
+
+/* Button */
+.btn {
+  display: inline-block;
+  border: none;
+  border-radius: 14px;
+  padding: 0.95rem 1.15rem;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(102, 126, 234, 0.45);
+}
+
+/* Tiny helper text (muted) */
+.muted {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* Anim */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile tweaks */
+@media (max-width: 560px) {
+  .dashboard-header {
+    padding: 0.9rem 1rem;
+  }
+  .dashboard-header h1 {
+    font-size: 1.25rem;
+  }
+  .auth-form {
+    padding: 1.25rem;
+    border-radius: 18px;
+  }
 }
