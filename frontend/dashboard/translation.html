@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dashboard · Translations</title>
+    <link rel="stylesheet" href="./css/translations.css" />
+  </head>
+  <body>
+    <header class="dashboard-header">
+      <div class="container">
+        <h1>Translations</h1>
+        <nav>
+          <a href="./allStores.html">Stores</a>
+          <a href="./admin.html#Users">Users</a>
+          <a href="./admin.html">Exchange Rates</a>
+          <a href="./admin.html#shipping">Shipping</a>
+          <a href="./admin.html#analytics">Analytics</a>
+          <a href="./translations.html" class="active">Translations</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- ================= Toolbar / Filters ================= -->
+      <section
+        class="panel toolbar"
+        id="tl-toolbar"
+        data-api-base="http://116.203.51.133/luxmart"
+        data-auth-storage-key="storeJwt"
+        data-endpoints='{
+        "locales":        "/api/i18n/locales",
+        "namespaces":     "/api/i18n/namespaces",
+        "search":         "/api/i18n/keys",
+        "updateText":     "/api/i18n/keys/{id}/translation",
+        "createKey":      "/api/i18n/keys",
+        "syncKeys":       "/api/i18n/keys/sync",
+        "history":        "/api/i18n/keys/{id}/history",
+        "review":         "/api/i18n/keys/{id}/review",
+        "revert":         "/api/i18n/keys/{id}/revert",
+        "export":         "/api/i18n/export",
+        "import":         "/api/i18n/import",
+        "publish":        "/api/i18n/publish",
+        "bundle":         "/api/i18n/bundle"
+      }'
+      >
+        <div class="filters">
+          <!-- Фиксированные локали -->
+          <div class="field">
+            <label for="baseLocaleSel">Base locale</label>
+            <select id="baseLocaleSel" name="base-locale">
+              <option value="en" selected>English (en)</option>
+              <option value="ru">Русский (ru)</option>
+              <option value="az">Azərbaycanca (az)</option>
+              <option value="de">Deutsch (de)</option>
+              <option value="es">Español (es)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="localeSel">Target locale</label>
+            <select id="localeSel" name="locale">
+              <option value="en">English (en)</option>
+              <option value="ru">Русский (ru)</option>
+              <option value="az" selected>Azərbaycanca (az)</option>
+              <option value="de">Deutsch (de)</option>
+              <option value="es">Español (es)</option>
+            </select>
+          </div>
+
+          <!-- Неймспейсы -->
+          <div class="field">
+            <label for="nsSel">Namespace</label>
+            <select id="nsSel" name="namespace">
+              <option value="">All</option>
+              <!-- при желании можно зашить дефолтные: common, catalog, checkout -->
+            </select>
+          </div>
+
+          <!-- Поиск -->
+          <div class="field grow">
+            <label for="searchInput">Search</label>
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="key, text, tag, author…"
+            />
+          </div>
+
+          <!-- Статусы -->
+          <div class="field">
+            <label for="statusSel">Status</label>
+            <select id="statusSel" name="status">
+              <option value="">Any</option>
+              <option value="missing">Missing</option>
+              <option value="draft">Draft</option>
+              <option value="translated">Translated</option>
+              <option value="reviewed">Reviewed</option>
+            </select>
+          </div>
+
+          <!-- Авто-перевод -->
+          <div class="field">
+            <label for="mtToggle">Auto-translate</label>
+            <div class="switch">
+              <input id="mtToggle" type="checkbox" />
+              <span class="slider" aria-hidden="true"></span>
+            </div>
+            <div class="mt-provider">
+              <span class="chip chip-muted" id="mtProvider">Provider: —</span>
+              <button
+                class="btn xs ghost"
+                id="mtSettingsBtn"
+                title="Provider settings"
+              >
+                Settings
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>&nbsp;</label>
+            <button class="btn" id="applyFilters">Apply</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn ghost" id="addKeyBtn">Add Key</button>
+          <button class="btn ghost" id="importBtn">Import</button>
+          <button class="btn ghost" id="exportBtn">Export</button>
+          <button class="btn" id="publishBtn">Publish</button>
+          <button
+            class="btn ghost"
+            id="shortcutsBtn"
+            title="Keyboard shortcuts"
+          >
+            ⌨︎
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= Stats / Progress ================= -->
+      <section class="panel stats">
+        <div class="stat">
+          <div class="stat__label">Missing</div>
+          <div class="stat__value" id="stMissing">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Draft</div>
+          <div class="stat__value" id="stDraft">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Translated</div>
+          <div class="stat__value" id="stTranslated">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat__label">Reviewed</div>
+          <div class="stat__value" id="stReviewed">—</div>
+        </div>
+        <div class="progress">
+          <div class="progress__head">
+            <span>Progress</span>
+            <span id="progressPct">—%</span>
+          </div>
+          <div class="progress__bar">
+            <div
+              class="progress__fill"
+              id="progressFill"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= Sticky bulk actions ================= -->
+      <section class="sticky-actions" id="stickyActions" aria-hidden="true">
+        <div class="sticky-actions__inner">
+          <div class="sticky-actions__left">
+            <span id="unsavedBadge" class="chip chip-warn" hidden
+              >Unsaved edits</span
+            >
+            <button class="btn xs ghost" id="translateMissing">
+              Translate missing
+            </button>
+            <button class="btn xs ghost" id="bulkReview">
+              Mark page as reviewed
+            </button>
+          </div>
+          <div class="sticky-actions__right">
+            <button class="btn xs ghost" id="discardEdits">
+              Discard changes
+            </button>
+            <button class="btn xs" id="saveAll">Save all</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= Table ================= -->
+      <section class="panel table-wrap" id="tl-tableWrap" aria-live="polite">
+        <div class="table-head">
+          <div class="th col-key">Key</div>
+          <div class="th col-desc">Description</div>
+          <div class="th col-base">
+            Base (<span id="headBaseLocale">—</span>)
+          </div>
+          <div class="th col-locale">
+            Current (<span id="headLocale">—</span>)
+          </div>
+          <div class="th col-status">Status</div>
+          <div class="th col-meta">Updated</div>
+        </div>
+
+        <div id="rows" class="rows">
+          <!-- JS rows -->
+        </div>
+
+        <div id="emptyState" class="empty" hidden>
+          No results. Try other filters.
+        </div>
+
+        <div class="table-foot">
+          <div class="pager">
+            <button class="btn xs ghost" id="prevPage">Prev</button>
+            <span id="pageInfo" class="muted">Page 1 of 1</span>
+            <button class="btn xs ghost" id="nextPage">Next</button>
+          </div>
+          <div class="bulk">
+            <button class="btn xs ghost" id="pageTranslate">
+              Translate this page
+            </button>
+            <button class="btn xs ghost" id="pageSave">Save page</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= Context / QA side ================= -->
+      <section class="panel side-split">
+        <div class="side-split__col">
+          <h3 class="panel-title">Context</h3>
+          <div class="context">
+            <div class="context__preview" id="ctxPreview">No screenshot</div>
+            <div class="context__notes">
+              <label for="ctxNotes">Notes</label>
+              <textarea
+                id="ctxNotes"
+                rows="5"
+                placeholder="Contextual notes for translators…"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="side-split__col">
+          <h3 class="panel-title">Quality checks</h3>
+          <ul class="qa-list" id="qaList"></ul>
+
+          <div class="glossary-box">
+            <div class="glossary-head">
+              <span>Glossary</span>
+              <button class="btn xs ghost" id="openGlossary">Manage</button>
+            </div>
+            <div class="glossary" id="glossary"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ================= Toaster ================= -->
+    <div
+      id="toaster"
+      class="toaster"
+      aria-live="assertive"
+      aria-atomic="true"
+    ></div>
+
+    <!-- ================= Modals ================= -->
+
+    <!-- Add Key -->
+    <div id="dlgAddKey" class="modal" aria-hidden="true">
+      <div class="modal__dialog">
+        <div class="modal__head">
+          <h3>Add Key</h3>
+          <button class="icon closeAddKey" aria-label="Close">×</button>
+        </div>
+        <form class="modal__content" id="addKeyForm" novalidate>
+          <div class="grid-2">
+            <div class="field">
+              <label for="akNamespace">Namespace</label>
+              <input
+                id="akNamespace"
+                name="namespace"
+                placeholder="catalog"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="akKey">Key</label>
+              <input id="akKey" name="key" placeholder="addToCart" required />
+            </div>
+          </div>
+          <div class="field">
+            <label for="akDescription">Description</label>
+            <textarea
+              id="akDescription"
+              name="description"
+              rows="3"
+              placeholder="Context for translators"
+            ></textarea>
+          </div>
+          <div class="field">
+            <label for="akPlaceholders">Placeholders (comma separated)</label>
+            <input
+              id="akPlaceholders"
+              name="placeholders"
+              placeholder="{name}, {count}"
+            />
+          </div>
+          <div class="field">
+            <label for="akTags">Tags (comma separated)</label>
+            <input id="akTags" name="tags" placeholder="homepage, critical" />
+          </div>
+          <div class="modal__actions">
+            <button type="button" class="btn ghost closeAddKey">Cancel</button>
+            <button type="submit" class="btn" id="akSubmit">Create</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Provider Settings -->
+    <div id="dlgProvider" class="modal" aria-hidden="true">
+      <div class="modal__dialog">
+        <div class="modal__head">
+          <h3>Auto-translate provider</h3>
+          <button class="icon closeProvider" aria-label="Close">×</button>
+        </div>
+        <form class="modal__content" id="providerForm">
+          <div class="grid-2">
+            <div class="field">
+              <label for="mtProviderSel">Provider</label>
+              <select id="mtProviderSel">
+                <option value="none">None</option>
+                <option value="google">Google</option>
+                <option value="deepl">DeepL</option>
+                <option value="azure">Azure Translator</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="mtFormality">Tone/Formality</label>
+              <select id="mtFormality">
+                <option value="">Auto</option>
+                <option value="formal">Formal</option>
+                <option value="informal">Informal</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="mtExclusions">Do not translate terms (comma)</label>
+            <input id="mtExclusions" placeholder="Luxmart, SKU, API" />
+          </div>
+          <div class="field">
+            <label for="mtApiKey">API key (backend vault)</label>
+            <input id="mtApiKey" placeholder="Stored server-side" disabled />
+          </div>
+          <div class="modal__actions">
+            <button type="button" class="btn ghost closeProvider">
+              Cancel
+            </button>
+            <button type="submit" class="btn" id="providerSave">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Glossary -->
+    <div id="dlgGlossary" class="modal" aria-hidden="true">
+      <div class="modal__dialog">
+        <div class="modal__head">
+          <h3>Glossary</h3>
+          <button class="icon closeGlossary" aria-label="Close">×</button>
+        </div>
+        <div class="modal__content">
+          <div class="glossary-admin">
+            <div class="grid-2">
+              <div class="field">
+                <label for="glTerm">Term (base)</label>
+                <input id="glTerm" placeholder="Cart" />
+              </div>
+              <div class="field">
+                <label for="glTrans">Translation</label>
+                <input id="glTrans" placeholder="Корзина" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="glNotes">Notes</label>
+              <input id="glNotes" placeholder="UI button label" />
+            </div>
+            <div class="modal__actions">
+              <button class="btn ghost closeGlossary">Close</button>
+              <button class="btn" id="glAdd">Add term</button>
+            </div>
+          </div>
+          <div class="glossary-list" id="glossaryList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plural Editor -->
+    <div id="dlgPlural" class="modal" aria-hidden="true">
+      <div class="modal__dialog">
+        <div class="modal__head">
+          <h3>Plural forms</h3>
+          <button class="icon closePlural" aria-label="Close">×</button>
+        </div>
+        <form class="modal__content" id="pluralForm">
+          <div class="plural-grid">
+            <div class="field">
+              <label>one</label><textarea rows="2" id="plOne"></textarea>
+            </div>
+            <div class="field">
+              <label>few</label><textarea rows="2" id="plFew"></textarea>
+            </div>
+            <div class="field">
+              <label>many</label><textarea rows="2" id="plMany"></textarea>
+            </div>
+            <div class="field">
+              <label>other</label><textarea rows="2" id="plOther"></textarea>
+            </div>
+          </div>
+          <div class="modal__actions">
+            <button type="button" class="btn ghost closePlural">Cancel</button>
+            <button type="submit" class="btn" id="pluralSave">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Import -->
+    <div id="dlgImport" class="modal" aria-hidden="true">
+      <div class="modal__dialog">
+        <div class="modal__head">
+          <h3>Import Translations</h3>
+          <button class="icon closeImport" aria-label="Close">×</button>
+        </div>
+        <div class="modal__content">
+          <div class="grid-2">
+            <div class="field">
+              <label for="impLocale">Locale (for flat files)</label>
+              <select id="impLocale">
+                <option value="en">en</option>
+                <option value="ru">ru</option>
+                <option value="az">az</option>
+                <option value="de">de</option>
+                <option value="es">es</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="impMode">Mode</label>
+              <select id="impMode">
+                <option value="overwrite">Overwrite</option>
+                <option value="skip">Skip</option>
+                <option value="create-duplicates">Create duplicates</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="impFile">File (JSON/CSV)</label>
+            <input id="impFile" type="file" accept=".json,.csv" />
+          </div>
+        </div>
+        <div class="modal__actions">
+          <button class="btn ghost closeImport">Cancel</button>
+          <button class="btn" id="impSubmit">Import</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div id="dlgExport" class="modal" aria-hidden="true">
+      <div class="modal__dialog">
+        <div class="modal__head">
+          <h3>Export Translations</h3>
+          <button class="icon closeExport" aria-label="Close">×</button>
+        </div>
+        <div class="modal__content grid-2">
+          <div class="field">
+            <label>Locales</label>
+            <div class="locale-tags" id="expLocales">
+              <label
+                ><input type="checkbox" value="en" checked />
+                <span class="tag">en</span></label
+              >
+              <label
+                ><input type="checkbox" value="ru" checked />
+                <span class="tag">ru</span></label
+              >
+              <label
+                ><input type="checkbox" value="az" />
+                <span class="tag">az</span></label
+              >
+              <label
+                ><input type="checkbox" value="de" />
+                <span class="tag">de</span></label
+              >
+              <label
+                ><input type="checkbox" value="es" />
+                <span class="tag">es</span></label
+              >
+            </div>
+          </div>
+          <div class="field">
+            <label for="expFormat">Format</label>
+            <select id="expFormat">
+              <option value="json">JSON</option>
+              <option value="csv">CSV</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="expStyle">JSON style</label>
+            <select id="expStyle">
+              <option value="nested">Nested</option>
+              <option value="flat">Flat</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="expNamespaces">Namespaces (comma, optional)</label>
+            <input id="expNamespaces" placeholder="common,catalog" />
+          </div>
+        </div>
+        <div class="modal__actions">
+          <button class="btn ghost closeExport">Cancel</button>
+          <button class="btn" id="expSubmit">Export</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Publish -->
+    <div id="dlgPublish" class="modal" aria-hidden="true">
+      <div class="modal__dialog">
+        <div class="modal__head">
+          <h3>Publish</h3>
+          <button class="icon closePublish" aria-label="Close">×</button>
+        </div>
+        <div class="modal__content">
+          <p>
+            This will build and freeze current reviewed translations into a
+            versioned bundle.
+          </p>
+        </div>
+        <div class="modal__actions">
+          <button class="btn ghost closePublish">Cancel</button>
+          <button class="btn" id="pubSubmit">Publish</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Drawer -->
+    <aside id="drawer" class="drawer" aria-hidden="true">
+      <div class="drawer__head">
+        <h3 id="drawerTitle">History</h3>
+        <button class="icon closeDrawer" aria-label="Close">×</button>
+      </div>
+      <div class="drawer__body" id="drawerBody"></div>
+    </aside>
+
+    <script src="../assets/js/i18n.js"></script>
+    <script src="./js/allStores.js"></script>
+    <script src="../assets/js/currency.js"></script>
+    <script src="./js/dashboard.js"></script>
+    <script src="./js/translation.js"></script>
+  </body>
+</html>
