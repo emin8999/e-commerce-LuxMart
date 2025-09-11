@@ -305,9 +305,9 @@ body {
   -webkit-appearance: none;
   margin: 0;
 }
-#rates input[type="number"] {
+/* #rates input[type="number"] {
   -moz-appearance: textfield;
-}
+} */
 
 /* Кнопка Save — стиль, как в навигации/экспорте */
 #rates #saveRates {
