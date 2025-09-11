@@ -2,17 +2,24 @@
 let storesData = [];
 let filteredData = [];
 
-// Sample data - Backend API-dən gələcək
-const mockStoresData = [];
+// API base
+const API_BASE = "http://116.203.51.133/luxmart";
 
 // Initialize data
-function initializeStores() {
-  // Bu hissədə real API çağrısı olacaq
-  setTimeout(() => {
-    storesData = mockStoresData;
+async function initializeStores() {
+  try {
+    document.getElementById("stores-container").innerHTML =
+      '<div class="loading">Loading stores data...</div>';
+    const list = await fetchStoresFromAPI();
+    storesData = list;
     filteredData = [...storesData];
     renderStoresTable();
-  }, 1000);
+  } catch (e) {
+    console.error("Initialize stores failed:", e);
+    storesData = [];
+    filteredData = [];
+    renderStoresTable();
+  }
 }
 
 // Render stores table
@@ -74,7 +81,9 @@ function renderStoresTable() {
                                 <td>${store.phone || "N/A"}</td>
                                 <td>${store.location || "N/A"}</td>
                                 <td><span class="store-category">${
-                                  store.category || "general"
+                                  Array.isArray(store.category)
+                                    ? store.category.join(", ")
+                                    : (store.category || "general")
                                 }</span></td>
                                 <td>${
                                   store.storeDescription || "No description"
@@ -99,20 +108,30 @@ function populateCategoryFilter() {
   const currentValue = categoryFilter.value;
 
   // Get unique categories from stores data
-  const categories = [
-    ...new Set(
-      storesData
-        .map((store) => store.category)
-        .filter((cat) => cat && cat !== "general" && cat !== "")
-    ),
-  ].sort();
+  const catSet = new Set();
+  storesData.forEach((store) => {
+    const c = store.category;
+    if (!c) return;
+    if (Array.isArray(c)) {
+      c.forEach((x) => {
+        const v = String(x || "").trim();
+        if (v && v.toLowerCase() !== "general") catSet.add(v);
+      });
+    } else {
+      const v = String(c || "").trim();
+      if (v && v.toLowerCase() !== "general") catSet.add(v);
+    }
+  });
+  const categories = Array.from(catSet).sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: "base" })
+  );
 
   // Clear and repopulate options
   categoryFilter.innerHTML = '<option value="">All Categories</option>';
   categories.forEach((category) => {
     const option = document.createElement("option");
-    option.value = category.toLowerCase();
-    option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+    option.value = String(category).toLowerCase();
+    option.textContent = category;
     categoryFilter.appendChild(option);
   });
 
@@ -128,12 +147,22 @@ function filterStores() {
   const categoryFilter = document.querySelector(".category-filter").value;
 
   filteredData = storesData.filter((store) => {
+    const name = String(store.storeName || "").toLowerCase();
+    const owner = String(store.ownerName || "").toLowerCase();
+    const email = String(store.email || "").toLowerCase();
     const matchesSearch =
-      store.storeName.toLowerCase().includes(searchTerm) ||
-      store.ownerName.toLowerCase().includes(searchTerm) ||
-      store.email.toLowerCase().includes(searchTerm);
-    const matchesCategory =
-      !categoryFilter || store.category === categoryFilter;
+      name.includes(searchTerm) || owner.includes(searchTerm) || email.includes(searchTerm);
+
+    let matchesCategory = true;
+    if (categoryFilter) {
+      const cat = store.category;
+      if (Array.isArray(cat)) {
+        const list = cat.map((x) => String(x || "").toLowerCase());
+        matchesCategory = list.includes(categoryFilter);
+      } else {
+        matchesCategory = String(cat || "").toLowerCase() === categoryFilter;
+      }
+    }
 
     return matchesSearch && matchesCategory;
   });
@@ -155,7 +184,7 @@ function exportToExcel() {
     Email: store.email,
     Phone: store.phone,
     Location: store.location,
-    Category: store.category,
+    Category: Array.isArray(store.category) ? store.category.join("; ") : (store.category || ""),
     Description: store.storeDescription,
   }));
 
@@ -185,7 +214,7 @@ function exportToCSV() {
         escapeCSV(store.email),
         escapeCSV(store.phone),
         escapeCSV(store.location),
-        escapeCSV(store.category),
+        escapeCSV(Array.isArray(store.category) ? store.category.join("; ") : (store.category || "")),
         escapeCSV(store.storeDescription),
       ].join(",")
     ),
@@ -249,10 +278,34 @@ function downloadCSV(content, filename) {
 // API call to backend (real implementation)
 async function fetchStoresFromAPI() {
   try {
-    const response = await fetch("/api/stores"); // Backend endpoint
-    if (!response.ok) throw new Error("Failed to fetch stores");
-    const stores = await response.json();
-    return stores;
+    const response = await fetch(`${API_BASE}/store/all-stores`, {
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) throw new Error(`Failed to fetch stores: ${response.status}`);
+    const data = await response.json();
+    const list = Array.isArray(data) ? data : data.stores || [];
+    // Normalize fields used by table and filters
+    return list.map((s) => ({
+      logo: s.logo || s.image || "",
+      storeName: s.storeName || s.name || s.title || "",
+      ownerName: s.ownerName || s.owner || s.owner_email || "",
+      email: s.email || s.ownerEmail || "",
+      phone: s.phone || s.ownerPhone || "",
+      location: s.location || s.address || "",
+      slug: s.slug || s.storeSlug || "",
+      category: s.categoryList || s.categories || s.category || [],
+      storeDescription: s.storeDescription || s.description || "",
+    })).map((s) => {
+      // Ensure category is string or array consistently
+      if (!s.category) s.category = [];
+      if (typeof s.category === "string") {
+        s.category = s.category
+          .split(/[,;]+/)
+          .map((x) => x.trim())
+          .filter(Boolean);
+      }
+      return s;
+    });
   } catch (error) {
     console.error("Error fetching stores:", error);
     document.getElementById("stores-container").innerHTML = `
