@@ -345,23 +345,96 @@ a {
   margin-bottom: 12px;
 }
 
-/* Footer */
-.footer {
-  background: #fff;
-  border-top: 1px solid var(--border);
-  margin-top: 24px;
+/* ======= Premium Footer Only ======= */
+
+:root {
+  --ftr-grad-1: #0f141b;
+  --ftr-grad-2: #1b1f27;
+  --ftr-glass: rgba(255, 255, 255, 0.06);
+  --ftr-line: rgba(255, 255, 255, 0.12);
+  --ftr-text: #f3f6fb;
+  --ftr-muted: #a9b4c4;
+  --ftr-accent: #c5a46d;
 }
+
+/* Основной блок футера */
+.footer {
+  background: linear-gradient(135deg, var(--ftr-grad-1), var(--ftr-grad-2));
+  border-top: 1px solid var(--ftr-line);
+  color: var(--ftr-text);
+  margin-top: 32px;
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* Контейнер с рядами */
 .footer__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
+  padding: 20px 16px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
+
+/* Навигация */
 .footer__nav {
   display: flex;
-  gap: 16px;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 .footer__link {
-  color: var(--primary);
+  color: var(--ftr-text);
   font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+}
+.footer__link:hover {
+  background: var(--ftr-glass);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  color: var(--ftr-accent);
+}
+
+/* Малый текст / копирайт */
+.footer small,
+.footer p {
+  color: var(--ftr-muted);
+  font-size: 0.9rem;
+}
+
+/* Иконки соцсетей (если будут) */
+.footer__social {
+  display: flex;
+  gap: 12px;
+}
+.footer__social a {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ftr-glass);
+  border: 1px solid var(--ftr-line);
+  color: var(--ftr-text);
+  transition: 0.25s;
+}
+.footer__social a:hover {
+  background: var(--ftr-accent);
+  color: #111;
+  transform: translateY(-2px);
+}
+
+/* Адаптация */
+@media (max-width: 600px) {
+  .footer__row {
+    flex-direction: column;
+    text-align: center;
+  }
+  .footer__nav {
+    justify-content: center;
+  }
+  .footer__social {
+    justify-content: center;
+  }
 }

@@ -27,16 +27,23 @@
             <option value="EUR">€</option>
             <option value="TRY">₺</option>
           </select>
-          <a href="javascript:void(0)" id="profileBtn" title="Profile">👤</a>
-          <a href="./cart.html" class="header__cart" title="Cart">🛒<span class="header__badge" id="cartBadge" style="display:none">0</span></a>
-          <button class="burger" id="burgerBtn">☰</button>
+           <a href="javascript:void(0)" id="profileBtn" title="Profile">👤</a>
+           <a href="./cart.html" class="header__cart" title="Cart">🛒<span class="header__badge" id="cartBadge" style="display:none">0</span></a>
+           <button class="burger" id="burgerBtn">☰</button>
         </div>
       </div>
     </div>
     <div class="overlay" id="drawerOverlay"></div>
     <div class="drawer" id="drawer">
-      <button id="drawerClose" class="btn">✖</button>
-      
+     <button id="drawerClose" class="btn">✖</button>
+
+   
+    <div class="drawer__icons">
+      <a href="javascript:void(0)" id="drawerProfileBtn" title="Profile" class="header__icon">👤</a>
+      <a href="./cart.html" class="header__icon" title="Cart">
+        🛒<span class="header__badge" id="drawerCartBadge" style="display:none">0</span>
+      </a>
+    </div>
       <a class="header__link" data-i18n="nav.products" href="./products.html">Products</a>
       <a class="header__link" data-i18n="nav.our_stores" href="./our-stores.html">Our Stores</a>
       <a class="header__link" data-i18n="nav.about_us" href="./about.html">About Us</a>
@@ -71,7 +78,9 @@
   </div>`;
   modalRoot.appendChild(modal);
   // Ensure freshly injected markup is translated to current locale
-  try { window.i18n && window.i18n.setLocale(window.i18n.getLocale()); } catch(_) {}
+  try {
+    window.i18n && window.i18n.setLocale(window.i18n.getLocale());
+  } catch (_) {}
   function openCat() {
     modal.classList.add("show");
     if (window.renderCategories) window.renderCategories("catList");
@@ -104,6 +113,7 @@
   // Cart badge
   window.renderCartBadge = function () {
     const badge = document.getElementById("cartBadge");
+    const badge2 = document.getElementById("drawerCartBadge"); // NEW
     const count =
       window.cart && typeof window.cart.getCount === "function"
         ? window.cart.getCount()
@@ -111,8 +121,14 @@
     if (count > 0) {
       badge.textContent = count > 99 ? "99+" : String(count);
       badge.style.display = "flex";
-    } else {
+    }
+    if (badge2) {
+      badge2.textContent = txt;
+      badge2.style.display = "flex";
+    } // NEW
+    else {
       badge.style.display = "none";
+      if (badge2) badge2.style.display = "none"; // NEW
     }
   };
   try {
@@ -123,6 +139,18 @@
   const profileBtn = document.getElementById("profileBtn");
   if (profileBtn) {
     profileBtn.addEventListener("click", () => {
+      const token = localStorage.getItem("Jwt");
+      if (token && token.length > 0) {
+        window.location.href = "./profile.html";
+      } else {
+        window.location.href = "./login.html";
+      }
+    });
+  }
+  // NEW: та же логика для кнопки профиля в дровере
+  const drawerProfileBtn = document.getElementById("drawerProfileBtn");
+  if (drawerProfileBtn) {
+    drawerProfileBtn.addEventListener("click", () => {
       const token = localStorage.getItem("Jwt");
       if (token && token.length > 0) {
         window.location.href = "./profile.html";

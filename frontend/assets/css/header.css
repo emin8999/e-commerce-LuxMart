@@ -1,0 +1,268 @@
+/* ======= Premium Header Only (override) ======= */
+
+:root {
+  --hdr-grad-1: #1b1f27; /* глубокий графит */
+  --hdr-grad-2: #0f141b; /* тёмный антрацит */
+  --hdr-glass: rgba(255, 255, 255, 0.06);
+  --hdr-line: rgba(255, 255, 255, 0.12);
+  --hdr-text: #f3f6fb;
+  --hdr-muted: #a9b4c4;
+  --hdr-accent: #c5a46d; /* песочно-золотой акцент */
+  --hdr-shadow: rgba(0, 0, 0, 0.35);
+}
+
+/* Шапка: стеклянный тёмный градиент, липкая, с тенью */
+.header {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(135deg, var(--hdr-grad-1), var(--hdr-grad-2));
+  border-bottom: 1px solid var(--hdr-line);
+  box-shadow: 0 8px 24px var(--hdr-shadow);
+  z-index: 1000;
+}
+
+/* Внутренний ряд */
+.header__row {
+  padding: 12px 16px;
+  gap: 14px;
+}
+
+/* Логотип */
+.logo {
+  color: var(--hdr-text);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+.logo:hover {
+  opacity: 0.9;
+}
+
+/* Навигация: компактные «пилюли» */
+.header__nav {
+  gap: 10px;
+}
+.header__link {
+  color: var(--hdr-text);
+  background: var(--hdr-glass);
+  border: 1px solid var(--hdr-line);
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+  font-weight: 600;
+}
+.header__link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Иконки/селекты справа */
+.header__icons {
+  gap: 10px;
+}
+.header__icons select {
+  appearance: none;
+  color: var(--hdr-text);
+  background: var(--hdr-glass);
+  border: 1px solid var(--hdr-line);
+  border-radius: 10px;
+  padding: 8px 28px 8px 10px;
+  position: relative;
+  font-weight: 600;
+}
+.header__icons select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(197, 164, 109, 0.25);
+  border-color: var(--hdr-accent);
+}
+
+/* Профиль/корзина */
+.header__icons a {
+  color: var(--hdr-text);
+  background: var(--hdr-glass);
+  border: 1px solid var(--hdr-line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  transition: all 0.25s ease;
+}
+.header__icons a:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+/* Бейдж корзины — акцентный */
+.header__badge {
+  background: var(--hdr-accent) !important;
+  color: #111;
+  font-weight: 800;
+  border: 2px solid #111;
+  width: 22px;
+  height: 22px;
+  top: -8px;
+  right: -10px;
+}
+
+/* Бургер — стеклянная кнопка */
+.burger {
+  display: block;
+  margin-left: auto;
+  background: var(--hdr-glass);
+  border: 1px solid var(--hdr-line);
+  border-radius: 12px;
+  color: var(--hdr-text);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+@media (min-width: 1024px) {
+  .burger {
+    display: none;
+  }
+}
+.burger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+/* Оверлей и дровер (мобильное меню) */
+.overlay {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.drawer {
+  width: 86%;
+  max-width: 420px;
+  background: linear-gradient(180deg, #0b0f14, #121821);
+  color: var(--hdr-text);
+  transform: translateX(100%);
+  transition: transform 0.28s ease;
+  border-left: 1px solid #0b0f14;
+  box-shadow: -18px 0 36px rgba(0, 0, 0, 0.45);
+  margin-top: 0; /* перекрываем прежний отступ */
+  top: 0; /* фиксируем под самый верх */
+}
+.drawer.open {
+  transform: translateX(0);
+}
+
+/* Кнопка закрытия в дровере */
+.drawer .btn {
+  align-self: flex-end;
+  background: var(--hdr-glass);
+  border: 1px solid var(--hdr-line);
+  color: var(--hdr-text);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.drawer .btn:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Ссылки в дровере — крупнее, с разделителями */
+.drawer .header__link {
+  display: block;
+  padding: 12px 12px;
+  border: 1px solid transparent;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--hdr-text);
+  background: transparent;
+}
+.drawer .header__link:hover {
+  background: rgba(197, 164, 109, 0.08);
+  border-color: rgba(197, 164, 109, 0.22);
+}
+
+/* Модалка категорий — чуть «воздушнее» */
+.modal__panel {
+  border: 1px solid var(--hdr-line);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
+}
+
+/* Тонкие скроллбары в дровере (поддерживаемые браузеры) */
+.drawer {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+.drawer::-webkit-scrollbar {
+  width: 10px;
+}
+.drawer::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  border: 2px solid transparent;
+}
+
+/* Ховеры/фокус для доступности */
+.header__link:focus-visible,
+.header__icons a:focus-visible,
+.burger:focus-visible,
+.drawer .btn:focus-visible {
+  outline: 3px solid rgba(197, 164, 109, 0.45);
+  outline-offset: 2px;
+}
+
+/* Адаптация — ужимаем отступы на узких экранах */
+@media (max-width: 480px) {
+  .header__row {
+    padding: 10px 12px;
+  }
+  .header__icons select {
+    padding-right: 24px;
+  }
+}
+/* ==== MOBILE: прячем иконки в самой шапке, когда появляется бургер ==== */
+@media (max-width: 1023px) {
+  /* скрываем профиль и корзину в хедере, селекты можно оставить */
+  .header__icons #profileBtn,
+  .header__icons .header__cart {
+    display: none !important;
+  }
+}
+
+/* ==== Drawer top icons row (профиль слева, корзина справа) ==== */
+.drawer__icons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* слева/справа */
+  gap: 12px;
+  padding: 8px 12px 10px;
+  margin-bottom: 6px;
+  background: var(--hdr-glass);
+  border: 1px solid var(--hdr-line);
+  border-radius: 12px;
+}
+
+.drawer__icons .header__icon {
+  color: var(--hdr-text);
+  background: transparent;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 10px;
+  font-size: 18px; /* чуть крупнее тап-таргет */
+  line-height: 1;
+  position: relative; /* для бейджа */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.drawer__icons .header__icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+/* бейдж в дровере — тот же стиль, что в хедере */
+#drawerCartBadge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: var(--hdr-accent);
+  color: #111;
+  font-weight: 800;
+  border: 2px solid #111;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: none; /* включаем из JS */
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}

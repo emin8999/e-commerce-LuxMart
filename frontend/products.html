@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Products</title>
 
-    <link rel="stylesheet" href="./assets/css/products.css" />
     <link rel="stylesheet" href="./assets/css/style.css" />
+    <link rel="stylesheet" href="./assets/css/header.css" />
+    <link rel="stylesheet" href="./assets/css/products.css" />
   </head>
   <body>
     <div id="app-header"></div>
@@ -26,8 +27,18 @@
             <button id="applyFilters" class="btn">Apply</button>
             <button id="clearFilters" class="btn ghost">Clear</button>
           </div>
+          <div class="sort">
+            <label for="sortSel">Sort:</label>
+            <select id="sortSel">
+              <option value="popular">Popular</option>
+              <option value="priceAsc">Price: Low → High</option>
+              <option value="priceDesc">Price: High → Low</option>
+              <option value="titleAsc">Title A→Z</option>
+              <option value="titleDesc">Title Z→A</option>
+            </select>
+          </div>
         </div>
-        <div class="sort">
+        <!-- <div class="sort">
           <label for="sortSel">Sort:</label>
           <select id="sortSel">
             <option value="popular">Popular</option>
@@ -36,8 +47,52 @@
             <option value="titleAsc">Title A→Z</option>
             <option value="titleDesc">Title Z→A</option>
           </select>
-        </div>
+        </div> -->
       </section>
+      <!-- Mobile Filters Button -->
+      <button
+        class="filters-fab"
+        id="openFilters"
+        aria-controls="filtersModal"
+        aria-expanded="false"
+      >
+        Filters
+      </button>
+
+      <!-- Mobile Filters Modal -->
+      <div
+        class="filters-modal"
+        id="filtersModal"
+        aria-hidden="true"
+        role="dialog"
+        aria-label="Filters"
+      >
+        <div class="filters-modal__panel">
+          <div class="filters-modal__head">
+            <h3 style="margin: 0">Filters</h3>
+            <button class="filters-modal__close" id="closeFilters">
+              Close
+            </button>
+          </div>
+
+          <!-- Повторяем те же элементы, что в .filters -->
+          <label class="checkbox">
+            <input type="checkbox" id="onlySaleModal" />
+            <span>Only with discount</span>
+          </label>
+
+          <div class="price-range" style="margin-top: 10px">
+            <input type="number" id="minPriceModal" placeholder="Min price" />
+            <span class="dash">—</span>
+            <input type="number" id="maxPriceModal" placeholder="Max price" />
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 12px">
+            <button id="applyFiltersModal" class="btn">Apply</button>
+            <button id="clearFiltersModal" class="btn ghost">Clear</button>
+          </div>
+        </div>
+      </div>
 
       <section id="productsGrid" class="grid"></section>
       <div id="gridEmpty" class="empty" hidden>No products</div>
@@ -53,5 +108,61 @@
     <script src="./assets/js/products.js"></script>
     <div id="app-footer"></div>
     <script src="./assets/js/footer.js"></script>
+    <script>
+      (function () {
+        const btn = document.getElementById("openFilters");
+        const dlg = document.getElementById("filtersModal");
+        const close = document.getElementById("closeFilters");
+
+        btn?.addEventListener("click", () => {
+          dlg?.classList.add("open");
+          btn.setAttribute("aria-expanded", "true");
+          dlg.setAttribute("aria-hidden", "false");
+        });
+        function closeDlg() {
+          dlg?.classList.remove("open");
+          btn.setAttribute("aria-expanded", "false");
+          dlg.setAttribute("aria-hidden", "true");
+        }
+        close?.addEventListener("click", closeDlg);
+        dlg?.addEventListener("click", (e) => {
+          if (e.target === dlg) closeDlg();
+        });
+
+        /* (Необязательно) Синхронизация значений с основными полями */
+        const map = [
+          ["onlySale", "onlySaleModal", "checked"],
+          ["minPrice", "minPriceModal", "value"],
+          ["maxPrice", "maxPriceModal", "value"],
+        ];
+        map.forEach(([a, b, prop]) => {
+          const A = document.getElementById(a),
+            B = document.getElementById(b);
+          if (A && B) {
+            B[prop] = A[prop];
+            B.addEventListener("input", () => {
+              A[prop] = B[prop];
+            });
+          }
+        });
+        document
+          .getElementById("applyFiltersModal")
+          ?.addEventListener("click", () => {
+            document.getElementById("applyFilters")?.click();
+            closeDlg();
+          });
+        document
+          .getElementById("clearFiltersModal")
+          ?.addEventListener("click", () => {
+            document.getElementById("clearFilters")?.click();
+            // подтянем новые значения в модалку
+            map.forEach(([a, b, prop]) => {
+              const A = document.getElementById(a),
+                B = document.getElementById(b);
+              if (A && B) B[prop] = A[prop];
+            });
+          });
+      })();
+    </script>
   </body>
 </html>

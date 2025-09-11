@@ -1,0 +1,238 @@
+/* ======= Our Stores · Premium Overrides (HTML не меняем) ======= */
+
+/* ===== Body Background Premium ===== */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #f7f9ff;
+  line-height: 1.6;
+}
+
+/* Чтобы панельные блоки (магазины) не сливались с фоном */
+.store-section,
+.loading-state,
+.error-state,
+.no-stores {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #1a1a1a !important;
+}
+
+:root {
+  --bg1: #667eea;
+  --bg2: #764ba2;
+  --panel: rgba(255, 255, 255, 0.95);
+  --line: #e9ecef;
+  --text: #1a1a1a;
+  --muted: #6c757d;
+  --accent: #c5a46d; /* песочно-золотой акцент */
+  --head: #2c3e50;
+  --ok: #2ecc71;
+  --err: #e74c3c;
+}
+
+/* Фон страницы и контейнер */
+main.container {
+  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+  min-height: 100vh;
+  padding-top: 28px;
+  padding-bottom: 40px;
+}
+main.container > h1 {
+  color: #f7f9ff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* ===== Список магазинов: ВЕРТИКАЛЬНО, без горизонтального скролла ===== */
+.stores-slider {
+  display: grid !important;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  overflow: visible !important; /* убираем горизонтальную прокрутку */
+}
+
+/* Состояния загрузки/ошибок в премиум-стиле */
+.loading-state {
+  text-align: center;
+  padding: 48px 16px;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+.loading-spinner {
+  border-top-color: #fff !important;
+}
+.loading-state p {
+  color: #2c3e50;
+  opacity: 0.9;
+}
+
+.error-state {
+  background: rgba(231, 76, 60, 0.09);
+  border: 1px solid rgba(231, 76, 60, 0.35);
+  border-radius: 16px;
+  color: #a12824;
+  box-shadow: 0 10px 28px rgba(231, 76, 60, 0.15);
+}
+.retry-btn {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  border-radius: 12px;
+}
+.retry-btn:hover {
+  filter: brightness(1.05);
+}
+
+.no-stores {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== Секция магазина («слайд»): стеклянная панель ===== */
+.store-section {
+  background: var(--panel) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-left: 4px solid var(--accent);
+  border-radius: 22px !important;
+  padding: 22px !important;
+  margin: 0; /* управляем отступом через gap контейнера */
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.store-section:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Шапка магазина */
+.store-header {
+  cursor: pointer;
+  padding-bottom: 14px !important;
+  margin-bottom: 16px !important;
+  border-bottom: 2px solid var(--line) !important;
+  transition: border-color 0.25s ease;
+}
+.store-header:hover {
+  border-color: var(--accent) !important;
+}
+
+.store-title {
+  font-size: clamp(1.25rem, 1.2vw + 1rem, 1.6rem) !important;
+  color: var(--head) !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px !important;
+}
+.store-title::before {
+  content: "🏪";
+  font-size: 1.25rem;
+}
+
+.store-info {
+  color: #334155 !important;
+  font-weight: 500;
+  margin: 0 !important;
+}
+
+/* Товары внутри магазина: адаптивная сетка */
+.products-container {
+  position: relative;
+}
+.products-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: 14px !important;
+  margin-bottom: 12px !important;
+}
+
+/* Карточка товара — стекло/тень/ховер */
+.product-card {
+  background: #fff !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.14) !important;
+  border-color: rgba(197, 164, 109, 0.55) !important; /* акцент */
+}
+.product-image {
+  background: linear-gradient(135deg, #f8fafc, #e9eef5) !important;
+  height: 180px !important;
+}
+.product-info {
+  padding: 12px 12px 14px !important;
+}
+.product-name {
+  color: #1f2937 !important;
+  font-weight: 700 !important;
+  margin: 0 0 6px !important;
+}
+.product-price {
+  color: var(--ok) !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+}
+
+/* Кнопка "See All" — премиум */
+.see-all-btn {
+  background: linear-gradient(135deg, var(--bg1), var(--bg2)) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  box-shadow: 0 10px 28px rgba(102, 126, 234, 0.35) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+.see-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(102, 126, 234, 0.45) !important;
+  filter: brightness(1.02);
+}
+
+/* ===== Адаптация ===== */
+@media (max-width: 968px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  }
+  .product-image {
+    height: 160px !important;
+  }
+}
+@media (max-width: 640px) {
+  .store-section {
+    padding: 16px !important;
+    border-radius: 18px !important;
+  }
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+  }
+  .product-image {
+    height: 140px !important;
+  }
+}
+@media (max-width: 360px) {
+  .products-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .product-image {
+    height: 130px !important;
+  }
+}
+
+/* Анимация появления (оставляем твоё название @keyframes fadeIn) */
+.store-section {
+  animation: fadeIn 0.6s ease-out;
+}
+.product-card {
+  animation: fadeIn 0.4s ease-out;
+}

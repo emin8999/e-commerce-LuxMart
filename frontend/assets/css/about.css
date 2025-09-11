@@ -1,76 +1,214 @@
+/* ======= About Page (scoped to main#about) ======= */
 :root {
-  --black: #000000;
-  --sand: #c2b280; /* песочный оттенок */
-}
-
-/* Общие стили */
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  line-height: 1.6;
-  background: transparent; /* фон без цвета */
-  color: var(--black);
+  --bg1: #667eea;
+  --bg2: #764ba2;
+  --panel: rgba(255, 255, 255, 0.95);
+  --line: #e9ecef;
+  --text: #1a1a1a;
+  --muted: #6c757d;
+  --accent: #c5a46d; /* песочно-золотой акцент */
+  --head: #2c3e50;
 }
 
 main#about {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 24px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+  color: var(--text);
+  padding: 2rem 1rem 3rem;
+  display: grid;
+  gap: 1.25rem;
 }
 
-/* Заголовки */
-main#about h1,
-main#about h2,
-main#about h3 {
-  color: var(--black);
-  margin-top: 1.2em;
-  margin-bottom: 0.4em;
-  font-weight: 700;
+/* Карточки-секции */
+main#about > section {
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  padding: 1.6rem;
+  animation: aboutFadeIn 0.5s ease both;
 }
 
-/* Подзаголовки или акценты — песочный цвет */
+/* Типографика */
+main#about h1 {
+  font-size: clamp(1.6rem, 2.2vw + 1rem, 2.1rem);
+  font-weight: 800;
+  color: var(--head);
+  letter-spacing: 0.2px;
+  margin-bottom: 0.5rem;
+}
 main#about h2 {
-  border-bottom: 1px solid var(--sand);
-  padding-bottom: 4px;
+  font-size: clamp(1.25rem, 1.2vw + 1rem, 1.6rem);
+  font-weight: 800;
+  color: var(--head);
+  margin: 0.2rem 0 0.75rem;
+}
+main#about h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--head);
+  margin: 1rem 0 0.5rem;
+}
+main#about p {
+  line-height: 1.65;
+  color: #2c3e50;
+}
+main#about p + p {
+  margin-top: 0.6rem;
 }
 
-main#about strong {
-  color: var(--sand);
+/* Списки: история/ценности/партнёры */
+main#about ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.6rem;
+  display: grid;
+  gap: 0.5rem;
+}
+main#about li {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  display: grid;
+  gap: 0.25rem;
+}
+main#about li strong {
+  color: var(--head);
+  font-weight: 800;
+  margin-right: 0.4rem;
+}
+main#about li span {
+  color: #334155;
 }
 
-/* Тексты */
-main#about p,
-main#about li,
-main#about dt,
-main#about dd,
-main#about blockquote {
-  color: var(--black);
-}
-
-/* Списки */
-main#about ul,
+/* Быстрые факты (dl) */
 main#about dl {
-  padding-left: 20px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.6rem 1rem;
+  margin-top: 0.6rem;
 }
-
 main#about dt {
-  font-weight: 600;
-  color: var(--sand);
+  color: var(--head);
+  font-weight: 800;
+}
+main#about dd {
+  color: #334155;
+  margin: 0;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.55rem 0.7rem;
 }
 
 /* Цитаты */
 main#about blockquote {
-  border-left: 3px solid var(--sand);
-  margin: 12px 0;
-  padding-left: 12px;
+  margin: 0.8rem 0;
+  padding: 1rem 1.1rem;
+  border-left: 4px solid var(--accent);
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+main#about blockquote p {
+  margin: 0 0 0.4rem;
   font-style: italic;
+  color: #1f2937;
+}
+main#about blockquote footer {
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 
-/* Ссылки */
-main#about a {
-  color: var(--black);
-  text-decoration: underline;
+/* CTA кнопка */
+main#about a[href] {
+  color: #fff;
+  text-decoration: none;
+  display: inline-block;
+  border: none;
+  border-radius: 14px;
+  padding: 0.9rem 1.15rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
+  transition: all 0.25s ease;
 }
-main#about a:hover {
-  color: var(--sand);
+main#about a[href]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(102, 126, 234, 0.45);
+}
+
+/* «Партнёрские логотипы» (плейсхолдеры) — в одну строку на десктопе */
+main#about section[aria-labelledby="trust-title"] ul {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+main#about section[aria-labelledby="trust-title"] li {
+  text-align: center;
+  font-weight: 700;
+  color: #2c3e50;
+  background-image: linear-gradient(180deg, #fff, #f8fafc);
+}
+
+/* Герой-секция (первая) — чуть крупнее и с акцентной линией */
+main#about > section:first-of-type {
+  border-left: 4px solid var(--accent);
+}
+
+/* Мелкие элементы/отступы */
+main#about section + section {
+  margin-top: 0.2rem;
+}
+
+/* Анимация появления */
+@keyframes aboutFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ======= Мобильная адаптация ======= */
+
+/* Сетка фактов в один столбец на мобильных */
+@media (max-width: 720px) {
+  main#about {
+    padding: 1.25rem 0.9rem 2rem;
+    gap: 1rem;
+  }
+  main#about dl {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Партнёрские «логотипы» — 2 в ряд, затем 1 */
+@media (max-width: 860px) {
+  main#about section[aria-labelledby="trust-title"] ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  main#about section[aria-labelledby="trust-title"] ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Уменьшим тени и сделаем карточки компактнее на очень узких экранах */
+@media (max-width: 380px) {
+  main#about > section {
+    padding: 1.1rem;
+    border-radius: 18px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
+  }
+  main#about h1 {
+    font-size: 1.4rem;
+  }
+  main#about h2 {
+    font-size: 1.2rem;
+  }
 }
