@@ -1,6 +1,8 @@
 /* ======= Premium Header Only (override) ======= */
 
 :root {
+  /* ... твои переменные ... */
+  --hdr-height: 60px; /* высота хидера для позиционирования дровера */
   --hdr-grad-1: #1b1f27; /* глубокий графит */
   --hdr-grad-2: #0f141b; /* тёмный антрацит */
   --hdr-glass: rgba(255, 255, 255, 0.06);
@@ -126,10 +128,19 @@
 
 /* Оверлей и дровер (мобильное меню) */
 .overlay {
+  position: fixed;
+  left: 0;
+  top: var(--hdr-height); /* СРАЗУ НИЖЕ ХИДЕРА */
+  width: 100%;
+  height: calc(100dvh - var(--hdr-height));
   background: rgba(0, 0, 0, 0.45);
 }
 
 .drawer {
+  position: fixed; /* гарантируем фикс. позиционирование */
+  right: 0; /* прижат к правому краю */
+  top: var(--hdr-height); /* НАЧАЛО СРАЗУ ПОСЛЕ ХИДЕРА */
+  height: calc(100dvh - var(--hdr-height)); /* чтобы влезал на экран */
   width: 86%;
   max-width: 420px;
   background: linear-gradient(180deg, #0b0f14, #121821);
@@ -138,8 +149,7 @@
   transition: transform 0.28s ease;
   border-left: 1px solid #0b0f14;
   box-shadow: -18px 0 36px rgba(0, 0, 0, 0.45);
-  margin-top: 0; /* перекрываем прежний отступ */
-  top: 0; /* фиксируем под самый верх */
+  margin-top: 0; /* можно оставить, но уже не критично */
 }
 .drawer.open {
   transform: translateX(0);
