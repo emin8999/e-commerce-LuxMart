@@ -319,5 +319,47 @@ async function fetchStoresFromAPI() {
 
 // Initialize the page
 document.addEventListener("DOMContentLoaded", () => {
+  // Auth guard for admin pages
+  enforceAdminAuth();
+
+  // Bind logout if present
+  const logout = document.getElementById("adminLogoutBtn");
+  if (logout) {
+    logout.addEventListener("click", adminLogout);
+  }
+
   initializeStores();
+});
+
+// ===== Admin auth helpers =====
+function getAdminToken() {
+  try {
+    return localStorage.getItem("adminJWT");
+  } catch (_) {
+    return null;
+  }
+}
+
+function enforceAdminAuth() {
+  const t = getAdminToken();
+  if (!t) {
+    // Replace to avoid back navigation to a protected page
+    window.location.replace("./adminLogin.html");
+  }
+}
+
+function adminLogout() {
+  try {
+    localStorage.removeItem("adminJWT");
+  } catch (_) {}
+  // Clear history entry for current page and go to login
+  try { history.replaceState(null, "", "./adminLogin.html"); } catch (_) {}
+  window.location.replace("./adminLogin.html");
+}
+
+// Handle BFCache back-forward navigation: force re-check
+window.addEventListener("pageshow", function (e) {
+  if (!getAdminToken()) {
+    window.location.replace("./adminLogin.html");
+  }
 });

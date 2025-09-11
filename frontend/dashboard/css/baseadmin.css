@@ -245,3 +245,126 @@ body {
   outline: none;
   border-color: #667eea;
 }
+
+/* ===== Exchange Rates (вписывается в текущий дизайн) ===== */
+
+#rates {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin: 2rem 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* label | input */
+  gap: 1rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+#rates h2 {
+  grid-column: 1 / -1;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+#rates label {
+  align-self: center;
+  justify-self: end;
+  color: #2c3e50;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+#rates input[type="number"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 14px;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+  background: #fff;
+  color: #2c3e50;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+/* focus/hover как у остальных контролов */
+#rates input[type="number"]:hover {
+  border-color: #dfe4ea;
+}
+#rates input[type="number"]:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+
+/* прибираем стрелочки у number (кроссбраузерно) */
+#rates input[type="number"]::-webkit-outer-spin-button,
+#rates input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+#rates input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Кнопка Save — стиль, как в навигации/экспорте */
+#rates #saveRates {
+  grid-column: 1 / -1;
+  justify-self: start;
+  margin-top: 0.5rem;
+  border: none;
+  padding: 0.8rem 1.6rem;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+}
+#rates #saveRates:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(102, 126, 234, 0.45);
+}
+#rates #saveRates:active {
+  transform: translateY(0);
+}
+
+/* Состояния успеха/ошибки (если будешь показывать уведомления под секцией) */
+.rates-message {
+  margin-top: 0.75rem;
+  grid-column: 1 / -1;
+  text-align: left;
+  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+}
+.rates-message.ok {
+  background: #e9f9ef;
+  color: #1c7f47;
+  border: 1px solid #2ecc71;
+}
+.rates-message.err {
+  background: #fdecea;
+  color: #a33a2a;
+  border: 1px solid #e74c3c;
+}
+
+/* Адаптив — на мобильных в один столбец */
+@media (max-width: 680px) {
+  #rates {
+    grid-template-columns: 1fr;
+  }
+  #rates label {
+    justify-self: start;
+  }
+  #rates #saveRates {
+    justify-self: stretch; /* кнопка на всю ширину */
+    text-align: center;
+  }
+}
