@@ -11,7 +11,8 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <link rel="stylesheet" href="../assets/css/style.css" />
-    <link rel="stylesheet" href="../dashboard/css/dashboard.css" />
+    <link rel="stylesheet" href="./css/storedashboard.css" />
+    <link rel="stylesheet" href="./css/storeheaderdash.css" />
   </head>
   <body>
     <header class="dashboard-header">
@@ -59,41 +60,79 @@
             </div>
             <label>
               <span>Description</span>
-              <textarea id="storeDescription" name="storeDescription" rows="3" disabled></textarea>
+              <textarea
+                id="storeDescription"
+                name="storeDescription"
+                rows="3"
+                disabled
+              ></textarea>
             </label>
-            <div class="grid two" style="align-items:center">
+            <div class="grid two" style="align-items: center">
               <div>
                 <label>
                   <span>Slug</span>
                   <input type="text" id="slug" name="slug" disabled />
                 </label>
-                <label style="display:flex;gap:8px;align-items:center;margin-top:8px">
+                <label
+                  style="
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                    margin-top: 8px;
+                  "
+                >
                   <input type="checkbox" id="agreedToTerms" disabled />
                   <span>Agreed To Terms</span>
                 </label>
               </div>
-              <div style="justify-self:end;text-align:center">
-                <img id="logoPreview" alt="Logo" style="max-width:140px;max-height:140px;border:1px solid #e5e5e5;border-radius:8px;object-fit:contain" />
+              <div style="justify-self: end; text-align: center">
+                <img
+                  id="logoPreview"
+                  alt="Logo"
+                  style="
+                    max-width: 140px;
+                    max-height: 140px;
+                    border: 1px solid #e5e5e5;
+                    border-radius: 8px;
+                    object-fit: contain;
+                  "
+                />
               </div>
             </div>
 
-            <div style="display:flex;gap:8px;margin-top:12px">
+            <div style="display: flex; gap: 8px; margin-top: 12px">
               <button type="button" id="editStoreBtn" class="btn">Edit</button>
-              <button type="submit" id="saveStoreBtn" class="btn primary" disabled>Save</button>
-              <button type="button" id="cancelEditBtn" class="btn" disabled>Cancel</button>
-              <span id="storeInfoMsg" style="margin-left:8px"></span>
+              <button
+                type="submit"
+                id="saveStoreBtn"
+                class="btn primary"
+                disabled
+              >
+                Save
+              </button>
+              <button type="button" id="cancelEditBtn" class="btn" disabled>
+                Cancel
+              </button>
+              <span id="storeInfoMsg" style="margin-left: 8px"></span>
             </div>
           </form>
         </div>
       </section>
       <section>
         <h2>Products</h2>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <div
+          style="
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+          "
+        >
           <a href="addProducts.html" class="btn primary">+ Add Product</a>
           <button id="exportXlsBtn" class="btn">Export XLS</button>
-          <span id="productsMsg" style="margin-left:8px"></span>
+          <span id="productsMsg" style="margin-left: 8px"></span>
         </div>
-        <div style="overflow:auto">
+        <div style="overflow: auto">
           <table class="table" id="productsTable">
             <thead>
               <tr>

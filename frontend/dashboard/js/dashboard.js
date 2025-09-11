@@ -4,7 +4,10 @@
   const path = location.pathname;
 
   // ===== Store pages auth guard + logout =====
-  if (path.endsWith("/store.html")) {
+  const isStorePage =
+    !!document.getElementById("storeLogoutBtn") ||
+    /\/dashboard\/(store\.html|index\.html|addProducts\.html)$/.test(path);
+  if (isStorePage) {
     const token = localStorage.getItem("storeJwt");
     if (!token) {
       // no token → go to login and replace history entry

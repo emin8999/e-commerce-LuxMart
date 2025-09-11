@@ -1,0 +1,278 @@
+/* =============== Premium Store Dashboard (design-only override) =============== */
+:root {
+  --bg1: #667eea;
+  --bg2: #764ba2;
+  --panel: rgba(255, 255, 255, 0.96);
+  --glass: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.14);
+  --line-soft: #e9ecef;
+  --text: #1a1a1a;
+  --muted: #6f6f6f;
+  --head: #2c3e50;
+  --accent: #c5a46d; /* песочно-золотой */
+  --ok: #2ecc71;
+  --warn: #f39c12;
+  --err: #e74c3c;
+}
+
+/* ===== Body / общая сцена ===== */
+html,
+body {
+  height: 100%;
+}
+body {
+  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* Контентный контейнер: аккуратные отступы */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ===== Header (не меняем HTML — переоформляем) ===== */
+.dashboard-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: linear-gradient(135deg, #1b1f27, #0f141b);
+  border-bottom: 1px solid var(--line);
+  padding: 12px 16px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+.dashboard-header h1 {
+  margin: 0 0 8px 0;
+  color: #f3f6fb;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  font-size: clamp(18px, 2.2vw, 24px);
+  letter-spacing: 0.2px;
+}
+.dashboard-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.dashboard-header nav a,
+.dashboard-header nav .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--glass);
+  color: #f3f6fb;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+.dashboard-header nav a:hover,
+.dashboard-header nav .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+#storeLogoutBtn {
+  background: linear-gradient(135deg, var(--bg1), var(--bg2)) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
+}
+
+/* ===== Секции на главной панели: стеклянные панели ===== */
+main.container > section {
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-left: 4px solid var(--accent);
+  border-radius: 20px;
+  padding: 18px;
+  margin: 14px 0;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14);
+}
+main.container > section h2 {
+  margin: 0 0 12px 0;
+  color: var(--head);
+  letter-spacing: 0.2px;
+}
+
+/* ===== Формы (Store Information) ===== */
+.form .grid.two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 720px) {
+  .form .grid.two {
+    grid-template-columns: 1fr;
+  }
+}
+.form label {
+  display: grid;
+  gap: 6px;
+}
+.form label > span {
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.form input[type="text"],
+.form input[type="email"],
+.form input[type="tel"],
+.form input[type="number"],
+.form textarea {
+  width: 100%;
+  padding: 0.8rem 0.9rem;
+  border: 2px solid var(--line-soft);
+  border-radius: 12px;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+.form textarea {
+  resize: vertical;
+}
+.form input:focus,
+.form textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+}
+.form input[disabled],
+.form textarea[disabled] {
+  background: #f8fafc;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* Кнопки */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid var(--line-soft);
+  background: #fff;
+  color: var(--text);
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+  box-shadow: 0 3px 12px rgba(102, 126, 234, 0.2);
+}
+.btn.primary {
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Состояния сообщений */
+#storeInfoMsg,
+#productsMsg {
+  font-weight: 700;
+}
+#storeInfoMsg.ok,
+#productsMsg.ok {
+  color: var(--ok);
+}
+#storeInfoMsg.err,
+#productsMsg.err {
+  color: var(--err);
+}
+
+/* ===== Таблица товаров ===== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  background: #fff;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+}
+.table thead th {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.6px;
+  padding: 12px;
+}
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: middle;
+}
+.table tr:hover td {
+  background: #f8fafc;
+}
+.table td .btn {
+  padding: 0.5rem 0.7rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+/* Встроенный редактор строки */
+tr.edit-row td {
+  background: #fafcff !important;
+  border-top: 1px solid #e8eef7;
+  border-bottom: 1px solid #e8eef7;
+}
+tr.edit-row .form .grid.two {
+  gap: 10px;
+}
+tr.edit-row .form .btn {
+  margin-top: 4px;
+}
+
+/* Мини-картинка товара */
+#productsTable img {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+/* ===== Утилити-классы/мелочи ===== */
+.label {
+  font-size: 12px;
+  color: var(--muted);
+}
+[aria-live="polite"] {
+  min-height: 1.2em;
+}
+
+/* Немного пространства между секциями кнопок/элементов */
+main.container section > .btn,
+main.container section > div > .btn {
+  margin-right: 6px;
+}
+
+/* Печатная версия — убираем тени/кнопки */
+@media print {
+  .dashboard-header,
+  #storeLogoutBtn {
+    display: none !important;
+  }
+  main.container {
+    box-shadow: none;
+    padding: 0;
+  }
+  .table {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
