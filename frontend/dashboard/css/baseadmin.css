@@ -10,6 +10,7 @@ body {
   min-height: 100vh;
 }
 
+/* Header */
 .dashboard-header {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
@@ -17,35 +18,34 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
-
+.dashboard-header .container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
 .dashboard-header h1 {
   color: #2c3e50;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   font-size: 1.8rem;
   font-weight: 600;
 }
-
 .dashboard-header nav {
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
 }
-
 .dashboard-header nav a {
-  color: #667eea;
+  color: #fff;
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 25px;
+  background: linear-gradient(135deg, var(--bg-grad-from), var(--bg-grad-to));
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
   transition: all 0.3s ease;
   font-weight: 500;
 }
-
 .dashboard-header nav a:hover,
 .dashboard-header nav a.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .container {
@@ -54,6 +54,11 @@ body {
   padding: 0 2rem;
 }
 
+.stores-container {
+  display: flex;
+  width: 100%;
+  overflow: auto;
+}
 .stores-section {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
