@@ -12,19 +12,19 @@ function normalizeImg(src) {
   return `${API_PRODUCTS_BASE}/${s.replace(/^\/+/, "")}`;
 }
 
-// -------- Cart (localStorage) --------
-const CART_KEY = "cart";
+// -------- Cart (in-memory storage) --------
+// ВАЖНО: localStorage не поддерживается в Claude.ai, используем память
+let cartItems = [];
+
 function getCart() {
-  try {
-    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
-  } catch {
-    return [];
-  }
+  return cartItems;
 }
+
 function setCart(items) {
-  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  cartItems = items;
   renderCartBadge();
 }
+
 function addToCart(item) {
   const cart = getCart();
   const idx = cart.findIndex(
@@ -37,6 +37,7 @@ function addToCart(item) {
   setCart(cart);
   alert("Added to cart");
 }
+
 function renderCartBadge() {
   const n = getCart().reduce((a, b) => a + (b.qty || 0), 0);
   const badge = $$("#cartBadge");
@@ -50,6 +51,7 @@ function computePriceUSD(p) {
   const current = sale != null && sale >= 0 && sale < base ? sale : base;
   return { current, old: sale != null && sale < base ? base : null };
 }
+
 function formatCurrencyFromUSD(nUSD) {
   const cur = window.currency?.getCurrency?.() || "USD";
   const sym = window.currency?.symbol?.(cur) || "$";
@@ -71,19 +73,30 @@ function parseProductsPayload(payload) {
 }
 
 async function fetchAllProducts() {
+  // Исправлены эндпоинты согласно бэкенду
   const endpoints = [
     `${API_PRODUCTS_BASE}/api/products/all-products`,
-    `${API_PRODUCTS_BASE}/api/products`,
-    `${API_PRODUCTS_BASE}/api/products/all`,
+    `${API_PRODUCTS_BASE}/api/products/public`,
   ];
-  const headers = { "Content-Type": "application/json" };
+
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+
   for (const url of endpoints) {
     try {
-      const res = await fetch(url, { headers });
+      const res = await fetch(url, {
+        method: "GET",
+        headers,
+        mode: "cors",
+      });
+
       if (!res.ok) {
         console.warn("Products HTTP", res.status, url);
         continue;
       }
+
       const data = await res.json();
       const list = parseProductsPayload(data);
       if (Array.isArray(list) && list.length) return list;
@@ -97,6 +110,7 @@ async function fetchAllProducts() {
 
 // -------- Safe image pick --------
 function firstImage(p) {
+  // Исправлено: бэкенд возвращает imageUrls как массив строк
   const arr = Array.isArray(p.imageUrls)
     ? p.imageUrls
     : typeof p.imageUrls === "string"
@@ -136,7 +150,8 @@ function renderGrid(list) {
     const title = document.createElement("a");
     title.className = "title visit";
     title.href = thumb.href;
-    title.textContent = p.title ?? p.nameEn ?? `#${p.id}`;
+    // Исправлено: используем title, который приходит с бэкенда
+    title.textContent = p.title || `Product #${p.id}`;
 
     const priceDiv = document.createElement("div");
     priceDiv.className = "price";
@@ -152,22 +167,25 @@ function renderGrid(list) {
     const visit = document.createElement("a");
     visit.className = "visit";
     visit.href = thumb.href;
-    visit.textContent = "";
+    visit.textContent = "View Details";
 
     const add = document.createElement("button");
     add.className = "add-btn";
     add.innerHTML = `Add to cart`;
     add.addEventListener("click", (e) => {
       e.preventDefault();
-      addToCart({
+      // Добавляем проверку на наличие вариантов
+      const cartItem = {
         productId: p.id,
-        variantId: null,
+        variantId:
+          p.variants && p.variants.length > 0 ? p.variants[0].id : null,
         storeId: p.storeId,
         title: p.title,
         basePriceUSD: p.basePriceUSD,
         salePriceUSD: p.salePriceUSD,
         qty: 1,
-      });
+      };
+      addToCart(cartItem);
     });
 
     actions.appendChild(visit);
@@ -175,6 +193,18 @@ function renderGrid(list) {
 
     body.appendChild(title);
     body.appendChild(priceDiv);
+
+    // Добавляем отображение категории, если есть
+    if (p.nameEn) {
+      const categoryDiv = document.createElement("div");
+      categoryDiv.className = "category";
+      categoryDiv.textContent = p.nameEn;
+      categoryDiv.style.fontSize = "0.85rem";
+      categoryDiv.style.color = "#666";
+      categoryDiv.style.marginTop = "5px";
+      body.appendChild(categoryDiv);
+    }
+
     body.appendChild(actions);
 
     card.appendChild(thumb);
@@ -223,26 +253,86 @@ function applyFiltersTo(list) {
   return out;
 }
 
+// -------- Categories fetch --------
+async function fetchCategories() {
+  try {
+    const res = await fetch(`${API_PRODUCTS_BASE}/api/categories`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      mode: "cors",
+    });
+
+    if (res.ok) {
+      const categories = await res.json();
+      return categories;
+    }
+  } catch (err) {
+    console.warn("Failed to fetch categories", err);
+  }
+  return [];
+}
+
+// -------- Stores fetch --------
+async function fetchStores() {
+  try {
+    const res = await fetch(`${API_PRODUCTS_BASE}/store/all-stores`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      mode: "cors",
+    });
+
+    if (res.ok) {
+      const stores = await res.json();
+      return stores;
+    }
+  } catch (err) {
+    console.warn("Failed to fetch stores", err);
+  }
+  return [];
+}
+
 // -------- Init --------
 document.addEventListener("DOMContentLoaded", async () => {
   renderCartBadge();
+
+  // Показываем индикатор загрузки
+  const grid = $$("#productsGrid");
+  if (grid) {
+    grid.innerHTML =
+      '<div style="text-align: center; padding: 20px;">Loading products...</div>';
+  }
 
   const all = await fetchAllProducts();
 
   // initial render
   renderGrid(all);
 
+  // Загружаем категории и магазины для возможных фильтров
+  const categories = await fetchCategories();
+  const stores = await fetchStores();
+
+  console.log("Loaded categories:", categories.length);
+  console.log("Loaded stores:", stores.length);
+
   // filters
   $$("#applyFilters")?.addEventListener("click", () => {
     renderGrid(applyFiltersTo(all));
   });
+
   $$("#clearFilters")?.addEventListener("click", () => {
-    $$("#onlySale").checked = false;
-    $$("#minPrice").value = "";
-    $$("#maxPrice").value = "";
-    $$("#sortSel").value = "popular";
+    if ($$("#onlySale")) $$("#onlySale").checked = false;
+    if ($$("#minPrice")) $$("#minPrice").value = "";
+    if ($$("#maxPrice")) $$("#maxPrice").value = "";
+    if ($$("#sortSel")) $$("#sortSel").value = "popular";
     renderGrid(all);
   });
+
   $$("#sortSel")?.addEventListener("change", () => {
     renderGrid(applyFiltersTo(all));
   });
