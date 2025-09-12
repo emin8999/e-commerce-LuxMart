@@ -59,22 +59,40 @@ function formatCurrencyFromUSD(nUSD) {
 }
 
 // -------- Data fetch --------
+function parseProductsPayload(payload) {
+  if (!payload) return [];
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.data)) return payload.data;
+  if (Array.isArray(payload.content)) return payload.content;
+  if (Array.isArray(payload.items)) return payload.items;
+  if (Array.isArray(payload.products)) return payload.products;
+  if (Array.isArray(payload.list)) return payload.list;
+  return [];
+}
+
 async function fetchAllProducts() {
-  try {
-    const res = await fetch(`${API_PRODUCTS_BASE}/api/products/all-products`);
-    if (!res.ok) {
-      console.error("Products HTTP", res.status, await res.text());
-      return [];
+  const endpoints = [
+    `${API_PRODUCTS_BASE}/api/products/all-products`,
+    `${API_PRODUCTS_BASE}/api/products`,
+    `${API_PRODUCTS_BASE}/api/products/all`,
+  ];
+  const headers = { "Content-Type": "application/json" };
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { headers });
+      if (!res.ok) {
+        console.warn("Products HTTP", res.status, url);
+        continue;
+      }
+      const data = await res.json();
+      const list = parseProductsPayload(data);
+      if (Array.isArray(list) && list.length) return list;
+    } catch (err) {
+      console.warn("Products fetch error for", url, err);
     }
-    const data = await res.json();
-    // поддержка форматов [ {...}, {...} ] или { data: [ {...}, {...} ] }
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data.data)) return data.data;
-    return [];
-  } catch (err) {
-    console.error("Fetch error", err);
-    return [];
   }
+  // Nothing worked
+  return [];
 }
 
 // -------- Safe image pick --------
