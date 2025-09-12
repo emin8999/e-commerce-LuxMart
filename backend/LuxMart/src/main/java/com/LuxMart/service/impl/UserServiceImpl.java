@@ -155,6 +155,23 @@ public class UserServiceImpl implements UserService {
     if (dto.getPhone() != null) user.setPhone(dto.getPhone());
 
     userRepository.save(user);
+    }
+
+   @Override
+   @Transactional(readOnly = true)
+   public List<UserResponseDto> getAllUsersForAdmin() {
+   List<UserEntity> users = userRepository.findAll();
+    return users.stream()
+            .map(userMapper::mapToUserResponseDto) 
+            .toList();
+    }
+
+    @Override
+  @Transactional(readOnly = true)
+    public UserResponseDto getUserByIdForAdmin(Long id) {
+    UserEntity user = userRepository.findById(id)
+            .orElseThrow(() -> new UserNotFoundException());
+    return userMapper.mapToUserResponseDto(user);
 }
 
 }

@@ -1,5 +1,7 @@
 package com.LuxMart.service;
 
+import java.util.List;
+
 import com.LuxMart.dto.requestDto.LoginRequestDto;
 import com.LuxMart.dto.requestDto.RegisterRequestDto;
 import com.LuxMart.dto.requestDto.UserUpdateRequestDto;
@@ -20,5 +22,9 @@ public interface UserService {
        UserResponseDto getCurrentUser();
 
        void updateUser(Long userId, UserUpdateRequestDto dto);
+
+       List<UserResponseDto> getAllUsersForAdmin();
+
+       UserResponseDto getUserByIdForAdmin(Long id) ;
 }
 

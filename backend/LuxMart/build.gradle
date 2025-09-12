@@ -41,6 +41,8 @@ dependencies {
 	implementation "org.mapstruct:mapstruct:$mapstruct_version"
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'org.apache.poi:poi:5.2.4'
+    implementation 'org.apache.poi:poi-ooxml:5.2.4'
 	annotationProcessor "org.mapstruct:mapstruct-processor:$mapstruct_version"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
