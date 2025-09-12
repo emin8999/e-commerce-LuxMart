@@ -152,6 +152,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // Bütün məhsulları yüklə və mağaza üzrə qrupla
+  async function fetchAllProductsGroupedByStore() {
+    try {
+      const res = await fetch(`${API_CONFIG.baseURL}/api/products/all-products`, {
+        method: "GET",
+        headers: createRequestHeaders(),
+      });
+      if (!res.ok) return new Map();
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      const map = new Map();
+      list.forEach((p) => {
+        const sid = p.storeId ?? p.store_id ?? p.store?.id;
+        if (sid == null) return;
+        const key = String(sid);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(p);
+      });
+      return map;
+    } catch (_) {
+      return new Map();
+    }
+  }
+
   // Cache-dən store-ları götürmə
   function getStoresFromCache() {
     try {
@@ -225,14 +249,21 @@ document.addEventListener("DOMContentLoaded", function () {
     return cardElement;
   }
 
-  function createStoreSection(store) {
+  function createStoreSection(store, productsByStore) {
     const storeName =
       store.storeName || store.name || store.shopName || "Naməlum Mağaza";
-    const storeProducts = Array.isArray(store.products)
+    let storeProducts = Array.isArray(store.products)
       ? store.products
       : Array.isArray(store.items)
       ? store.items
       : [];
+    // Əgər backend mağaza içində məhsulları göndərmirsə, ümumi siyahıdan götür
+    if ((!storeProducts || storeProducts.length === 0) && (store.id != null)) {
+      const key = String(store.id);
+      if (productsByStore && productsByStore.has(key)) {
+        storeProducts = productsByStore.get(key);
+      }
+    }
 
     const storeElement = document.createElement("div");
     storeElement.className = "store-section";
@@ -300,7 +331,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return storeElement;
   }
 
-  function renderStores(stores) {
+  function renderStores(stores, productsByStore) {
     const container = getElement("storesSlider");
     if (!container) {
       console.error("storesSlider elementi tapılmadı!");
@@ -322,7 +353,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     stores.forEach((store, index) => {
       try {
-        const storeSection = createStoreSection(store);
+        const storeSection = createStoreSection(store, productsByStore);
         container.appendChild(storeSection);
         console.log(
           `Store ${index + 1} render edildi:`,
@@ -364,10 +395,16 @@ document.addEventListener("DOMContentLoaded", function () {
     showLoadingState();
 
     let stores = [];
+    let productsByStore = new Map();
 
     try {
       // Birinci cəhd: API-dən yükləmə
-      stores = await fetchStoresFromAPI();
+      const [s, pmap] = await Promise.all([
+        fetchStoresFromAPI(),
+        fetchAllProductsGroupedByStore(),
+      ]);
+      stores = s;
+      productsByStore = pmap;
       console.log("API-dən store-lar yükləndi:", stores.length);
     } catch (apiError) {
       console.warn(
@@ -392,7 +429,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Stores-u render et
-    renderStores(stores);
+    renderStores(stores, productsByStore);
 
     console.log("=== Stores səhifəsi hazır ===");
   }

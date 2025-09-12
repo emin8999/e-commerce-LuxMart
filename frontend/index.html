@@ -2,71 +2,103 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Home</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>LuxMart · Home</title>
+
+    <!-- Базовые стили проекта, если есть -->
     <link rel="stylesheet" href="./assets/css/style.css" />
     <link rel="stylesheet" href="./assets/css/header.css" />
+    <!-- Стили главной -->
+    <link rel="stylesheet" href="./assets/css/index.css" />
   </head>
   <body>
+    <!-- ТВОЙ существующий хедер (динамический) -->
     <div id="app-header"></div>
-    <main class="container">
-      <section class="hero">
-        <div class="hero__banner">
-          <h1 data-i18n="home.hero_title">Premium Marketplace</h1>
-          <p data-i18n="home.hero_sub">Calm, elegant, mobile-first design.</p>
+
+    <main class="container home">
+      <!-- Hero (баннер) -->
+      <section class="amz-hero">
+        <div class="amz-hero__panel">
+          <h1>Discover premium goods</h1>
+          <p>Trending collections, curated sellers, global delivery.</p>
+          <div class="amz-search-inline">
+            <input
+              id="heroSearch"
+              type="search"
+              placeholder="Search products…"
+            />
+            <button id="heroSearchBtn" class="btn btn-primary">Search</button>
+          </div>
+          <div id="heroChips" class="amz-chips">
+            <!-- JS вставит популярные категории -->
+          </div>
+        </div>
+        <div class="amz-hero__art" aria-hidden="true"></div>
+      </section>
+
+      <!-- Крупные плитки категорий -->
+      <section class="section">
+        <h2 class="amz-h2">Shop by Category</h2>
+        <div id="categoriesGrid" class="amz-tiles"></div>
+        <div id="catsEmpty" class="empty" hidden>No categories yet.</div>
+      </section>
+
+      <!-- Категорийные полки (как на Amazon) -->
+      <section class="section cat-shelves">
+        <div class="shelf__head">
+          <h2 class="amz-h2">Explore by category</h2>
+          <a class="link" href="./products.html">Browse all</a>
+        </div>
+        <div id="catShelves" class="cat-shelves-grid"></div>
+        <div id="catShelvesEmpty" class="empty" hidden>
+          No category groups yet.
         </div>
       </section>
 
-      <section class="categories-grid" id="home-cats">
-        <h2 data-i18n="home.categories">Categories</h2>
-        <div class="grid" id="categoriesGrid"></div>
+      <!-- Полка: Featured -->
+      <section class="section shelf">
+        <div class="shelf__head">
+          <h2 class="amz-h2">Featured</h2>
+          <div class="shelf__actions">
+            <label class="muted">Sort</label>
+            <select id="featSort">
+              <option value="popular" selected>Popular</option>
+              <option value="priceAsc">Price ↑</option>
+              <option value="priceDesc">Price ↓</option>
+              <option value="titleAsc">Title A–Z</option>
+              <option value="titleDesc">Title Z–A</option>
+            </select>
+          </div>
+        </div>
+        <div id="featuredGrid" class="shelf__row snap-x"></div>
+        <div id="featEmpty" class="empty" hidden>No featured products.</div>
       </section>
 
-      <section class="carousel" id="saleNow">
-        <div class="section-head">
-          <h2 data-i18n="home.sale_now">Sale Now</h2>
-          <a
-            href="./products.html?filter=sale"
-            class="see-all"
-            data-i18n="home.see_all"
-            >See all</a
-          >
+      <!-- Полка: On Sale -->
+      <section class="section shelf">
+        <div class="shelf__head">
+          <h2 class="amz-h2">On Sale</h2>
+          <a class="link" href="./products.html?sale=1">See all deals</a>
         </div>
-        <div class="row" id="saleRow"></div>
+        <div id="saleGrid" class="shelf__row snap-x"></div>
+        <div id="saleEmpty" class="empty" hidden>No sale items right now.</div>
       </section>
 
-      <section class="carousel" id="bestSellers">
-        <div class="section-head">
-          <h2 data-i18n="home.best_sellers">Best Sellers</h2>
-          <a
-            href="./products.html?filter=best"
-            class="see-all"
-            data-i18n="home.see_all"
-            >See all</a
-          >
+      <!-- Полка: Партнёрские магазины -->
+      <section class="section shelf">
+        <div class="shelf__head">
+          <h2 class="amz-h2">Our Partner Stores</h2>
+          <a class="link" href="./our-stores.html">All stores</a>
         </div>
-        <div class="row" id="bestRow"></div>
-      </section>
-
-      <section class="carousel" id="frequentlyTogether">
-        <div class="section-head">
-          <h2 data-i18n="home.frequently_together">
-            Frequently Bought Together
-          </h2>
-        </div>
-        <div class="row" id="fbtRow"></div>
-      </section>
-
-      <section class="stores" id="ourStores">
-        <div class="section-head">
-          <h2 data-i18n="nav.our_stores">Our Stores</h2>
-          <a href="./our-stores.html" class="see-all" data-i18n="home.see_all"
-            >See all</a
-          >
-        </div>
-        <div class="row" id="storesRow"></div>
+        <div id="storesSlider" class="shelf__row snap-x"></div>
+        <div id="storesEmpty" class="empty" hidden>No partner stores yet.</div>
       </section>
     </main>
+
+    <!-- ТВОЙ существующий футер (динамический) -->
+    <div id="app-footer"></div>
+
+    <!-- Общие скрипты, если используются -->
     <div id="app-modal-root"></div>
     <script src="./assets/js/i18n.js"></script>
     <script src="./assets/js/currency.js"></script>
@@ -74,8 +106,8 @@
     <script src="./assets/js/categories.js"></script>
     <script src="./assets/js/pricing.js"></script>
     <script src="./assets/js/cart.js"></script>
-
-    <div id="app-footer"></div>
     <script src="./assets/js/footer.js"></script>
+    <!-- Логика главной -->
+    <script src="./assets/js/index.js"></script>
   </body>
 </html>

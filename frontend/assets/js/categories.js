@@ -82,6 +82,35 @@ async function loadCategories() {
   return CATEGORIES_CACHE;
 }
 
+// Собираем категории, которые реально используются в товарах
+async function loadUsedCategoryInfo() {
+  try {
+    const res = await fetch(`${API_CATEGORIES_BASE}/api/products/all-products`);
+    if (!res.ok) return { ids: new Set(), names: new Set() };
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+
+    const ids = new Set();
+    const names = new Set();
+    list.forEach((p) => {
+      // Находим возможные поля категорий на товаре
+      const pid = p.categoryId ?? p.category_id ?? p.category?.id;
+      if (pid != null) ids.add(String(pid));
+
+      const pname =
+        p.categoryName ??
+        p.category_name ??
+        p.category?.name ??
+        p.category ??
+        null;
+      if (pname) names.add(String(pname).trim().toLowerCase());
+    });
+    return { ids, names };
+  } catch (_) {
+    return { ids: new Set(), names: new Set() };
+  }
+}
+
 window.renderCategories = async function (targetId) {
   const wrap = document.getElementById(targetId);
   if (!wrap) return;
@@ -92,7 +121,8 @@ window.renderCategories = async function (targetId) {
   const lc = window.i18n?.getLocale?.() || "en";
   const nameKey = localeField(lc);
 
-  const cats = await loadCategories();
+  // Загружаем все категории и пересекаем с реально используемыми
+  const [cats, used] = await Promise.all([loadCategories(), loadUsedCategoryInfo()]);
   wrap.removeAttribute("data-loading");
 
   if (!cats.length) {
@@ -109,10 +139,22 @@ window.renderCategories = async function (targetId) {
     return;
   }
 
+  // Фильтруем категории: оставляем только те, что встречаются в товарах (по id или имени)
+  const isUsed = (node) => {
+    const idMatch = node?.id != null && used.ids.has(String(node.id));
+    const rawName = categoryTitle(node, nameKey);
+    const nameMatch = rawName && used.names.has(String(rawName).trim().toLowerCase());
+    return idMatch || nameMatch;
+  };
+
   cats.forEach((cat) => {
+    // Оставляем карточку, если сама категория используется или любой из её детей используется
+    const childrenAll = getChildren(cat);
+    const usedChildren = childrenAll.filter(isUsed);
+    if (!(isUsed(cat) || usedChildren.length)) return;
+
     const title = categoryTitle(cat, nameKey);
-    const children = getChildren(cat);
-    const childNames = children
+    const childNames = usedChildren
       .map((c) => categoryTitle(c, nameKey))
       .filter(Boolean);
 

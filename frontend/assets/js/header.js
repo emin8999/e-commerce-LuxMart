@@ -10,9 +10,10 @@
          
           <a class="header__link" data-i18n="nav.products" href="./products.html">Products</a>
           <a class="header__link" data-i18n="nav.our_stores" href="./our-stores.html">Our Stores</a>
+          <a class="header__link" data-i18n="nav.category" id="openCatModal" href="javascript:void(0)">Category</a>
            <a class="header__link" data-i18n="nav.about_us" href="./about.html">About Us</a>
           <a class="header__link" data-i18n="nav.customer_service" href="./customer.html">Customer Service</a>
-          <a class="header__link" data-i18n="nav.category" id="openCatModal" href="javascript:void(0)">Category</a>
+          
         </nav>
         <div class="header__icons">
           <select id="langSelect" title="Language">
@@ -46,9 +47,10 @@
     </div>
       <a class="header__link" data-i18n="nav.products" href="./products.html">Products</a>
       <a class="header__link" data-i18n="nav.our_stores" href="./our-stores.html">Our Stores</a>
+      <a class="header__link" data-i18n="nav.category" id="openCatModalDrawer" href="javascript:void(0)">Category</a>
       <a class="header__link" data-i18n="nav.about_us" href="./about.html">About Us</a>
       <a class="header__link" data-i18n="nav.customer_service" href="./customer.html">Customer Service</a>
-      <a class="header__link" data-i18n="nav.category" id="openCatModalDrawer" href="javascript:void(0)">Category</a>
+      
     </div>
   `;
 
