@@ -80,11 +80,54 @@ a {
   flex-direction: column;
   gap: 8px;
 }
-.card .price {
+.card-actions {
+  margin-top: 10px;
+  padding: 10px;
+}
+
+/* Add to Cart — premium style */
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.75rem 1.2rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
   font-weight: 700;
+  font-size: 0.95rem;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(102, 126, 234, 0.45);
+}
+
+.add-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+}
+
+/* Вариант "с иконкой корзины" */
+.add-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.card .price {
+  display: flex;
+  font-weight: 700;
+  flex-direction: row-reverse;
+  gap: 10px;
 }
 .card .old {
-  color: var(--muted);
+  color: var(--sale);
   text-decoration: line-through;
 }
 

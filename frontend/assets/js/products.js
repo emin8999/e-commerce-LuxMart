@@ -51,9 +51,10 @@ function computePriceUSD(p) {
   return { current, old: sale != null && sale < base ? base : null };
 }
 function formatCurrencyFromUSD(nUSD) {
-  const cur = window.currency?.getCurrency?.() || 'USD';
-  const sym = window.currency?.symbol?.(cur) || '$';
-  const converted = window.currency?.convertUSD?.(Number(nUSD) || 0, cur) || Number(nUSD) || 0;
+  const cur = window.currency?.getCurrency?.() || "USD";
+  const sym = window.currency?.symbol?.(cur) || "$";
+  const converted =
+    window.currency?.convertUSD?.(Number(nUSD) || 0, cur) || Number(nUSD) || 0;
   return `${sym}${converted.toFixed(2)}`;
 }
 
@@ -122,7 +123,9 @@ function renderGrid(list) {
     const priceDiv = document.createElement("div");
     priceDiv.className = "price";
     priceDiv.innerHTML = `${formatCurrencyFromUSD(price.current)} ${
-      price.old ? `<span class="old">${formatCurrencyFromUSD(price.old)}</span>` : ""
+      price.old
+        ? `<span class="old">${formatCurrencyFromUSD(price.old)}</span>`
+        : ""
     }`;
 
     const actions = document.createElement("div");
@@ -131,16 +134,11 @@ function renderGrid(list) {
     const visit = document.createElement("a");
     visit.className = "visit";
     visit.href = thumb.href;
-    visit.textContent = "View";
+    visit.textContent = "";
 
     const add = document.createElement("button");
     add.className = "add-btn";
-    add.innerHTML = `
-      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-        <path d="M7 4h-2l-1 2h2l3.6 7.59-1.35 2.44A2 2 0 0 0 10 19h9v-2h-8.42a.25.25 0 0 1-.22-.37L11.1 14h6.45a2 2 0 0 0 1.8-1.11L22 7H7.42l-.7-1.4A1 1 0 0 0 6 5H3V3h3a2 2 0 0 1 1.8 1.1L9 8h11l-2 4H11.42"/>
-      </svg>
-      Add
-    `;
+    add.innerHTML = `Add to cart`;
     add.addEventListener("click", (e) => {
       e.preventDefault();
       addToCart({
