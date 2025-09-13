@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/products/all-products").permitAll()
                         .requestMatchers("/api/products/public/**").permitAll()
                         .requestMatchers("/api/products/my-store").permitAll()
+                        .requestMatchers("/api/admin/users").permitAll()
                         .requestMatchers("/store/register").permitAll()
                         .requestMatchers("/store/login").permitAll()
                         .requestMatchers("/store/all-stores").permitAll()
