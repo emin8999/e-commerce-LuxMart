@@ -11,19 +11,19 @@
  */
 
 const API_BASE = "http://116.203.51.133/luxmart";
-const TOKEN_KEY = "storeJwt"; // если Checkout требует авторизацию продавца/покупателя — подставь свой ключ
-const CART_KEY = "cart"; // формат: { items: [{productId, variantId?, size?, qty, ...meta}] }
+const TOKEN_KEY = "storeJwt";
+const CART_KEY = "cart";
 
-// Эндпойнты (раздельные имена под бэкенд)
+// Эндпойнты
 const API = {
   PRODUCT_ONE: (id) => `${API_BASE}/api/products/${encodeURIComponent(id)}`,
   PRODUCTS_ALL: `${API_BASE}/api/products/all-products`,
   PRODUCTS_BY_CATEGORY: (catId) =>
     `${API_BASE}/api/products/category/${encodeURIComponent(catId)}`,
 
-  COUPON_APPLY: `${API_BASE}/api/cart/coupons/apply`, // POST {code, items} -> {ok, discountUSD, message}
-  SHIPPING_QUOTE: `${API_BASE}/api/shipping/quote`, // POST {country, items} -> {ok, shippingUSD}
-  ORDER_CREATE: `${API_BASE}/api/orders`, // POST {items, totals, coupon?, shipping?} -> {orderId}
+  COUPON_APPLY: `${API_BASE}/api/cart/coupons/apply`,
+  SHIPPING_QUOTE: `${API_BASE}/api/shipping/quote`,
+  ORDER_CREATE: `${API_BASE}/api/orders`,
 };
 
 // ===== УТИЛИТЫ =====
@@ -48,22 +48,23 @@ function normalizeImg(src) {
 }
 
 // ===== ЛОКАЛЬНАЯ КОРЗИНА =====
+// Теперь корзина — это массив объектов [{productId, variantId?, size?, qty, ...meta}]
 function getCart() {
   try {
-    const parsed = JSON.parse(localStorage.getItem(CART_KEY));
-    if (parsed && typeof parsed === "object" && Array.isArray(parsed.items)) {
-      return parsed;
-    }
+    const arr = JSON.parse(localStorage.getItem(CART_KEY));
+    if (Array.isArray(arr)) return arr;
   } catch {}
-  return { items: [] };
+  return [];
 }
-function setCart(cartObj) {
-  localStorage.setItem(CART_KEY, JSON.stringify(cartObj));
-  try { window.renderCartBadge && window.renderCartBadge(); } catch(_) {}
+function setCart(items) {
+  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  try {
+    window.renderCartBadge && window.renderCartBadge();
+  } catch (_) {}
   // совместимость с альтернативной шапкой
   const badge = document.getElementById("cart-badge");
   if (badge) {
-    const count = cartObj.items.reduce((s, it) => s + Number(it.qty || 0), 0);
+    const count = items.reduce((s, it) => s + Number(it.qty || 0), 0);
     if (count > 0) {
       badge.textContent = count > 99 ? "99+" : String(count);
       badge.classList.remove("hidden");
@@ -74,60 +75,58 @@ function setCart(cartObj) {
 }
 function addCartItem(newItem) {
   const cart = getCart();
-  const key = (x) => `${x.productId}__${x.variantId ?? ''}__${x.size ?? ''}`;
-  // merge by productId+variantId(+size)
-  const idx = cart.items.findIndex((x) => key(x) === key(newItem));
-  if (idx >= 0) cart.items[idx].qty = Number(cart.items[idx].qty || 0) + Number(newItem.qty || 1);
-  else cart.items.push({ qty: 1, ...newItem });
+  const key = (x) => `${x.productId}__${x.variantId ?? ""}__${x.size ?? ""}`;
+  const idx = cart.findIndex((x) => key(x) === key(newItem));
+  if (idx >= 0)
+    cart[idx].qty = Number(cart[idx].qty || 0) + Number(newItem.qty || 1);
+  else cart.push({ qty: 1, ...newItem });
   setCart(cart);
 }
 function updateCartItem(productId, variantId, qty) {
   const cart = getCart();
-  const i = cart.items.findIndex(
+  const i = cart.findIndex(
     (x) =>
       String(x.productId) === String(productId) &&
       String(x.variantId || "") === (variantId || "")
   );
   if (i >= 0) {
-    cart.items[i].qty = Math.max(0, Number(qty || 0));
-    if (cart.items[i].qty === 0) cart.items.splice(i, 1);
+    cart[i].qty = Math.max(0, Number(qty || 0));
+    if (cart[i].qty === 0) cart.splice(i, 1);
   }
   setCart(cart);
 }
 function changeCartItemVariant(productId, oldVariantId, newVariant, meta = {}) {
-  // newVariant: {id, size?}
   const cart = getCart();
-  const i = cart.items.findIndex(
+  const i = cart.findIndex(
     (x) =>
       String(x.productId) === String(productId) &&
       String(x.variantId || "") === String(oldVariantId || "")
   );
   if (i < 0) return;
-  const item = cart.items[i];
+  const item = cart[i];
   const candidate = {
     ...item,
     ...meta,
     variantId: newVariant?.id ?? null,
     size: newVariant?.size ?? null,
   };
-  // try to merge with existing of same variant
-  const j = cart.items.findIndex(
+  const j = cart.findIndex(
     (x) =>
       String(x.productId) === String(candidate.productId) &&
       String(x.variantId || "") === String(candidate.variantId || "") &&
       String(x.size || "") === String(candidate.size || "")
   );
   if (j >= 0 && j !== i) {
-    cart.items[j].qty = Number(cart.items[j].qty || 0) + Number(candidate.qty || 0);
-    cart.items.splice(i, 1);
+    cart[j].qty = Number(cart[j].qty || 0) + Number(candidate.qty || 0);
+    cart.splice(i, 1);
   } else {
-    cart.items[i] = candidate;
+    cart[i] = candidate;
   }
   setCart(cart);
 }
 function removeCartItem(productId, variantId) {
-  const cart = getCart();
-  cart.items = cart.items.filter(
+  let cart = getCart();
+  cart = cart.filter(
     (x) =>
       !(
         String(x.productId) === String(productId) &&
@@ -137,23 +136,36 @@ function removeCartItem(productId, variantId) {
   setCart(cart);
 }
 function clearCart() {
-  setCart({ items: [] });
+  setCart([]);
 }
 
 // Глобальный помощник корзины для кнопок "Add to cart"
 window.cart = {
-  add(item) { addCartItem(item); },
-  updateQty(productId, variantId, qty) { updateCartItem(productId, variantId, qty); },
-  changeVariant(productId, oldVariantId, newVariant, meta) { changeCartItemVariant(productId, oldVariantId, newVariant, meta); },
-  remove(productId, variantId) { removeCartItem(productId, variantId); },
-  clear() { clearCart(); },
-  getItems() { return getCart().items.slice(); },
-  getCount() { return getCart().items.reduce((s, it) => s + Number(it.qty || 0), 0); },
+  add(item) {
+    addCartItem(item);
+  },
+  updateQty(productId, variantId, qty) {
+    updateCartItem(productId, variantId, qty);
+  },
+  changeVariant(productId, oldVariantId, newVariant, meta) {
+    changeCartItemVariant(productId, oldVariantId, newVariant, meta);
+  },
+  remove(productId, variantId) {
+    removeCartItem(productId, variantId);
+  },
+  clear() {
+    clearCart();
+  },
+  getItems() {
+    return getCart().slice();
+  },
+  getCount() {
+    return getCart().reduce((s, it) => s + Number(it.qty || 0), 0);
+  },
 };
 
 // Цена по товару/варианту
 function unitPriceUSD(p, v) {
-  // приоритет: цена варианта → иначе цена товара (с учётом скидки)
   const base =
     v && v.basePriceUSD != null
       ? Number(v.basePriceUSD)
@@ -215,11 +227,11 @@ document.addEventListener("DOMContentLoaded", init);
 async function init() {
   await loadCartLines();
   renderCart();
-  await loadSimilarForTopCategory(); // рекомендации
+  await loadSimilarForTopCategory();
 }
 
 async function loadCartLines() {
-  const cart = getCart().items;
+  const cart = getCart();
   const lines = [];
   // подгружаем продукты (и при необходимости — данные варианта)
   for (const item of cart) {
@@ -239,7 +251,10 @@ async function loadCartLines() {
       });
     } catch (e) {
       // Если продукт с сервера не пришёл — используем минимальные данные из item
-      console.warn("Product fetch error, fallback to local item", item.productId);
+      console.warn(
+        "Product fetch error, fallback to local item",
+        item.productId
+      );
       const base = Number(item.basePriceUSD ?? 0);
       const sale = item.salePriceUSD != null ? Number(item.salePriceUSD) : null;
       const productFallback = {
@@ -308,7 +323,7 @@ function renderCart() {
   if (!state.lines.length) {
     empty.hidden = false;
     renderSummary();
-    renderSimilar([]); // очистить рекомендации
+    renderSimilar([]);
     return;
   }
   empty.hidden = true;
@@ -340,7 +355,9 @@ function renderCart() {
           const stock = Number(vv.stockQuantity || vv.stock || 0);
           const disabled = stock <= 0 ? "disabled" : "";
           const sel = String(v?.id || "") === String(vv.id) ? "selected" : "";
-          const label = `${vv.size || "Variant"}${stock > 0 ? ` — ${stock} in stock` : ""}`;
+          const label = `${vv.size || "Variant"}${
+            stock > 0 ? ` — ${stock} in stock` : ""
+          }`;
           return `<option value="${vv.id}" ${sel} ${disabled}>${label}</option>`;
         })
         .join("");
@@ -411,17 +428,21 @@ function renderCart() {
       });
 
     // variant/size change
-    row
-      .querySelector(`#variant-${p.id}`)
-      ?.addEventListener("change", (e) => {
-        const newVarId = e.target.value || null;
-        const chosen = (p.variants || []).find((vv) => String(vv.id) === String(newVarId));
-        changeCartItemVariant(p.id, v?.id || null, chosen || { id: null, size: null });
-        loadCartLines().then(() => {
-          renderCart();
-          loadSimilarForTopCategory();
-        });
+    row.querySelector(`#variant-${p.id}`)?.addEventListener("change", (e) => {
+      const newVarId = e.target.value || null;
+      const chosen = (p.variants || []).find(
+        (vv) => String(vv.id) === String(newVarId)
+      );
+      changeCartItemVariant(
+        p.id,
+        v?.id || null,
+        chosen || { id: null, size: null }
+      );
+      loadCartLines().then(() => {
+        renderCart();
+        loadSimilarForTopCategory();
       });
+    });
 
     // remove
     row.querySelector(".removeBtn")?.addEventListener("click", () => {
@@ -511,7 +532,7 @@ async function getShippingQuote() {
         productId: L.product.id,
         variantId: L.variant?.id || null,
         qty: L.cartItem.qty,
-        weightGrams: L.product.weightGrams || 0, // если на бэке используете вес
+        weightGrams: L.product.weightGrams || 0,
       })),
     };
     const res = await httpPostJson(API.SHIPPING_QUOTE, payload);
