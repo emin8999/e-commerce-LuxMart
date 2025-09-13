@@ -1680,94 +1680,94 @@ async function bulkUnbanUsers() {
 /* =========================
  * 10) Экспорт CSV/XLSX
  * ========================= */
-function bindExportModal() {
-  $$(".closeExport").forEach((b) =>
-    b.addEventListener("click", closeExportModal)
-  );
+// function bindExportModal() {
+//   $$(".closeExport").forEach((b) =>
+//     b.addEventListener("click", closeExportModal)
+//   );
 
-  const expSubmit = $("#expSubmit");
-  if (expSubmit) {
-    expSubmit.addEventListener("click", onExportSubmit);
-  }
-}
+//   const expSubmit = $("#expSubmit");
+//   if (expSubmit) {
+//     expSubmit.addEventListener("click", onExportSubmit);
+//   }
+// }
 
-function openExportModal(defaultFormat) {
-  const expFormat = $("#expFormat");
-  if (defaultFormat && expFormat) {
-    expFormat.value = defaultFormat;
-  }
-  show($("#dlgExport"));
-}
+// function openExportModal(defaultFormat) {
+//   const expFormat = $("#expFormat");
+//   if (defaultFormat && expFormat) {
+//     expFormat.value = defaultFormat;
+//   }
+//   show($("#dlgExport"));
+// }
 
-function closeExportModal() {
-  hide($("#dlgExport"));
-}
+// function closeExportModal() {
+//   hide($("#dlgExport"));
+// }
 
-async function onExportSubmit() {
-  const expFormat = $("#expFormat");
-  const expScope = $("#expScope");
+// async function onExportSubmit() {
+//   const expFormat = $("#expFormat");
+//   const expScope = $("#expScope");
 
-  const fmt = expFormat ? expFormat.value : "csv"; // csv|xlsx
-  const scope = expScope ? expScope.value : "all"; // all|page|selected
+//   const fmt = expFormat ? expFormat.value : "csv"; // csv|xlsx
+//   const scope = expScope ? expScope.value : "all"; // all|page|selected
 
-  await exportUsers(fmt, scope);
-  closeExportModal();
-}
+//   await exportUsers(fmt, scope);
+//   closeExportModal();
+// }
 
-async function exportUsers(format = "csv", scope = "all") {
-  const ep =
-    format === "xlsx"
-      ? api.endpoints.exportXls || API_NAMES.exportXls
-      : api.endpoints.exportCsv || API_NAMES.exportCsv;
+// async function exportUsers(format = "csv", scope = "all") {
+//   const ep =
+//     format === "xlsx"
+//       ? api.endpoints.exportXls || API_NAMES.exportXls
+//       : api.endpoints.exportCsv || API_NAMES.exportCsv;
 
-  // Бэкенд: поддержите параметры фильтров и scope/ids
-  const common = {
-    role: state.filters.role,
-    status: state.filters.status,
-    from: state.filters.from,
-    to: state.filters.to,
-    search: state.filters.search,
-    sort: state.filters.sort,
-  };
+//   // Бэкенд: поддержите параметры фильтров и scope/ids
+//   const common = {
+//     role: state.filters.role,
+//     status: state.filters.status,
+//     from: state.filters.from,
+//     to: state.filters.to,
+//     search: state.filters.search,
+//     sort: state.filters.sort,
+//   };
 
-  let queryObj = { ...common, scope };
+//   let queryObj = { ...common, scope };
 
-  if (scope === "page") {
-    queryObj.page = state.page;
-    queryObj.size = state.size;
-  }
-  if (scope === "selected") {
-    if (!state.selection.size) return toast("No users selected", "warn");
-    queryObj.ids = Array.from(state.selection.values());
-  }
+//   if (scope === "page") {
+//     queryObj.page = state.page;
+//     queryObj.size = state.size;
+//   }
+//   if (scope === "selected") {
+//     if (!state.selection.size) return toast("No users selected", "warn");
+//     queryObj.ids = Array.from(state.selection.values());
+//   }
 
-  const url = api.base + ep + qs(queryObj);
+//   const url = api.base + ep + qs(queryObj);
 
-  try {
-    const blob = await httpGet(url); // бэкенд должен вернуть CSV/XLSX контент-тип
+//   try {
+//     const blob = await httpGet(url); // бэкенд должен вернуть CSV/XLSX контент-тип
 
-    if (!(blob instanceof Blob)) {
-      throw new Error("Invalid response format for export");
-    }
+//     if (!(blob instanceof Blob)) {
+//       throw new Error("Invalid response format for export");
+//     }
 
-    downloadBlob(blob, `users_export_${scope}.${format}`);
-    toast(`Exported (${format.toUpperCase()})`);
-  } catch (e) {
-    console.error("ExportUsers error:", e);
-    toast(`Export error: ${e.message}`, "err");
-  }
-}
+//     downloadBlob(blob, `users_export_${scope}.${format}`);
+//     toast(`Exported (${format.toUpperCase()})`);
+//   } catch (e) {
+//     console.error("ExportUsers error:", e);
+//     toast(`Export error: ${e.message}`, "err");
+//   }
+// }
 
-function downloadBlob(blob, filename) {
-  const a = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  a.href = url;
-  a.download = filename;
-  a.style.display = "none";
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    URL.revokeObjectURL(url);
-    a.remove();
-  }, 100);
-}
+// function downloadBlob(blob, filename) {
+//   const a = document.createElement("a");
+//   const url = URL.createObjectURL(blob);
+//   a.href = url;
+//   a.download = filename;
+//   a.style.display = "none";
+//   document.body.appendChild(a);
+//   a.click();
+//   setTimeout(() => {
+//     URL.revokeObjectURL(url);
+//     a.remove();
+//   }, 100);
+// }
