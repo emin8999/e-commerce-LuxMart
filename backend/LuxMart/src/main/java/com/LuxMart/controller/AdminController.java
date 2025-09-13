@@ -3,6 +3,8 @@ package com.LuxMart.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,6 +22,8 @@ import com.LuxMart.dto.requestDto.user.BanRequest;
 import com.LuxMart.dto.requestDto.user.BulkRoleRequest;
 import com.LuxMart.dto.requestDto.user.SetRoleRequest;
 import com.LuxMart.dto.requestDto.user.UserDetails;
+import com.LuxMart.dto.requestDto.user.UserFilterRequest;
+import com.LuxMart.dto.requestDto.user.UserListItem;
 import com.LuxMart.dto.responseDto.LoginResponseDto;
 import com.LuxMart.dto.responseDto.UserResponseDto;
 import com.LuxMart.service.AdminUserService;
@@ -53,13 +57,19 @@ public class AdminController {
         }
         return ResponseEntity.badRequest().body("No valid token provided");
     }
-    
+
     @GetMapping("/users")
-   // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseDto>> getAllUsersForAdmin() {
-        List<UserResponseDto> users = userService.getAllUsersForAdmin();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<Page<UserListItem>> getUsers(UserFilterRequest filter, Pageable pageable) {
+    Page<UserListItem> users = adminUserService.getUsers(filter, pageable);
+    return ResponseEntity.ok(users);
     }
+    
+//     @GetMapping("/users")
+//    // @PreAuthorize("hasRole('ADMIN')")
+//     public ResponseEntity<List<UserResponseDto>> getAllUsersForAdmin() {
+//         List<UserResponseDto> users = userService.getAllUsersForAdmin();
+//         return ResponseEntity.ok(users);
+//     }
 
   //   @GetMapping("/users/{id}")
   //  @PreAuthorize("hasRole('ADMIN')")

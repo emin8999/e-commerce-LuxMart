@@ -49,6 +49,7 @@ public class AdminUserServiceImpl  implements AdminUserService{
     private final SecurityService securityService;
 
     @Override
+    @Transactional
     public Page<UserListItem> getUsers(UserFilterRequest filter, Pageable pageable) {
         Specification<UserEntity> spec = createUserSpecification(filter);
         Page<UserEntity> userPage = userRepository.findAll(spec, pageable);
