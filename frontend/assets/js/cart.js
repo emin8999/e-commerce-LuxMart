@@ -81,6 +81,17 @@ async function httpGetJson(url, opt = {}) {
   return res.json();
 }
 
+// --- ДОБАВЛЕНО: публичный GET без авторизации ---
+async function httpGetJsonPublic(url, opt = {}) {
+  const res = await fetch(url, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    ...opt,
+  });
+  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  return res.json();
+}
+
 async function httpPostJson(url, bodyObj) {
   const res = await fetch(url, {
     method: "POST",
@@ -262,7 +273,10 @@ async function loadCart() {
     for (const item of state.cart.items || []) {
       if (!state.products.has(item.productId)) {
         try {
-          const product = await httpGetJson(API.PRODUCT_ONE(item.productId));
+          // --- ЗАМЕНА: используем публичный GET ---
+          const product = await httpGetJsonPublic(
+            API.PRODUCT_ONE(item.productId)
+          );
           state.products.set(item.productId, product);
         } catch (e) {
           console.warn("Could not load product:", item.productId);
