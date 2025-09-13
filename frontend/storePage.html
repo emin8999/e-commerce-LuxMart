@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Store · LuxMart</title>
+    <link rel="stylesheet" href="./assets/css/style.css" />
+    <link rel="stylesheet" href="./assets/css/header.css" />
+    <link rel="stylesheet" href="./assets/css/products.css" />
+  </head>
+  <body>
+    <div id="app-header"></div>
+
+    <main class="container">
+      <h1 id="storeTitle" class="page-title">Store</h1>
+
+      <!-- Store meta block -->
+      <section id="storeMeta" class="filters" style="grid-row:auto;">
+        <div style="display:flex; gap:14px; align-items:center;">
+          <div id="storeLogoWrap" class="thumb" style="width:92px; aspect-ratio:1/1; border-radius:12px; overflow:hidden; border:1px solid var(--line); background:#fff;"></div>
+          <div>
+            <div id="storeName" style="font-weight:800; font-size:18px; line-height:1.2; margin-bottom:6px;">—</div>
+            <div id="storeDesc" style="color:var(--muted);"></div>
+          </div>
+        </div>
+        <div id="storeContacts" style="display:grid; gap:6px; margin-top:10px; color:#2c3e50;"></div>
+      </section>
+
+      <!-- Sort row reused from products page styles -->
+      <div class="sort">
+        <label>Sort</label>
+        <select id="sortSel">
+          <option value="popular" selected>Popular</option>
+          <option value="priceAsc">Price ↑</option>
+          <option value="priceDesc">Price ↓</option>
+          <option value="titleAsc">Title A–Z</option>
+          <option value="titleDesc">Title Z–A</option>
+        </select>
+      </div>
+
+      <section id="productsGrid" class="grid"></section>
+      <div id="gridEmpty" class="empty" hidden>No products for this store.</div>
+    </main>
+
+    <div id="app-footer"></div>
+
+    <div id="app-modal-root"></div>
+    <script src="./assets/js/i18n.js"></script>
+    <script src="./assets/js/currency.js"></script>
+    <script src="./assets/js/header.js"></script>
+    <script src="./assets/js/categories.js"></script>
+    <script src="./assets/js/pricing.js"></script>
+    <script src="./assets/js/cart.js"></script>
+    <script src="./assets/js/footer.js"></script>
+    <script src="./assets/js/storePage.js"></script>
+  </body>
+  </html>
+
