@@ -138,15 +138,20 @@ main.container > h1 {
   margin: 0 !important;
 }
 
-/* Товары внутри магазина: адаптивная сетка */
+/* Товары внутри магазина: горизонтальная лента со скроллом */
 .products-container {
   position: relative;
 }
 .products-grid {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
   gap: 14px !important;
   margin-bottom: 12px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 0.5rem;
 }
 
 /* Карточка товара — стекло/тень/ховер */
@@ -158,6 +163,8 @@ main.container > h1 {
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08) !important;
   transition: transform 0.25s ease, box-shadow 0.25s ease,
     border-color 0.25s ease;
+  flex: 0 0 220px; /* фиксированная ширина для горизонтальной ленты */
+  scroll-snap-align: start;
 }
 .product-card:hover {
   transform: translateY(-6px);
@@ -201,9 +208,8 @@ main.container > h1 {
 
 /* ===== Адаптация ===== */
 @media (max-width: 968px) {
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
-  }
+  /* уменьшаем ширину карточек для планшетов */
+  .product-card { flex-basis: 180px; }
   .product-image {
     height: 160px !important;
   }
@@ -213,17 +219,14 @@ main.container > h1 {
     padding: 16px !important;
     border-radius: 18px !important;
   }
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
-  }
+  /* смартфоны: компактнее */
+  .product-card { flex-basis: 150px; }
   .product-image {
     height: 140px !important;
   }
 }
 @media (max-width: 360px) {
-  .products-grid {
-    grid-template-columns: 1fr !important;
-  }
+  .product-card { flex-basis: 100%; }
   .product-image {
     height: 130px !important;
   }
