@@ -37,7 +37,7 @@
             <label for="roleSel">Role</label>
             <select id="roleSel" name="role">
               <option value="">Any</option>
-              <option value="CUSTOMER" selected>Customer</option>
+              <option value="CLIENT" selected>Client</option>
               <option value="SELLER">Seller</option>
               <option value="ADMIN">Admin</option>
             </select>
@@ -176,53 +176,22 @@
         </div>
 
         <div id="usersRows" class="rows">
-          <!-- JS rows go here
-        Пример строки (для ориентира):
-        <div class="row" data-id="42">
-          <div class="td col-check"><input type="checkbox" class="rowCheck"></div>
-          <div class="td col-id mono">42</div>
-          <div class="td col-user">
-            <div class="user-cell">
-              <img class="user-avatar" src="./assets/avatar-ph.png" alt="avatar">
-              <div>
-                <div class="user-name">Jane Doe</div>
-                <div class="user-meta">AZ, Baku</div>
-              </div>
-            </div>
-          </div>
-          <div class="td col-email">jane@example.com</div>
-          <div class="td col-phone">+994 50 000 00 00</div>
-          <div class="td col-reg muted">2025-09-10 12:30</div>
-          <div class="td col-orders mono">12</div>
-          <div class="td col-spend mono">$845.20</div>
-          <div class="td col-status"><span class="badge active">active</span></div>
-          <div class="td col-role">
-            <span class="role-chip role-customer" title="Change role in drawer">CUSTOMER</span>
-          </div>
-          <div class="td col-actions">
-            <div class="action-group">
-              <button class="btn xs ghost openDrawer">Details</button>
-              <button class="btn xs ghost editRole">Change role</button>
-            </div>
-          </div>
-        </div>
-      -->
+          <!-- JS rows go here -->
         </div>
 
         <div id="emptyState" class="empty" hidden>No users found</div>
 
+        <!-- Pagination removed - bütün data bir dəfədə yüklənir -->
         <div class="table-foot">
-          <div class="pager">
-            <button class="btn xs ghost" id="prevPage">Prev</button>
-            <span id="pageInfo" class="muted">Page 1 of 1</span>
-            <button class="btn xs ghost" id="nextPage">Next</button>
+          <div class="total-info">
+            <span id="totalInfo" class="muted">Total: 0 users</span>
           </div>
           <div class="bulk">
-            <button class="btn xs ghost" id="pageExportCsv">
-              Export page (CSV)
+            <button class="btn xs ghost" id="allExportCsv">
+              Export all (CSV)
             </button>
-            <button class="btn xs ghost" id="pageExportXls">
-              Export page (Excel)
+            <button class="btn xs ghost" id="allExportXls">
+              Export all (Excel)
             </button>
           </div>
         </div>
@@ -280,7 +249,7 @@
             <div class="field">
               <label for="udRole">Role</label>
               <select id="udRole" name="role">
-                <option value="CUSTOMER">Customer</option>
+                <option value="CLIENT">Client</option>
                 <option value="SELLER">Seller</option>
                 <option value="ADMIN">Admin</option>
               </select>
@@ -302,9 +271,9 @@
           </form>
         </section>
 
-        <!-- Адреса/Заметки (опционально расширим в JS) -->
+        <!-- Address (changed from Addresses to Address - singular) -->
         <section class="u-section">
-          <h4>Addresses</h4>
+          <h4>Address</h4>
           <div id="udAddresses" class="muted">—</div>
         </section>
       </div>
@@ -329,7 +298,6 @@
             <label for="expScope">Scope</label>
             <select id="expScope">
               <option value="all" selected>All (with filters)</option>
-              <option value="page">Current page</option>
               <option value="selected">Selected</option>
             </select>
           </div>
@@ -355,7 +323,7 @@
           <div class="field">
             <label for="bulkRoleSel">Role</label>
             <select id="bulkRoleSel">
-              <option value="CUSTOMER">Customer</option>
+              <option value="CLIENT">Client</option>
               <option value="SELLER">Seller</option>
               <option value="ADMIN">Admin</option>
             </select>
