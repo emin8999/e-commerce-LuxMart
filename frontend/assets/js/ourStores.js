@@ -258,10 +258,14 @@ document.addEventListener("DOMContentLoaded", function () {
       ? store.items
       : [];
     // Əgər backend mağaza içində məhsulları göndərmirsə, ümumi siyahıdan götür
-    if ((!storeProducts || storeProducts.length === 0) && (store.id != null)) {
-      const key = String(store.id);
-      if (productsByStore && productsByStore.has(key)) {
-        storeProducts = productsByStore.get(key);
+    if (!storeProducts || storeProducts.length === 0) {
+      const sid =
+        store.id ?? store.storeId ?? store.store_id ?? (store.store && store.store.id);
+      if (sid != null) {
+        const key = String(sid);
+        if (productsByStore && productsByStore.has(key)) {
+          storeProducts = productsByStore.get(key);
+        }
       }
     }
 
