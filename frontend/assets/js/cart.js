@@ -1,6 +1,10 @@
-// -------- API base --------
-const API_BASE = "http://116.203.51.133:9090"; // Укажите правильный порт
-const API_CONTEXT = "/luxmart"; // Контекстный путь
+// -------- API base (configurable) --------
+const API_BASE =
+  (window.LUXMART_CONFIG && window.LUXMART_CONFIG.API_BASE) ||
+  "http://116.203.51.133:9090"; // default backend host:port
+const API_CONTEXT =
+  (window.LUXMART_CONFIG && window.LUXMART_CONFIG.API_CONTEXT) ||
+  "/luxmart"; // default context path
 
 // -------- Helpers --------
 const $$ = (sel, root = document) => root.querySelector(sel);
@@ -102,16 +106,17 @@ const CartAPI = {
 async function updateCartBadge() {
   try {
     const cart = await CartAPI.getCart();
-    const badge = $$("#cartBadge");
-    if (badge) {
-      const count = cart.totalItemsCount || 0;
+    const badges = [
+      $$("#cartBadge"),
+      $$("#drawerCartBadge"),
+      $$("#cart-badge"),
+    ].filter(Boolean);
+
+    const count = cart.totalItemsCount || 0;
+    badges.forEach((badge) => {
       badge.textContent = count > 0 ? String(count) : "0";
-      if (count > 0) {
-        badge.style.display = "inline-block";
-      } else {
-        badge.style.display = "none";
-      }
-    }
+      badge.style.display = count > 0 ? "inline-block" : "none";
+    });
   } catch (error) {
     console.error("Error updating cart badge:", error);
   }
@@ -430,11 +435,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   await updateCartBadge();
 
   const grid = $$("#productsGrid");
+  if (!grid) {
+    // Not a products page; skip products fetch quietly
+    console.debug("No #productsGrid on this page; skipping product fetch.");
+    return;
+  }
+
   if (grid) {
     grid.innerHTML =
       '<div style="text-align: center; padding: 20px;">Loading products...</div>';
-  } else {
-    console.error("Element with id 'productsGrid' not found");
   }
 
   try {
