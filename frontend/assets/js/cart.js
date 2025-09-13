@@ -249,21 +249,21 @@ const state = {
 // ===== ЗАГРУЗКА И ОТРИСОВКА =====
 document.addEventListener("DOMContentLoaded", init);
 
-async function init() {
-  try {
-    // Check if user is authenticated
-    getCurrentUserId();
+// async function init() {
+//   try {
+//     // Check if user is authenticated
+//     getCurrentUserId();
 
-    await loadCart();
-    renderCart();
-    await loadSimilarForTopCategory();
-  } catch (error) {
-    console.error("Initialization error:", error);
-    // Redirect to login or show error
-    document.body.innerHTML =
-      "<div class='container'><h2>Please log in to view your cart</h2></div>";
-  }
-}
+//     await loadCart();
+//     renderCart();
+//     await loadSimilarForTopCategory();
+//   } catch (error) {
+//     console.error("Initialization error:", error);
+//     // Redirect to login or show error
+//     document.body.innerHTML =
+//       "<div class='container'><h2>Please log in to view your cart</h2></div>";
+//   }
+// }
 
 async function loadCart() {
   try {
