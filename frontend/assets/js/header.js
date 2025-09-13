@@ -114,23 +114,29 @@
 
   // Cart badge
   window.renderCartBadge = function () {
+    let cart = [];
+    try {
+      cart = JSON.parse(localStorage.getItem("cart")) || [];
+    } catch {}
+    const count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
+
     const badge = document.getElementById("cartBadge");
-    const badge2 = document.getElementById("drawerCartBadge"); // NEW
-    const count =
-      window.cart && typeof window.cart.getCount === "function"
-        ? window.cart.getCount()
-        : 0;
-    if (count > 0) {
-      badge.textContent = count > 99 ? "99+" : String(count);
-      badge.style.display = "flex";
+    const badge2 = document.getElementById("drawerCartBadge");
+    if (badge) {
+      if (count > 0) {
+        badge.textContent = count > 99 ? "99+" : String(count);
+        badge.style.display = "flex";
+      } else {
+        badge.style.display = "none";
+      }
     }
     if (badge2) {
-      badge2.textContent = txt;
-      badge2.style.display = "flex";
-    } // NEW
-    else {
-      badge.style.display = "none";
-      if (badge2) badge2.style.display = "none"; // NEW
+      if (count > 0) {
+        badge2.textContent = count > 99 ? "99+" : String(count);
+        badge2.style.display = "flex";
+      } else {
+        badge2.style.display = "none";
+      }
     }
   };
   try {
