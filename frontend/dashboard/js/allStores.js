@@ -325,7 +325,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Bind logout if present
   const logout = document.getElementById("adminLogoutBtn");
   if (logout) {
-    logout.addEventListener("click", adminLogout);
+    // Prefer unified logout if provided by header
+    const handler = (window.AdminAuth && window.AdminAuth.logout) || adminLogout;
+    logout.addEventListener("click", function (e) {
+      e.preventDefault();
+      handler();
+    });
   }
 
   initializeStores();

@@ -59,13 +59,51 @@
       <div id="adminNavOverlay" class="admin-nav__overlay" hidden></div>
     `;
 
-    // logout
+    // logout (call API then redirect to adminLogin.html)
+    async function adminApiLogout() {
+      const url = "http://116.203.51.133/luxmart/api/admin/logout";
+      const token =
+        localStorage.getItem("adminJWT") ||
+        localStorage.getItem("adminJwt") ||
+        localStorage.getItem("storeJwt");
+      try {
+        await fetch(url, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          credentials: "omit",
+        }).catch(() => {});
+      } catch (_) {
+        // ignore network errors; proceed to local cleanup
+      }
+    }
+
+    async function handleAdminLogout() {
+      if (!confirm("Log out from Admin?")) return;
+      await adminApiLogout();
+      // clear possible tokens
+      ["adminJWT", "adminJwt", "storeJwt"].forEach((k) =>
+        localStorage.removeItem(k)
+      );
+      try {
+        history.replaceState(null, "", "./adminLogin.html");
+      } catch (_) {}
+      window.location.replace("./adminLogin.html");
+    }
+
+    // expose globally so other modules can reuse
+    window.AdminAuth = Object.assign(window.AdminAuth || {}, {
+      logout: handleAdminLogout,
+    });
+
     container
       .querySelector("#adminLogoutBtn")
-      ?.addEventListener("click", () => {
-        if (!confirm("Log out from Admin?")) return;
-        TOKEN_KEYS.forEach((k) => localStorage.removeItem(k));
-        location.reload();
+      ?.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleAdminLogout();
       });
 
     // подсветка по hash для admin.html
