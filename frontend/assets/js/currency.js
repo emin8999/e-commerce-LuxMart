@@ -1,8 +1,9 @@
 // Prefer global config when present; fallback preserved
 const FALLBACK_BASE = "http://116.203.51.133/luxmart";
-const API_ROOT = (window.APP_CONFIG && window.APP_CONFIG.apiBase)
-  ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
-  : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
+const API_ROOT =
+  window.APP_CONFIG && window.APP_CONFIG.apiBase
+    ? window.APP_CONFIG.apiBase.replace(/\/$/, "")
+    : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
 window.currency = (function () {
   let cur = localStorage.getItem("currency") || "USD";
   let rates = { AZN: 1.7, EUR: 0.92, TRY: 33.0 };
@@ -10,7 +11,7 @@ window.currency = (function () {
 
   async function fetchConfig() {
     try {
-      const r1 = await fetch(`${API_ROOT}/config/rates`);
+      // const r1 = await fetch(`${API_ROOT}/config/rates`);
       rates = await r1.json();
       const r2 = await fetch(`${API_ROOT}/config/shipping`);
       const js = await r2.json();
