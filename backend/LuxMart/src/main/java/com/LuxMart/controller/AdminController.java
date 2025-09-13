@@ -3,6 +3,7 @@ package com.LuxMart.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +25,7 @@ import com.LuxMart.dto.responseDto.UserResponseDto;
 import com.LuxMart.service.AdminUserService;
 import com.LuxMart.service.UserService;
 
-
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -42,8 +43,19 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            userService.logout(token);
+            return ResponseEntity.ok("Admin logged out successfully");
+        }
+        return ResponseEntity.badRequest().body("No valid token provided");
+    }
+    
     @GetMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
+   // @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseDto>> getAllUsersForAdmin() {
         List<UserResponseDto> users = userService.getAllUsersForAdmin();
         return ResponseEntity.ok(users);
