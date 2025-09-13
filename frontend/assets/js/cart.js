@@ -1,8 +1,8 @@
 "use strict";
 
 /**
- * Cart Page (Amazon-like)
- * - Локальная корзина (localStorage)
+ * Cart Page (Server-side Cart API)
+ * - Server-side səbət (API əsaslı)
  * - Подсчёт цен/скидок/итога
  * - Применение купона (API)
  * - Расчёт доставки (API)
@@ -12,14 +12,21 @@
 
 const API_BASE = "http://116.203.51.133/luxmart";
 const TOKEN_KEY = "storeJwt";
-const CART_KEY = "cart";
+const USER_ID_KEY = "userId"; // User ID-ni localStorage-də saxlayırıq
 
-// Эндпойнты
+// API Endpoints
 const API = {
   PRODUCT_ONE: (id) => `${API_BASE}/api/products/${encodeURIComponent(id)}`,
   PRODUCTS_ALL: `${API_BASE}/api/products/all-products`,
   PRODUCTS_BY_CATEGORY: (catId) =>
     `${API_BASE}/api/products/category/${encodeURIComponent(catId)}`,
+
+  // Server-side Cart API endpoints
+  CART_ADD: `${API_BASE}/api/cart/add`,
+  CART_GET: `${API_BASE}/api/cart/get`,
+  CART_UPDATE: `${API_BASE}/api/cart/update`,
+  CART_REMOVE: `${API_BASE}/api/cart/remove`,
+  CART_CLEAR: `${API_BASE}/api/cart/clear`,
 
   COUPON_APPLY: `${API_BASE}/api/cart/coupons/apply`,
   SHIPPING_QUOTE: `${API_BASE}/api/shipping/quote`,
@@ -31,8 +38,24 @@ const $$ = (sel, root = document) => root.querySelector(sel);
 const $$$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 function authHeaders() {
+  const userId = localStorage.getItem(USER_ID_KEY);
+  const headers = {};
+  if (userId) {
+    headers["User-Id"] = userId;
+  }
   const token = localStorage.getItem(TOKEN_KEY);
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+function getCurrentUserId() {
+  const userId = localStorage.getItem(USER_ID_KEY);
+  if (!userId) {
+    throw new Error("User not authenticated");
+  }
+  return userId;
 }
 
 function money(n) {
@@ -47,139 +70,7 @@ function normalizeImg(src) {
   return `${API_BASE}/${s.replace(/^\/+/, "")}`;
 }
 
-// ===== ЛОКАЛЬНАЯ КОРЗИНА =====
-// Теперь корзина — это массив объектов [{productId, variantId?, size?, qty, ...meta}]
-function getCart() {
-  try {
-    const arr = JSON.parse(localStorage.getItem(CART_KEY));
-    if (Array.isArray(arr)) return arr;
-  } catch {}
-  return [];
-}
-function setCart(items) {
-  localStorage.setItem(CART_KEY, JSON.stringify(items));
-  try {
-    window.renderCartBadge && window.renderCartBadge();
-  } catch (_) {}
-  // совместимость с альтернативной шапкой
-  const badge = document.getElementById("cart-badge");
-  if (badge) {
-    const count = items.reduce((s, it) => s + Number(it.qty || 0), 0);
-    if (count > 0) {
-      badge.textContent = count > 99 ? "99+" : String(count);
-      badge.classList.remove("hidden");
-    } else {
-      badge.classList.add("hidden");
-    }
-  }
-}
-function addCartItem(newItem) {
-  const cart = getCart();
-  const key = (x) => `${x.productId}__${x.variantId ?? ""}__${x.size ?? ""}`;
-  const idx = cart.findIndex((x) => key(x) === key(newItem));
-  if (idx >= 0)
-    cart[idx].qty = Number(cart[idx].qty || 0) + Number(newItem.qty || 1);
-  else cart.push({ qty: 1, ...newItem });
-  setCart(cart);
-}
-function updateCartItem(productId, variantId, qty) {
-  const cart = getCart();
-  const i = cart.findIndex(
-    (x) =>
-      String(x.productId) === String(productId) &&
-      String(x.variantId || "") === (variantId || "")
-  );
-  if (i >= 0) {
-    cart[i].qty = Math.max(0, Number(qty || 0));
-    if (cart[i].qty === 0) cart.splice(i, 1);
-  }
-  setCart(cart);
-}
-function changeCartItemVariant(productId, oldVariantId, newVariant, meta = {}) {
-  const cart = getCart();
-  const i = cart.findIndex(
-    (x) =>
-      String(x.productId) === String(productId) &&
-      String(x.variantId || "") === String(oldVariantId || "")
-  );
-  if (i < 0) return;
-  const item = cart[i];
-  const candidate = {
-    ...item,
-    ...meta,
-    variantId: newVariant?.id ?? null,
-    size: newVariant?.size ?? null,
-  };
-  const j = cart.findIndex(
-    (x) =>
-      String(x.productId) === String(candidate.productId) &&
-      String(x.variantId || "") === String(candidate.variantId || "") &&
-      String(x.size || "") === String(candidate.size || "")
-  );
-  if (j >= 0 && j !== i) {
-    cart[j].qty = Number(cart[j].qty || 0) + Number(candidate.qty || 0);
-    cart.splice(i, 1);
-  } else {
-    cart[i] = candidate;
-  }
-  setCart(cart);
-}
-function removeCartItem(productId, variantId) {
-  let cart = getCart();
-  cart = cart.filter(
-    (x) =>
-      !(
-        String(x.productId) === String(productId) &&
-        String(x.variantId || "") === (variantId || "")
-      )
-  );
-  setCart(cart);
-}
-function clearCart() {
-  setCart([]);
-}
-
-// Глобальный помощник корзины для кнопок "Add to cart"
-window.cart = {
-  add(item) {
-    addCartItem(item);
-  },
-  updateQty(productId, variantId, qty) {
-    updateCartItem(productId, variantId, qty);
-  },
-  changeVariant(productId, oldVariantId, newVariant, meta) {
-    changeCartItemVariant(productId, oldVariantId, newVariant, meta);
-  },
-  remove(productId, variantId) {
-    removeCartItem(productId, variantId);
-  },
-  clear() {
-    clearCart();
-  },
-  getItems() {
-    return getCart().slice();
-  },
-  getCount() {
-    return getCart().reduce((s, it) => s + Number(it.qty || 0), 0);
-  },
-};
-
-// Цена по товару/варианту
-function unitPriceUSD(p, v) {
-  const base =
-    v && v.basePriceUSD != null
-      ? Number(v.basePriceUSD)
-      : Number(p.basePriceUSD ?? 0);
-  const sale =
-    v && v.salePriceUSD != null
-      ? Number(v.salePriceUSD)
-      : p.salePriceUSD != null
-      ? Number(p.salePriceUSD)
-      : null;
-  return sale != null && sale >= 0 && sale < base ? sale : base;
-}
-
-// ===== API-запросы =====
+// ===== SERVER-SIDE CART API =====
 async function httpGetJson(url, opt = {}) {
   const res = await fetch(url, {
     method: "GET",
@@ -189,6 +80,7 @@ async function httpGetJson(url, opt = {}) {
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
   return res.json();
 }
+
 async function httpPostJson(url, bodyObj) {
   const res = await fetch(url, {
     method: "POST",
@@ -204,9 +96,131 @@ async function httpPostJson(url, bodyObj) {
   return ct.includes("application/json") ? res.json() : res.text();
 }
 
+// Server-side cart functions
+async function getCartFromServer() {
+  try {
+    const response = await httpGetJson(API.CART_GET);
+    return response.data || response; // API response structure-a görə
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+    return {
+      cartId: null,
+      userId: null,
+      items: [],
+      totalPrice: 0,
+      totalItemsCount: 0,
+    };
+  }
+}
+
+async function addCartItemToServer(productId, size, quantity = 1) {
+  try {
+    const requestBody = {
+      productId: productId,
+      size: size || null,
+      quantity: quantity,
+    };
+
+    const response = await httpPostJson(API.CART_ADD, requestBody);
+    updateCartBadge();
+    return response.data || response;
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    throw error;
+  }
+}
+
+async function updateCartItemOnServer(productId, variantId, quantity) {
+  try {
+    const requestBody = {
+      productId: productId,
+      variantId: variantId,
+      quantity: quantity,
+    };
+
+    const response = await httpPostJson(API.CART_UPDATE, requestBody);
+    updateCartBadge();
+    return response.data || response;
+  } catch (error) {
+    console.error("Error updating cart item:", error);
+    throw error;
+  }
+}
+
+async function removeCartItemFromServer(productId, variantId) {
+  try {
+    const requestBody = {
+      productId: productId,
+      variantId: variantId,
+    };
+
+    const response = await httpPostJson(API.CART_REMOVE, requestBody);
+    updateCartBadge();
+    return response.data || response;
+  } catch (error) {
+    console.error("Error removing cart item:", error);
+    throw error;
+  }
+}
+
+async function clearCartOnServer() {
+  try {
+    const response = await httpPostJson(API.CART_CLEAR, {});
+    updateCartBadge();
+    return response.data || response;
+  } catch (error) {
+    console.error("Error clearing cart:", error);
+    throw error;
+  }
+}
+
+function updateCartBadge() {
+  // Cart badge update functionality
+  getCartFromServer().then((cart) => {
+    const badge = document.getElementById("cart-badge");
+    if (badge) {
+      const count = cart.totalItemsCount || 0;
+      if (count > 0) {
+        badge.textContent = count > 99 ? "99+" : String(count);
+        badge.classList.remove("hidden");
+      } else {
+        badge.classList.add("hidden");
+      }
+    }
+  });
+}
+
+// Global cart helper for "Add to cart" buttons
+window.cart = {
+  async add(item) {
+    return await addCartItemToServer(
+      item.productId,
+      item.size,
+      item.quantity || 1
+    );
+  },
+  async updateQty(productId, variantId, qty) {
+    return await updateCartItemOnServer(productId, variantId, qty);
+  },
+  async remove(productId, variantId) {
+    return await removeCartItemFromServer(productId, variantId);
+  },
+  async clear() {
+    return await clearCartOnServer();
+  },
+  async getCart() {
+    return await getCartFromServer();
+  },
+  async getCount() {
+    const cart = await getCartFromServer();
+    return cart.totalItemsCount || 0;
+  },
+};
+
 // ===== СОСТОЯНИЕ СТРАНИЦЫ =====
 const state = {
-  lines: [], // [{ cartItem, product, variant, categoryId }]
+  cart: null, // Server-dən gələn cart response
+  products: new Map(), // productId -> product details cache
   totals: {
     subtotal: 0,
     discount: 0,
@@ -225,88 +239,75 @@ const state = {
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
-  await loadCartLines();
-  renderCart();
-  await loadSimilarForTopCategory();
+  try {
+    // Check if user is authenticated
+    getCurrentUserId();
+
+    await loadCart();
+    renderCart();
+    await loadSimilarForTopCategory();
+  } catch (error) {
+    console.error("Initialization error:", error);
+    // Redirect to login or show error
+    document.body.innerHTML =
+      "<div class='container'><h2>Please log in to view your cart</h2></div>";
+  }
 }
 
-async function loadCartLines() {
-  const cart = getCart();
-  const lines = [];
-  // подгружаем продукты (и при необходимости — данные варианта)
-  for (const item of cart) {
-    try {
-      const p = await httpGetJson(API.PRODUCT_ONE(item.productId));
-      let variant = null;
-      if (item.variantId && Array.isArray(p.variants)) {
-        variant =
-          p.variants.find((v) => String(v.id) === String(item.variantId)) ||
-          null;
+async function loadCart() {
+  try {
+    state.cart = await getCartFromServer();
+
+    // Cache product details
+    for (const item of state.cart.items || []) {
+      if (!state.products.has(item.productId)) {
+        try {
+          const product = await httpGetJson(API.PRODUCT_ONE(item.productId));
+          state.products.set(item.productId, product);
+        } catch (e) {
+          console.warn("Could not load product:", item.productId);
+          // Fallback product object
+          state.products.set(item.productId, {
+            id: item.productId,
+            title: item.productTitle || `Product #${item.productId}`,
+            slug: item.productSlug || "",
+            imageUrls: [],
+            basePriceUSD: item.unitPrice || 0,
+          });
+        }
       }
-      lines.push({
-        cartItem: item,
-        product: p,
-        variant,
-        categoryId: p.categoryId,
-      });
-    } catch (e) {
-      // Если продукт с сервера не пришёл — используем минимальные данные из item
-      console.warn(
-        "Product fetch error, fallback to local item",
-        item.productId
-      );
-      const base = Number(item.basePriceUSD ?? 0);
-      const sale = item.salePriceUSD != null ? Number(item.salePriceUSD) : null;
-      const productFallback = {
-        id: item.productId,
-        title: item.title || `#${item.productId}`,
-        description: item.description || "",
-        basePriceUSD: base,
-        salePriceUSD: sale,
-        imageUrls: item.imageUrls || [],
-        variants: [],
-        categoryId: item.categoryId || null,
-      };
-      lines.push({
-        cartItem: item,
-        product: productFallback,
-        variant: item.size ? { id: item.variantId, size: item.size } : null,
-        categoryId: productFallback.categoryId,
-      });
     }
+
+    recomputeTotals();
+  } catch (error) {
+    console.error("Error loading cart:", error);
   }
-  state.lines = lines;
-  recomputeTotals();
 }
 
 function recomputeTotals() {
+  if (!state.cart || !state.cart.items) {
+    state.totals = { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0 };
+    return;
+  }
+
   const t = {
-    subtotal: 0,
-    discount: 0,
+    subtotal: state.cart.totalPrice || 0,
+    discount: 0, // Server tərəfindən hesablanır
     shipping: state.totals.shipping || 0,
     tax: 0,
     total: 0,
   };
 
-  for (const L of state.lines) {
-    const p = L.product,
-      v = L.variant,
-      qty = Number(L.cartItem.qty || 0);
-    const base =
-      v && v.basePriceUSD != null
-        ? Number(v.basePriceUSD)
-        : Number(p.basePriceUSD ?? 0);
-    const current = unitPriceUSD(p, v);
-    t.subtotal += current * qty;
-    if (base > current) t.discount += (base - current) * qty;
+  // Calculate discount from server data if available
+  for (const item of state.cart.items) {
+    const product = state.products.get(item.productId);
+    if (product && product.basePriceUSD > item.unitPrice) {
+      t.discount += (product.basePriceUSD - item.unitPrice) * item.quantity;
+    }
   }
 
-  // простая модель налога: 0 (можно расширить по стране)
-  t.tax = 0;
-
-  // if coupon applied — скидка уже содержится в state.totals.discount? нет → применяем из state.coupon
-  // Здесь скидка купона прибавляется к discount (как дополнительная)
-  if (state.coupon.applied && state.totals && state.totals.couponDiscountUSD) {
+  // Add coupon discount
+  if (state.coupon.applied && state.totals.couponDiscountUSD) {
     t.discount += state.totals.couponDiscountUSD;
   }
 
@@ -320,7 +321,7 @@ function renderCart() {
 
   listRoot.innerHTML = "";
 
-  if (!state.lines.length) {
+  if (!state.cart?.items?.length) {
     empty.hidden = false;
     renderSummary();
     renderSimilar([]);
@@ -328,18 +329,14 @@ function renderCart() {
   }
   empty.hidden = true;
 
-  state.lines.forEach((L) => {
-    const p = L.product,
-      v = L.variant,
-      it = L.cartItem;
-    const img =
-      p.imageUrls && p.imageUrls.length ? normalizeImg(p.imageUrls[0]) : "";
-    const price = unitPriceUSD(p, v);
-    const base =
-      v && v.basePriceUSD != null
-        ? Number(v.basePriceUSD)
-        : Number(p.basePriceUSD ?? 0);
-    const hasDiscount = base > price;
+  state.cart.items.forEach((item) => {
+    const product = state.products.get(item.productId);
+    if (!product) return;
+
+    const img = product.imageUrls?.length
+      ? normalizeImg(product.imageUrls[0])
+      : "";
+    const hasDiscount = product.basePriceUSD > item.unitPrice;
 
     const row = document.createElement("div");
     row.className = "card";
@@ -347,110 +344,84 @@ function renderCart() {
     row.style.gridTemplateColumns = "120px 1fr 160px";
     row.style.gap = "12px";
     row.style.alignItems = "start";
-    // Селектор размера/варианта (если есть варианты)
-    let variantSelectorHtml = "";
-    if (Array.isArray(p.variants) && p.variants.length) {
-      const options = p.variants
-        .map((vv) => {
-          const stock = Number(vv.stockQuantity || vv.stock || 0);
-          const disabled = stock <= 0 ? "disabled" : "";
-          const sel = String(v?.id || "") === String(vv.id) ? "selected" : "";
-          const label = `${vv.size || "Variant"}${
-            stock > 0 ? ` — ${stock} in stock` : ""
-          }`;
-          return `<option value="${vv.id}" ${sel} ${disabled}>${label}</option>`;
-        })
-        .join("");
-      variantSelectorHtml = `
-        <div style="margin-top:6px">
-          <label class="muted" for="variant-${p.id}">Size</label>
-          <select id="variant-${p.id}" class="" style="margin-left:8px; padding:.35rem .5rem; border:1px solid #e9ecef; border-radius:8px">
-            ${options}
-          </select>
-        </div>`;
-    }
 
     row.innerHTML = `
       <a class="product-thumb" href="./productView.html?id=${encodeURIComponent(
-        p.id
+        product.id
       )}" style="display:block;width:120px;height:120px;overflow:hidden;border:1px solid #e9ecef;border-radius:10px;background:#fff">
         ${
           img
-            ? `<img src="${img}" alt="${p.title}" style="width:100%;height:100%;object-fit:cover"/>`
+            ? `<img src="${img}" alt="${product.title}" style="width:100%;height:100%;object-fit:cover"/>`
             : `<div class="product-thumb__ph" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">🛍️</div>`
         }
       </a>
       <div>
         <a class="title" href="./productView.html?id=${encodeURIComponent(
-          p.id
-        )}" style="font-weight:700">${p.title || p.nameEn || `#${p.id}`}</a>
-        ${variantSelectorHtml}
+          product.id
+        )}" style="font-weight:700">${product.title}</a>
         ${
-          p.description
-            ? `<div class="muted" style="margin-top:4px;max-width:70ch;line-height:1.45">${p.description}</div>`
+          item.size
+            ? `<div class="muted" style="margin-top:4px">Size: ${item.size}</div>`
+            : ""
+        }
+        ${
+          product.description
+            ? `<div class="muted" style="margin-top:4px;max-width:70ch;line-height:1.45">${product.description}</div>`
             : ""
         }
         <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-          <label for="qty-${p.id}-${v?.id || "na"}" class="muted">Qty</label>
-          <input id="qty-${p.id}-${
-      v?.id || "na"
-    }" type="number" min="0" step="1" value="${
-      it.qty
+          <label for="qty-${item.id}" class="muted">Qty</label>
+          <input id="qty-${item.id}" type="number" min="0" step="1" value="${
+      item.quantity
     }" style="width:90px;padding:.45rem .6rem;border:1px solid #e9ecef;border-radius:10px"/>
-          <button class="btn ghost removeBtn">Remove</button>
+          <button class="btn ghost removeBtn" data-item-id="${
+            item.id
+          }" data-product-id="${item.productId}">Remove</button>
         </div>
       </div>
       <div style="text-align:right">
-        <div class="price">${money(price)} ${
+        <div class="price">${money(item.unitPrice)} ${
       hasDiscount
         ? `<span class="old" style="margin-left:6px;opacity:.6;text-decoration:line-through">${money(
-            base
+            product.basePriceUSD
           )}</span>`
         : ""
     }</div>
         <div class="muted" style="margin-top:6px">Subtotal: <strong>${money(
-          price * it.qty
+          item.totalPrice
         )}</strong></div>
       </div>
     `;
 
-    // qty change
+    // Quantity change event
     row
-      .querySelector(`#qty-${p.id}-${v?.id || "na"}`)
-      ?.addEventListener("change", (e) => {
+      .querySelector(`#qty-${item.id}`)
+      ?.addEventListener("change", async (e) => {
         const q = Math.max(0, Number(e.target.value || 0));
-        updateCartItem(p.id, v?.id || null, q);
-        // перезагрузим строки (пересчёт цен, рекомендации и т.д.)
-        loadCartLines().then(() => {
+        try {
+          if (q === 0) {
+            await window.cart.remove(item.productId, null);
+          } else {
+            await window.cart.updateQty(item.productId, null, q);
+          }
+          await loadCart();
           renderCart();
-          loadSimilarForTopCategory();
-        });
+          await loadSimilarForTopCategory();
+        } catch (error) {
+          console.error("Error updating quantity:", error);
+        }
       });
 
-    // variant/size change
-    row.querySelector(`#variant-${p.id}`)?.addEventListener("change", (e) => {
-      const newVarId = e.target.value || null;
-      const chosen = (p.variants || []).find(
-        (vv) => String(vv.id) === String(newVarId)
-      );
-      changeCartItemVariant(
-        p.id,
-        v?.id || null,
-        chosen || { id: null, size: null }
-      );
-      loadCartLines().then(() => {
+    // Remove button event
+    row.querySelector(".removeBtn")?.addEventListener("click", async () => {
+      try {
+        await window.cart.remove(item.productId, null);
+        await loadCart();
         renderCart();
-        loadSimilarForTopCategory();
-      });
-    });
-
-    // remove
-    row.querySelector(".removeBtn")?.addEventListener("click", () => {
-      removeCartItem(p.id, v?.id || null);
-      loadCartLines().then(() => {
-        renderCart();
-        loadSimilarForTopCategory();
-      });
+        await loadSimilarForTopCategory();
+      } catch (error) {
+        console.error("Error removing item:", error);
+      }
     });
 
     listRoot.appendChild(row);
@@ -474,6 +445,7 @@ async function applyCoupon() {
   const code = ($$("#couponCode").value || "").trim();
   const msg = $$("#couponMsg");
   msg.textContent = "";
+
   if (!code) {
     state.coupon = { code: "", applied: false, message: "" };
     state.totals.couponDiscountUSD = 0;
@@ -481,18 +453,20 @@ async function applyCoupon() {
     renderSummary();
     return;
   }
+
   try {
     const payload = {
       code,
-      items: state.lines.map((L) => ({
-        productId: L.product.id,
-        variantId: L.variant?.id || null,
-        qty: L.cartItem.qty,
-        unitPriceUSD: unitPriceUSD(L.product, L.variant),
+      items: (state.cart?.items || []).map((item) => ({
+        productId: item.productId,
+        variantId: null,
+        qty: item.quantity,
+        unitPriceUSD: item.unitPrice,
       })),
     };
+
     const res = await httpPostJson(API.COUPON_APPLY, payload);
-    // ожидается: { ok: true/false, discountUSD: number, message?: string }
+
     if (res.ok) {
       state.coupon = { code, applied: true, message: res.message || "Applied" };
       state.totals.couponDiscountUSD = Number(res.discountUSD || 0);
@@ -528,15 +502,19 @@ async function getShippingQuote() {
   try {
     const payload = {
       country,
-      items: state.lines.map((L) => ({
-        productId: L.product.id,
-        variantId: L.variant?.id || null,
-        qty: L.cartItem.qty,
-        weightGrams: L.product.weightGrams || 0,
-      })),
+      items: (state.cart?.items || []).map((item) => {
+        const product = state.products.get(item.productId);
+        return {
+          productId: item.productId,
+          variantId: null,
+          qty: item.quantity,
+          weightGrams: product?.weightGrams || 0,
+        };
+      }),
     };
+
     const res = await httpPostJson(API.SHIPPING_QUOTE, payload);
-    // ожидается: { ok: true, shippingUSD: number }
+
     if (res.ok) {
       state.totals.shipping = Number(res.shippingUSD || 0);
       recomputeTotals();
@@ -553,17 +531,19 @@ $$("#checkoutBtn")?.addEventListener("click", createOrder);
 async function createOrder() {
   const out = $$("#orderMsg");
   out.textContent = "";
-  if (!state.lines.length) {
+
+  if (!state.cart?.items?.length) {
     out.textContent = "Cart is empty.";
     return;
   }
+
   try {
     const payload = {
-      items: state.lines.map((L) => ({
-        productId: L.product.id,
-        variantId: L.variant?.id || null,
-        qty: L.cartItem.qty,
-        unitPriceUSD: unitPriceUSD(L.product, L.variant),
+      items: state.cart.items.map((item) => ({
+        productId: item.productId,
+        variantId: null,
+        qty: item.quantity,
+        unitPriceUSD: item.unitPrice,
       })),
       totals: {
         subtotalUSD: state.totals.subtotal,
@@ -577,12 +557,13 @@ async function createOrder() {
         country: $$("#shipCountry").value || "AZ",
       },
     };
+
     const res = await httpPostJson(API.ORDER_CREATE, payload);
-    // ожидается: { orderId }
+
     if (res.orderId) {
       out.textContent = `Order created: #${res.orderId}`;
-      clearCart();
-      await loadCartLines();
+      await window.cart.clear();
+      await loadCart();
       renderCart();
       await loadSimilarForTopCategory();
     } else {
@@ -596,35 +577,43 @@ async function createOrder() {
 
 // ===== РЕКОМЕНДАЦИИ ПО КАТЕГОРИИ =====
 async function loadSimilarForTopCategory() {
-  // возьмём самую частую категорию в корзине
+  if (!state.cart?.items?.length) {
+    renderSimilar([]);
+    return;
+  }
+
+  // Get most frequent category from cart products
   const freq = new Map();
-  for (const L of state.lines) {
-    if (!L.categoryId) continue;
-    const k = String(L.categoryId);
+  for (const item of state.cart.items) {
+    const product = state.products.get(item.productId);
+    if (!product?.categoryId) continue;
+    const k = String(product.categoryId);
     freq.set(k, (freq.get(k) || 0) + 1);
   }
+
   if (!freq.size) {
     renderSimilar([]);
     return;
   }
+
   const topCat = Array.from(freq.entries()).sort((a, b) => b[1] - a[1])[0][0];
 
   let list = [];
   try {
-    // сначала пробуем серверный эндпоинт категории
     const r = await fetch(API.PRODUCTS_BY_CATEGORY(topCat));
     if (!r.ok) throw new Error("no-endpoint");
     list = await r.json();
   } catch {
-    // если его нет — фильтруем all-products
     try {
       const all = await httpGetJson(API.PRODUCTS_ALL);
       list = all.filter((x) => String(x.categoryId) === String(topCat));
     } catch {}
   }
 
-  // исключим уже лежащие в корзине id
-  const inCart = new Set(state.lines.map((L) => String(L.product.id)));
+  // Exclude products already in cart
+  const inCart = new Set(
+    state.cart.items.map((item) => String(item.productId))
+  );
   const filtered = list.filter((p) => !inCart.has(String(p.id))).slice(0, 12);
 
   renderSimilar(filtered);
@@ -634,6 +623,7 @@ function renderSimilar(items) {
   const row = $$("#similarRow");
   const empty = $$("#similarEmpty");
   row.innerHTML = "";
+
   if (!items || !items.length) {
     empty.hidden = false;
     return;
@@ -641,8 +631,7 @@ function renderSimilar(items) {
   empty.hidden = true;
 
   items.forEach((p) => {
-    const img =
-      p.imageUrls && p.imageUrls.length ? normalizeImg(p.imageUrls[0]) : "";
+    const img = p.imageUrls?.length ? normalizeImg(p.imageUrls[0]) : "";
     const base = Number(p.basePriceUSD ?? 0);
     const sale = p.salePriceUSD != null ? Number(p.salePriceUSD) : null;
     const current = sale != null && sale >= 0 && sale < base ? sale : base;
