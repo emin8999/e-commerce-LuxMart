@@ -800,7 +800,7 @@ function withAuth(init = {}) {
       ...authHeaders(),
       ...(init.headers || {}),
     },
-    credentials: "omit",
+    credentials: "include",
   };
 }
 
