@@ -89,7 +89,12 @@ async function httpGetJsonPublic(url, opt = {}) {
 async function getCartFromServer() {
   try {
     const response = await httpGetJson(API.CART_GET);
-    return response.data || response;
+
+    // Backend-dən gələn cavabın formatına görə data yoxla
+    if (response && typeof response === "object" && "data" in response) {
+      return response.data;
+    }
+    return response;
   } catch (error) {
     console.error("Error fetching cart:", error);
     return {
