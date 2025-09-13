@@ -187,21 +187,22 @@ function applyFiltersTo(list) {
     out = out.filter((p) => computePriceUSD(p).current <= maxP);
   }
 
-  const sort = $$("#sortSel")?.value || "popular";
-  if (sort === "priceAsc")
-    out.sort((a, b) => computePriceUSD(a).current - computePriceUSD(b).current);
-  if (sort === "priceDesc")
-    out.sort((a, b) => computePriceUSD(b).current - computePriceUSD(a).current);
-  if (sort === "titleAsc")
-    out.sort((a, b) =>
-      String(a.title || "").localeCompare(String(b.title || ""))
-    );
-  if (sort === "titleDesc")
-    out.sort((a, b) =>
-      String(b.title || "").localeCompare(String(a.title || ""))
-    );
-
-  return out;
+  function sortList(list, mode) {
+    const out = list.slice();
+    if (mode === "priceAsc")
+      out.sort((a, b) => priceUSD(a).current - priceUSD(b).current);
+    else if (mode === "priceDesc")
+      out.sort((a, b) => priceUSD(b).current - priceUSD(a).current);
+    else if (mode === "titleAsc")
+      out.sort((a, b) =>
+        String(a.title || "").localeCompare(String(b.title || ""))
+      );
+    else if (mode === "titleDesc")
+      out.sort((a, b) =>
+        String(b.title || "").localeCompare(String(a.title || ""))
+      );
+    return out;
+  }
 }
 
 // -------- Init --------
