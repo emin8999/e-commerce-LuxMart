@@ -84,7 +84,6 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("ok", true));
     }
 
-    // 5) Unban - istifadəçini aktiv etmək
     @PostMapping("/{id}/unban")
     public ResponseEntity<Map<String, Object>> unbanUser(@PathVariable("id") Long id) {
         adminUserService.unbanUser(id);

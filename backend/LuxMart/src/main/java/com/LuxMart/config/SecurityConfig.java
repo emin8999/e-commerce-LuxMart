@@ -35,7 +35,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors-> cors.configurationSource(corsConfigurationSource()))
+                // .cors(cors-> cors.configurationSource(corsConfigurationSource()))
+                .cors(AbstractHttpConfigurer:: disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(
@@ -49,7 +50,6 @@ public class SecurityConfig {
                         .requestMatchers("api/profile").permitAll()
                         .requestMatchers("/api/update/**").permitAll()
                         .requestMatchers("/admin/login").permitAll()
-                        .requestMatchers("/api/admin/users").permitAll()
                         .requestMatchers("/api/products/all-products").permitAll()
                         .requestMatchers("/api/products/public/**").permitAll()
                         .requestMatchers("/api/products/my-store").permitAll()
@@ -79,24 +79,24 @@ public class SecurityConfig {
     }
 
 
-    @Bean
-      public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://116.203.51.133",
-                "http://127.0.0.1:5500",
-               "http://localhost:3000",
-                "http://localhost:9090"
-        ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setMaxAge(3600L);
+//     @Bean
+//       public CorsConfigurationSource corsConfigurationSource() {
+//         CorsConfiguration configuration = new CorsConfiguration();
+//         configuration.setAllowedOrigins(List.of(
+//                 "http://116.203.51.133",
+//                 "http://127.0.0.1:5500",
+//                "http://localhost:3000",
+//                 "http://localhost:9090"
+//         ));
+//         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//         configuration.setAllowedHeaders(List.of("*"));
+//         configuration.setAllowCredentials(true);
+//         configuration.setExposedHeaders(List.of("Authorization"));
+//         configuration.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-      return source;
-    }
+//         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//         source.registerCorsConfiguration("/**", configuration);
+//       return source;
+//     }
     
 }
