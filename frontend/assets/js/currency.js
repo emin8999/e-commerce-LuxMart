@@ -6,8 +6,8 @@ const API_ROOT =
     : `${FALLBACK_BASE.replace(/\/$/, "")}/api`;
 window.currency = (function () {
   let cur = localStorage.getItem("currency") || "USD";
-  let rates = { AZN: 1.7, EUR: 0.92, TRY: 33.0 };
-  let shipping = 5;
+  let rates = { AZN: 1.7, EUR: 0.85, TRY: 33.0 };
+  let shipping = 0;
 
   async function fetchConfig() {
     try {
