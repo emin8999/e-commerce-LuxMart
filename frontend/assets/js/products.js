@@ -85,8 +85,8 @@ function firstImage(p) {
 
 // -------- Render grid --------
 function renderGrid(list) {
-  const grid = $$("#productsGrid");
-  const empty = $$("#gridEmpty");
+  const grid = $("#productsGrid");
+  const empty = $("#gridEmpty");
   grid.innerHTML = "";
 
   if (!list.length) {
