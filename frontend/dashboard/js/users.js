@@ -925,7 +925,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindToolbar();
   bindPaging();
   bindStickyActions();
-  bindExportModal();
+  // bindExportModal();
   bindRoleBulkModal();
   bindDrawer();
 
