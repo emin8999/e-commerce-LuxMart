@@ -1,10 +1,9 @@
 // -------- API base (configurable) --------
 const API_BASE =
   (window.LUXMART_CONFIG && window.LUXMART_CONFIG.API_BASE) ||
-  "http://116.203.51.133:9090"; // default backend host:port
+  "http://116.203.51.133/luxmart"; // default backend host:port
 const API_CONTEXT =
-  (window.LUXMART_CONFIG && window.LUXMART_CONFIG.API_CONTEXT) ||
-  "/luxmart"; // default context path
+  (window.LUXMART_CONFIG && window.LUXMART_CONFIG.API_CONTEXT) || "/luxmart"; // default context path
 
 // -------- Helpers --------
 const $$ = (sel, root = document) => root.querySelector(sel);
