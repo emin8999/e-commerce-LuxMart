@@ -1,20 +1,20 @@
 // -------- API base (configurable) --------
 const API_BASE =
   (window.LUXMART_CONFIG && window.LUXMART_CONFIG.API_BASE) ||
-  "http://116.203.51.133/luxmart"; // default backend host:port
+  "http://116.203.51.133/luxmart";
+
 const API_CONTEXT =
-  (window.LUXMART_CONFIG && window.LUXMART_CONFIG.API_CONTEXT) || "/luxmart"; // default context path
+  (window.LUXMART_CONFIG && window.LUXMART_CONFIG.API_CONTEXT) || "";
 
 // -------- Helpers --------
 const $$ = (sel, root = document) => root.querySelector(sel);
 const $$$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-// -------- User management (для корзины) --------
+// -------- User management --------
 function getOrCreateUserId() {
   let userId = localStorage.getItem("guestUserId");
   if (!userId) {
-    // Генерируем временный ID для гостя (большое число, чтобы не пересекалось с реальными)
-    userId = "999" + Date.now().toString();
+    userId = "999" + Date.now();
     localStorage.setItem("guestUserId", userId);
   }
   return userId;
@@ -30,73 +30,70 @@ function normalizeImg(src) {
 
 // -------- Cart API integration --------
 const CartAPI = {
-  async addItem(productId, size = null, quantity = 1) {
-    const userId = getOrCreateUserId();
-    try {
-      const response = await fetch(`${API_BASE}${API_CONTEXT}/api/cart/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "User-Id": userId,
-        },
-        body: JSON.stringify({
-          productId: productId,
-          size: size,
-          quantity: quantity,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Item added to cart:", data);
-      updateCartBadge();
-      return data;
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      throw error;
-    }
-  },
-
   async getCart() {
     const userId = getOrCreateUserId();
     try {
-      const response = await fetch(`${API_BASE}${API_CONTEXT}/api/cart/get`, {
+      const res = await fetch(`${API_BASE}${API_CONTEXT}/api/cart/get`, {
         method: "GET",
-        headers: {
-          Accept: "application/json",
-          "User-Id": userId,
-        },
+        headers: { Accept: "application/json", "User-Id": userId },
       });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      console.error("Error fetching cart:", e);
+      return { items: [], totalPrice: 0, totalItemsCount: 0 };
+    }
+  },
 
-      if (!response.ok) {
-        if (response.status === 404) {
-          // Корзина не найдена - возвращаем пустую
-          return {
-            cartId: null,
-            userId: userId,
-            items: [],
-            totalPrice: 0,
-            totalItemsCount: 0,
-          };
+  async deleteItem(cartItemId) {
+    const userId = getOrCreateUserId();
+    try {
+      const res = await fetch(
+        `${API_BASE}${API_CONTEXT}/api/cart/${cartItemId}`,
+        {
+          method: "DELETE",
+          headers: { "User-Id": userId },
         }
-        throw new Error(`HTTP ${response.status}`);
-      }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      console.error("Error deleting item:", e);
+      throw e;
+    }
+  },
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching cart:", error);
-      return {
-        cartId: null,
-        userId: userId,
-        items: [],
-        totalPrice: 0,
-        totalItemsCount: 0,
-      };
+  async updateQuantity(cartItemId, quantity) {
+    const userId = getOrCreateUserId();
+    try {
+      const res = await fetch(
+        `${API_BASE}${API_CONTEXT}/api/cart/${cartItemId}/quantity`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", "User-Id": userId },
+          body: JSON.stringify({ quantity }),
+        }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      console.error("Error updating quantity:", e);
+      throw e;
+    }
+  },
+
+  async clearCart() {
+    const userId = getOrCreateUserId();
+    try {
+      const res = await fetch(`${API_BASE}${API_CONTEXT}/api/cart/clear`, {
+        method: "DELETE",
+        headers: { "User-Id": userId },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      console.error("Error clearing cart:", e);
+      throw e;
     }
   },
 };
@@ -139,94 +136,50 @@ function formatCurrencyFromUSD(nUSD) {
 
 // -------- Products API --------
 async function fetchAllProducts() {
-  console.log("Fetching products...");
-
   const endpoints = [
     `${API_BASE}${API_CONTEXT}/api/products/all-products`,
     `${API_BASE}${API_CONTEXT}/api/products/public`,
   ];
 
   for (const url of endpoints) {
-    console.log(`Trying: ${url}`);
     try {
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      console.log(`Response status: ${res.status}`);
-
-      if (!res.ok) {
-        console.warn(`HTTP ${res.status} for ${url}`);
-        continue;
-      }
+      const res = await fetch(url, { headers: { Accept: "application/json" } });
+      if (!res.ok) continue;
 
       const data = await res.json();
-      console.log("Products fetched:", data);
-
-      // Проверяем структуру ответа
       let products = [];
-      if (Array.isArray(data)) {
-        products = data;
-      } else if (data && typeof data === "object") {
+      if (Array.isArray(data)) products = data;
+      else if (data && typeof data === "object")
         products =
           data.data || data.content || data.items || data.products || [];
-      }
-
-      if (products.length > 0) {
-        console.log(`Found ${products.length} products`);
-        return products;
-      }
+      if (products.length > 0) return products;
     } catch (err) {
       console.error(`Error fetching from ${url}:`, err);
     }
   }
-
-  console.warn("No products found");
   return [];
 }
 
-// -------- Get first image --------
 function firstImage(p) {
   let images = [];
-
-  if (Array.isArray(p.imageUrls)) {
-    images = p.imageUrls;
-  } else if (Array.isArray(p.images)) {
-    images = p.images;
-  } else if (typeof p.imageUrl === "string") {
-    images = [p.imageUrl];
-  } else if (typeof p.imageUrls === "string") {
-    images = [p.imageUrls];
-  }
-
+  if (Array.isArray(p.imageUrls)) images = p.imageUrls;
+  else if (Array.isArray(p.images)) images = p.images;
+  else if (typeof p.imageUrl === "string") images = [p.imageUrl];
+  else if (typeof p.imageUrls === "string") images = [p.imageUrls];
   return images.length > 0 ? normalizeImg(images[0]) : "";
 }
 
 // -------- Render product grid --------
 function renderGrid(list) {
-  console.log(`Rendering ${list.length} products`);
-
   const grid = $$("#productsGrid");
-  const empty = $$("#gridEmpty");
-
-  if (!grid) {
-    console.error("productsGrid element not found");
-    return;
-  }
-
+  if (!grid) return;
   grid.innerHTML = "";
 
-  if (!list || !list.length) {
-    if (empty) empty.hidden = false;
+  if (!list.length) {
     grid.innerHTML =
-      '<div style="text-align: center; padding: 20px;">No products available</div>';
+      '<div style="text-align:center;padding:20px;">No products available</div>';
     return;
   }
-
-  if (empty) empty.hidden = true;
 
   list.forEach((p) => {
     const price = computePriceUSD(p);
@@ -235,310 +188,179 @@ function renderGrid(list) {
     const card = document.createElement("div");
     card.className = "card";
     card.style.cssText =
-      "border: 1px solid #ddd; padding: 15px; margin: 10px; border-radius: 8px; background: white;";
+      "border:1px solid #ddd;padding:15px;margin:10px;border-radius:8px;background:white;";
 
     const thumb = document.createElement("a");
-    thumb.className = "thumb";
     thumb.href = `./productView.html?id=${encodeURIComponent(p.id)}`;
-    thumb.style.cssText =
-      "display: block; text-align: center; margin-bottom: 10px;";
+    thumb.innerHTML = img
+      ? `<img src="${img}" alt="${
+          p.title || ""
+        }" style="max-width:100%;height:200px;object-fit:cover;border-radius:4px;">`
+      : '<div style="height:200px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;border-radius:4px;font-size:3em;">🛍️</div>';
+    card.appendChild(thumb);
 
-    if (img) {
-      thumb.innerHTML = `<img src="${img}" alt="${
-        p.title || ""
-      }" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: 4px;">`;
-    } else {
-      thumb.innerHTML =
-        '<div style="height: 200px; display: flex; align-items: center; justify-content: center; background: #f5f5f5; border-radius: 4px; font-size: 3em;">🛍️</div>';
-    }
-
-    const body = document.createElement("div");
-    body.className = "card-body";
-
-    const title = document.createElement("a");
-    title.className = "title";
-    title.href = thumb.href;
+    const title = document.createElement("div");
     title.textContent = p.title || `Product #${p.id}`;
-    title.style.cssText =
-      "display: block; font-weight: 600; margin-bottom: 8px; text-decoration: none; color: #333; font-size: 1.1em;";
+    title.style.fontWeight = "600";
+    card.appendChild(title);
 
     const priceDiv = document.createElement("div");
-    priceDiv.className = "price";
-    priceDiv.style.cssText =
-      "margin-bottom: 10px; font-size: 1.2em; color: #2c3e50;";
-
-    if (price.old) {
-      priceDiv.innerHTML = `
-        <span style="color: #27ae60; font-weight: bold;">${formatCurrencyFromUSD(
+    priceDiv.innerHTML = price.old
+      ? `<span style="color:#27ae60;font-weight:bold;">${formatCurrencyFromUSD(
           price.current
-        )}</span>
-        <span style="text-decoration: line-through; color: #95a5a6; margin-left: 10px; font-size: 0.9em;">${formatCurrencyFromUSD(
+        )}</span> <span style="text-decoration:line-through;color:#95a5a6;margin-left:5px;">${formatCurrencyFromUSD(
           price.old
-        )}</span>
-      `;
-    } else {
-      priceDiv.innerHTML = `<span style="font-weight: bold;">${formatCurrencyFromUSD(
-        price.current
-      )}</span>`;
-    }
-
-    // Категория
-    if (p.nameEn || p.categoryName) {
-      const categoryDiv = document.createElement("div");
-      categoryDiv.className = "category";
-      categoryDiv.textContent = p.nameEn || p.categoryName;
-      categoryDiv.style.cssText =
-        "font-size: 0.9em; color: #7f8c8d; margin-bottom: 10px;";
-      body.appendChild(categoryDiv);
-    }
-
-    // Выбор размера (если есть варианты)
-    let sizeSelect = null;
-    if (p.variants && p.variants.length > 0) {
-      const sizeDiv = document.createElement("div");
-      sizeDiv.style.cssText = "margin-bottom: 10px;";
-
-      const sizeLabel = document.createElement("label");
-      sizeLabel.textContent = "Size: ";
-      sizeLabel.style.cssText = "font-size: 0.9em; margin-right: 5px;";
-
-      sizeSelect = document.createElement("select");
-      sizeSelect.style.cssText =
-        "padding: 5px; border: 1px solid #ddd; border-radius: 4px;";
-      sizeSelect.innerHTML = '<option value="">Select size</option>';
-
-      p.variants.forEach((v) => {
-        if (v.size && v.stockQuantity > 0) {
-          const option = document.createElement("option");
-          option.value = v.size;
-          option.textContent = `${v.size} (${v.stockQuantity} in stock)`;
-          sizeSelect.appendChild(option);
-        }
-      });
-
-      sizeDiv.appendChild(sizeLabel);
-      sizeDiv.appendChild(sizeSelect);
-      body.appendChild(sizeDiv);
-    }
-
-    const actions = document.createElement("div");
-    actions.className = "card-actions";
-    actions.style.cssText = "display: flex; gap: 10px; margin-top: 10px;";
-
-    const viewBtn = document.createElement("a");
-    viewBtn.className = "btn-view";
-    viewBtn.href = thumb.href;
-    viewBtn.textContent = "View Details";
-    viewBtn.style.cssText =
-      "padding: 8px 16px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; font-size: 0.9em; text-align: center; flex: 1;";
+        )}</span>`
+      : `<span style="font-weight:bold;">${formatCurrencyFromUSD(
+          price.current
+        )}</span>`;
+    card.appendChild(priceDiv);
 
     const addBtn = document.createElement("button");
-    addBtn.className = "btn-add";
     addBtn.textContent = "Add to Cart";
     addBtn.style.cssText =
-      "padding: 8px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; flex: 1;";
-
-    addBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-
-      // Получаем размер, если есть селектор
-      let selectedSize = null;
-      if (sizeSelect) {
-        selectedSize = sizeSelect.value;
-        if (!selectedSize) {
-          alert("Please select a size");
-          return;
-        }
-      }
-
+      "padding:8px 16px;background:#27ae60;color:white;border:none;border-radius:4px;cursor:pointer;";
+    addBtn.addEventListener("click", async () => {
       try {
-        await CartAPI.addItem(p.id, selectedSize, 1);
-        alert(
-          `Added to cart: ${p.title}${
-            selectedSize ? ` (Size: ${selectedSize})` : ""
-          }`
-        );
-      } catch (error) {
-        alert("Error adding to cart. Please try again.");
-        console.error(error);
+        const cart = await CartAPI.getCart();
+        const existingItem = cart.items.find((i) => i.productId === p.id);
+        if (existingItem) {
+          await CartAPI.updateQuantity(
+            existingItem.id,
+            existingItem.quantity + 1
+          );
+        } else {
+          // Создаем новый товар через updateQuantity на бэке (имитация add)
+          // В бэке может быть отдельный add endpoint, если нет — нужен кастом
+          alert("Cannot add new item: backend endpoint missing");
+        }
+        await renderCart();
+        await updateCartBadge();
+      } catch (e) {
+        console.error(e);
       }
     });
-
-    actions.appendChild(viewBtn);
-    actions.appendChild(addBtn);
-
-    body.appendChild(title);
-    body.appendChild(priceDiv);
-    body.appendChild(actions);
-
-    card.appendChild(thumb);
-    card.appendChild(body);
+    card.appendChild(addBtn);
 
     grid.appendChild(card);
   });
 }
 
-// -------- Filters & sorting --------
-function applyFiltersTo(list) {
-  const onlySale = $$("#onlySale")?.checked || false;
-  const minP = parseFloat($$("#minPrice")?.value) || 0;
-  const maxP = parseFloat($$("#maxPrice")?.value) || Infinity;
+// -------- Render cart in #cartList --------
+async function renderCart() {
+  const cartContainer = $$("#cartList");
+  if (!cartContainer) return;
 
-  let filtered = list.slice();
+  const cart = await CartAPI.getCart();
+  cartContainer.innerHTML = "";
 
-  if (onlySale) {
-    filtered = filtered.filter((p) => {
-      const { current, old } = computePriceUSD(p);
-      return old != null && current < old;
-    });
+  if (!cart.items || !cart.items.length) {
+    cartContainer.innerHTML = "<div>Your cart is empty</div>";
+    return;
   }
 
-  filtered = filtered.filter((p) => {
-    const { current } = computePriceUSD(p);
-    return current >= minP && current <= maxP;
+  cart.items.forEach((item) => {
+    const row = document.createElement("div");
+    row.style.cssText =
+      "display:flex;align-items:center;gap:10px;margin-bottom:10px;border-bottom:1px solid #eee;padding-bottom:10px;";
+
+    const img = document.createElement("img");
+    img.src = normalizeImg(item.imageUrl || item.imageUrls?.[0]);
+    img.style.cssText =
+      "width:60px;height:60px;object-fit:cover;border-radius:4px;";
+    row.appendChild(img);
+
+    const info = document.createElement("div");
+    info.style.flex = "1";
+
+    const title = document.createElement("div");
+    title.textContent = item.title || `Product #${item.productId}`;
+    title.style.fontWeight = "600";
+    info.appendChild(title);
+
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.value = item.quantity;
+    qtyInput.min = 1;
+    qtyInput.style.width = "50px";
+
+    qtyInput.addEventListener("change", async () => {
+      try {
+        await CartAPI.updateQuantity(item.id, parseInt(qtyInput.value, 10));
+        renderCart();
+        updateCartBadge();
+      } catch (e) {
+        alert("Error updating quantity");
+      }
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "Delete";
+    delBtn.style.cssText =
+      "background:red;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;";
+    delBtn.addEventListener("click", async () => {
+      try {
+        await CartAPI.deleteItem(item.id);
+        renderCart();
+        updateCartBadge();
+      } catch (e) {
+        alert("Error deleting item");
+      }
+    });
+
+    const qtyDiv = document.createElement("div");
+    qtyDiv.style.display = "flex";
+    qtyDiv.style.gap = "5px";
+    qtyDiv.appendChild(qtyInput);
+    qtyDiv.appendChild(delBtn);
+
+    info.appendChild(qtyDiv);
+    row.appendChild(info);
+
+    const priceDiv = document.createElement("div");
+    priceDiv.textContent = formatCurrencyFromUSD(
+      item.unitPriceUSD * item.quantity
+    );
+    priceDiv.style.fontWeight = "600";
+    row.appendChild(priceDiv);
+
+    cartContainer.appendChild(row);
   });
 
-  const sortBy = $$("#sortSel")?.value || "popular";
+  const totalDiv = document.createElement("div");
+  totalDiv.style.textAlign = "right";
+  totalDiv.style.fontWeight = "700";
+  totalDiv.style.marginTop = "10px";
+  totalDiv.textContent = `Total: ${formatCurrencyFromUSD(cart.totalPrice)}`;
+  cartContainer.appendChild(totalDiv);
 
-  switch (sortBy) {
-    case "priceAsc":
-      filtered.sort(
-        (a, b) => computePriceUSD(a).current - computePriceUSD(b).current
-      );
-      break;
-    case "priceDesc":
-      filtered.sort(
-        (a, b) => computePriceUSD(b).current - computePriceUSD(a).current
-      );
-      break;
-    case "titleAsc":
-      filtered.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-      break;
-    case "titleDesc":
-      filtered.sort((a, b) => (b.title || "").localeCompare(a.title || ""));
-      break;
-  }
-
-  return filtered;
+  const clearBtn = document.createElement("button");
+  clearBtn.textContent = "Clear Cart";
+  clearBtn.style.cssText =
+    "margin-top:10px;padding:8px 16px;background:#e74c3c;color:white;border:none;border-radius:4px;cursor:pointer;";
+  clearBtn.addEventListener("click", async () => {
+    await CartAPI.clearCart();
+    renderCart();
+    updateCartBadge();
+  });
+  cartContainer.appendChild(clearBtn);
 }
 
 // -------- Initialize page --------
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("Page loaded, initializing...");
-
-  // Инициализируем userId для гостя
-  const userId = getOrCreateUserId();
-  console.log("User ID:", userId);
-
-  // Обновляем бейдж корзины
   await updateCartBadge();
+  await renderCart();
 
   const grid = $$("#productsGrid");
-  if (!grid) {
-    // Not a products page; skip products fetch quietly
-    console.debug("No #productsGrid on this page; skipping product fetch.");
-    return;
-  }
+  if (!grid) return;
 
-  if (grid) {
-    grid.innerHTML =
-      '<div style="text-align: center; padding: 20px;">Loading products...</div>';
-  }
+  grid.innerHTML =
+    '<div style="text-align:center;padding:20px;">Loading products...</div>';
 
   try {
     const products = await fetchAllProducts();
-    console.log(`Fetched ${products.length} products`);
-
-    if (products.length === 0) {
-      console.warn("No products fetched, check API connection");
-    }
-
     renderGrid(products);
-
-    // Настройка фильтров
-    const applyBtn = $$("#applyFilters");
-    if (applyBtn) {
-      applyBtn.addEventListener("click", () => {
-        renderGrid(applyFiltersTo(products));
-      });
-    }
-
-    const clearBtn = $$("#clearFilters");
-    if (clearBtn) {
-      clearBtn.addEventListener("click", () => {
-        if ($$("#onlySale")) $$("#onlySale").checked = false;
-        if ($$("#minPrice")) $$("#minPrice").value = "";
-        if ($$("#maxPrice")) $$("#maxPrice").value = "";
-        if ($$("#sortSel")) $$("#sortSel").value = "popular";
-        renderGrid(products);
-      });
-    }
-
-    const sortSel = $$("#sortSel");
-    if (sortSel) {
-      sortSel.addEventListener("change", () => {
-        renderGrid(applyFiltersTo(products));
-      });
-    }
-
-    // Currency change handler
-    window.onCurrencyChange = () => {
-      try {
-        renderGrid(applyFiltersTo(products));
-      } catch (e) {
-        console.error("Error on currency change:", e);
-      }
-    };
-  } catch (error) {
-    console.error("Error initializing page:", error);
-    if (grid) {
-      grid.innerHTML =
-        '<div style="text-align: center; padding: 20px; color: red;">Error loading products. Please check console for details.</div>';
-    }
+  } catch (e) {
+    console.error("Error initializing products:", e);
   }
 });
-
-// -------- Глобальные функции для работы с корзиной --------
-window.cart = {
-  async add(productId, size = null, quantity = 1) {
-    return await CartAPI.addItem(productId, size, quantity);
-  },
-
-  async getCart() {
-    return await CartAPI.getCart();
-  },
-
-  async getCount() {
-    const cart = await CartAPI.getCart();
-    return cart.totalItemsCount || 0;
-  },
-};
-
-// -------- Debug helper --------
-window.debugAPI = async function () {
-  console.log("=== API Debug ===");
-  console.log("Base URL:", API_BASE);
-  console.log("Context:", API_CONTEXT);
-  console.log("User ID:", getOrCreateUserId());
-
-  // Тест корзины
-  try {
-    console.log("\n--- Testing Cart API ---");
-    const cart = await CartAPI.getCart();
-    console.log("Cart:", cart);
-  } catch (e) {
-    console.error("Cart API error:", e);
-  }
-
-  // Тест продуктов
-  try {
-    console.log("\n--- Testing Products API ---");
-    const products = await fetchAllProducts();
-    console.log(`Products count: ${products.length}`);
-    if (products.length > 0) {
-      console.log("Sample product:", products[0]);
-    }
-  } catch (e) {
-    console.error("Products API error:", e);
-  }
-};
